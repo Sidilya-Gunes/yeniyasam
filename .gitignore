@@ -1,0 +1,26 @@
+# Bîsmîllahîr Rahmanîr Rahîm
+# El Hamdu Lîllah î  Rabbul Alemîn
+# Es selatu vesSelamû ala rasûlîna Muhammedîn
+# La îlahe îll Allah
+# Muhammedur Rasûlûllah
+
+# bağımlılıklar
+node_modules/
+
+# Next.js çıktıları
+.next/
+out/
+build/
+
+# yardımcı betikler / geçici dosyalar
+tmp/
+
+# ortam değişkenleri
+.env
+.env*.local
+
+# işletim sistemi ve editör
+.DS_Store
+*.log
+.idea/
+.vscode/
