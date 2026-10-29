@@ -44,6 +44,8 @@ export interface Author {
   bio?: string;
   avatar?: string | StrapiMedia;
   email?: string;
+  twitter?: string;
+  articleCount?: number;
 }
 
 export interface Article {
@@ -57,12 +59,44 @@ export interface Article {
   coverImage?: string | StrapiMedia;
   category?: Category;
   author?: Author;
+  tags?: string[];
   publishedAt: string;
   updatedAt?: string;
   isHeadline?: boolean;
   isFeatured?: boolean;
-  videoUrl?: string;
+  readTime?: string;
   views?: number;
+}
+
+export interface VideoMedia {
+  id: number | string;
+  documentId?: string;
+  title: string;
+  slug: string;
+  category: string;
+  duration: string;
+  thumbnail: string | StrapiMedia;
+  videoUrl?: string;
+  publishedAt?: string;
+}
+
+export interface DailyFeature {
+  id: number | string;
+  documentId?: string;
+  type: 'manset' | 'jin' | 'karikatur' | 'foto';
+  title: string;
+  image: string | StrapiMedia;
+  date: string;
+  captionTitle?: string;
+  captionDescription?: string;
+  captionMeta?: string;
+}
+
+export interface NewsletterSubscriber {
+  id?: number | string;
+  email: string;
+  subscribedAt?: string;
+  isActive?: boolean;
 }
 
 export interface StrapiPagination {

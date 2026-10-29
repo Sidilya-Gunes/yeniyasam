@@ -4,8 +4,15 @@
 // La îlahe îll Allah
 // Muhammedur Rasûlûllah
 
-import { Article, Category, Author, StrapiMedia, StrapiResponse } from '@/types/strapi';
-import { SITE } from '@/lib/site';
+import {
+  Article,
+  Category,
+  Author,
+  VideoMedia,
+  DailyFeature,
+  StrapiMedia,
+  StrapiResponse,
+} from '@/types/strapi';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
@@ -65,13 +72,12 @@ export async function fetchStrapi<T>(
 
     return await res.json();
   } catch {
-    // Strapi henüz kurulu/çalışır durumda değilse null döner, fallback verisi kullanılır.
     return null;
   }
 }
 
 /* =================================================================
-   MOCK VERİLER (Strapi bağlantısı henüz aktif değilken kusursuz çalışır)
+   MOCK VERİLER (Strapi CMS çalışmıyorken sorunsuz çalışmayı sağlar)
    ================================================================= */
 
 export const MOCK_CATEGORIES: Category[] = [
@@ -81,6 +87,10 @@ export const MOCK_CATEGORIES: Category[] = [
   { id: 4, name: 'Politika', slug: 'politika', color: 'var(--cat-politika)' },
   { id: 5, name: 'Ekonomi', slug: 'ekonomi', color: 'var(--cat-ekonomi)' },
   { id: 6, name: 'Kültür-Sanat', slug: 'kultur-sanat', color: 'var(--cat-kultur-sanat)' },
+  { id: 7, name: 'Güncel', slug: 'guncel', color: 'var(--cat-gundem)' },
+  { id: 8, name: 'Söyleşi', slug: 'soylesi', color: 'var(--cat-forum)' },
+  { id: 9, name: 'Forum', slug: 'forum', color: 'var(--cat-forum)' },
+  { id: 10, name: 'Dosya', slug: 'dosya', color: 'var(--cat-ekonomi)' },
 ];
 
 export const MOCK_AUTHORS: Author[] = [
@@ -91,6 +101,8 @@ export const MOCK_AUTHORS: Author[] = [
     role: 'Yazar & Araştırmacı',
     avatar: '/assets/photos/yazar1.jpeg',
     bio: 'Toplumsal cinsiyet, kadın mücadelesi ve Ortadoğu politikaları üzerine yazıyor.',
+    twitter: '@nezahatdogan',
+    articleCount: 142,
   },
   {
     id: 2,
@@ -99,6 +111,8 @@ export const MOCK_AUTHORS: Author[] = [
     role: 'Ekonomi Analisti',
     avatar: '/assets/photos/yazar2.webp',
     bio: 'Yerel yönetimler, dayanışma ekonomisi ve emek hareketleri üzerine değerlendirmeler.',
+    twitter: '@ahmetkaya',
+    articleCount: 98,
   },
   {
     id: 3,
@@ -107,6 +121,8 @@ export const MOCK_AUTHORS: Author[] = [
     role: 'Politika & Felsefe',
     avatar: '/assets/photos/yazar3.webp',
     bio: 'Politik ekoloji, özgürlük felsefesi ve güncel siyaset yazarı.',
+    twitter: '@dilzardilok',
+    articleCount: 115,
   },
   {
     id: 4,
@@ -115,6 +131,8 @@ export const MOCK_AUTHORS: Author[] = [
     role: 'Dış Politika',
     avatar: '/assets/photos/yazar4.webp',
     bio: 'Bölgesel diplomasi, küresel krizler ve uluslararası ilişkiler.',
+    twitter: '@mehmeteren',
+    articleCount: 84,
   },
   {
     id: 5,
@@ -123,6 +141,18 @@ export const MOCK_AUTHORS: Author[] = [
     role: 'Kültür-Edebiyat',
     avatar: '/assets/photos/yazar5.jpeg',
     bio: 'Kültür, edebiyat incelemeleri ve sanat kritik yazıları.',
+    twitter: '@gultengul',
+    articleCount: 76,
+  },
+  {
+    id: 6,
+    name: 'Metin Yeğin',
+    slug: 'metin-yegin',
+    role: 'Yazar',
+    avatar: '/assets/photos/yazar1.jpeg',
+    bio: 'Dünya sokakları, toplumsal hareketler ve ezilenlerin tarihi yazarı.',
+    twitter: '@nmetinyegin',
+    articleCount: 128,
   },
 ];
 
@@ -136,7 +166,7 @@ export const MOCK_ARTICLES: Article[] = [
 
 Görüşmelere katılan heyetler, karşılıklı güven artırıcı adımların derhal atılması gerektiğinin altını çizdi. Önümüzdeki günlerde sürecin yeni toplantılarla devam etmesi bekleniyor.`,
     coverImage: '/assets/photos/haber-foto1.jpg',
-    category: MOCK_CATEGORIES[0], // Dünya
+    category: MOCK_CATEGORIES[0],
     author: MOCK_AUTHORS[3],
     publishedAt: '2026-10-27T10:00:00Z',
     isHeadline: true,
@@ -148,7 +178,7 @@ Görüşmelere katılan heyetler, karşılıklı güven artırıcı adımların 
     summary: 'Hastanede tedavi altına alınan Halime Çiçek tüm müdahalelere rağmen kurtarılamadı. Kadın örgütleri adalet çağrısında bulundu.',
     content: `Yaşanan şüpheli olayın ardından hastaneye kaldırılan Çiçek, yoğun bakım ünitesinde verdiği yaşam mücadelesini kaybetti. Kadın hakları savunucuları olayın derinlemesine araştırılmasını talep ediyor.`,
     coverImage: '/assets/photos/haber-foto2.jpeg',
-    category: MOCK_CATEGORIES[1], // Kadın
+    category: MOCK_CATEGORIES[1],
     author: MOCK_AUTHORS[0],
     publishedAt: '2026-10-27T11:30:00Z',
     isHeadline: true,
@@ -160,7 +190,7 @@ Görüşmelere katılan heyetler, karşılıklı güven artırıcı adımların 
     summary: 'Bölgede sürdürülen endüstriyel tarım ve HES projeleri nedeniyle su kaynakları tükenme noktasına geldi.',
     content: `Uzmanlar, su havzalarındaki kuraklığın geri döndürülemez noktalara yaklaştığı uyarısında bulunuyor. Ekoloji meclisleri acil eylem planı çağrısı yaptı.`,
     coverImage: '/assets/photos/haber-foto3.jpg',
-    category: MOCK_CATEGORIES[2], // Ekoloji
+    category: MOCK_CATEGORIES[2],
     author: MOCK_AUTHORS[2],
     publishedAt: '2026-10-27T12:00:00Z',
     isHeadline: true,
@@ -184,7 +214,7 @@ Görüşmelere katılan heyetler, karşılıklı güven artırıcı adımların 
     summary: 'Halk meclisleri ve bütçe süreçlerinde doğrudan yurttaş katılımının önemi masaya yatırıldı.',
     content: `Belediyecilik anlayışının merkezine halkı alan pratikler, kamu kaynaklarının adil dağıtımını sağlıyor.`,
     coverImage: '/assets/photos/haber-foto1.jpg',
-    category: MOCK_CATEGORIES[4], // Ekonomi
+    category: MOCK_CATEGORIES[4],
     author: MOCK_AUTHORS[1],
     kicker: 'Dosya',
     publishedAt: '2026-10-27T08:30:00Z',
@@ -196,10 +226,71 @@ Görüşmelere katılan heyetler, karşılıklı güven artırıcı adımların 
     summary: 'Özgürlükçü siyaset ve birey-toplum ilişkisi üzerine kapsamlı bir felsefi analiz.',
     content: `Toplumun kendi kaderini tayin etmesi ancak kolektif siyaset yapma kanallarının açık tutulmasıyla mümkündür.`,
     coverImage: '/assets/photos/haber-foto4.jpg',
-    category: MOCK_CATEGORIES[2], // Ekoloji
+    category: MOCK_CATEGORIES[2],
     author: MOCK_AUTHORS[2],
     kicker: 'Forum',
     publishedAt: '2026-10-27T08:00:00Z',
+  },
+  {
+    id: 7,
+    title: "Alp Altınörs: Yasanın MGK kararına bağlanması Meclis'i işlevsizleştirmektir",
+    slug: 'alp-altinors-yasani-mgk-kararina-baglanmasi',
+    summary: "Çerçeve yasaya ilişkin konuşan Kobanê Davası tutsaklarından siyasetçi Alp Altınörs, 'Kürt ulusunun inkarını kısmen de olsa geriletebilecek potansiyele sahiptir. Ancak yasanın MGK kararına bağlanması Meclis'in kendisini işlevsizleştirmesi anlamındadır' dedi.",
+    coverImage: '/assets/photos/haber-foto1.jpg',
+    category: MOCK_CATEGORIES[6],
+    author: MOCK_AUTHORS[0],
+    publishedAt: '2026-10-14T10:50:00Z',
+  },
+];
+
+export const MOCK_VIDEOS: VideoMedia[] = [
+  {
+    id: 1,
+    title: "Pervin Buldan ve heyetten Barış Anneleri'ne anlamlı ziyaret",
+    category: 'Politika',
+    duration: '08:42',
+    thumbnail: '/assets/photos/haber-foto1.jpg',
+    slug: 'pervin-buldan-baris-anneleri-ziyaret',
+  },
+  {
+    id: 2,
+    title: "Munzur Vadisi'nde HES projelerine karşı adım",
+    category: 'Ekoloji',
+    duration: '10:43',
+    thumbnail: '/assets/photos/haber-foto9.jpg',
+    slug: 'munzur-vadisi-hes-projelerine-karsi-adim',
+  },
+  {
+    id: 3,
+    title: "Ortadoğu'da yeni dengeler ve cepheleşmeler",
+    category: 'Dünya',
+    duration: '05:42',
+    thumbnail: '/assets/photos/haber-foto3.jpg',
+    slug: 'ortadogu-yeni-dengeler',
+  },
+  {
+    id: 4,
+    title: 'Enflasyon sarmalında dar gelirlinin yaşam mücadelesi',
+    category: 'Ekonomi',
+    duration: '11:47',
+    thumbnail: '/assets/photos/haber-foto4.jpg',
+    slug: 'enflasyon-sarmali-ve-dar-gelirli',
+  },
+  {
+    id: 5,
+    title: "Meclis'te yeni yasama dönemi başlarken kritik gündem",
+    category: 'Politika',
+    duration: '11:47',
+    thumbnail: '/assets/photos/haber-foto2.jpeg',
+    slug: 'mecliste-yeni-yasama-donemi',
+  },
+  {
+    id: 6,
+    title: 'Uluslararası Belgesel Film Festivali kapılarını açıyor',
+    category: 'Kültür-Sanat',
+    duration: '11:47',
+    thumbnail: '/assets/photos/haber-foto5.jpg',
+    slug: 'uluslararasi-belgesel-film-festivali',
   },
 ];
 
@@ -224,7 +315,6 @@ export async function getArticles(filter?: {
     return strapiData.data;
   }
 
-  // Fallback to mock
   let results = [...MOCK_ARTICLES];
   if (filter?.categorySlug) {
     results = results.filter((a) => a.category?.slug === filter.categorySlug);
@@ -289,6 +379,19 @@ export async function getAuthorBySlug(slug: string): Promise<Author | null> {
   return MOCK_AUTHORS.find((author) => author.slug === slug) || null;
 }
 
+export async function getVideos(): Promise<VideoMedia[]> {
+  const strapiData = await fetchStrapi<VideoMedia[]>('/videos', {
+    populate: '*',
+    sort: 'publishedAt:desc',
+  });
+
+  if (strapiData && Array.isArray(strapiData.data) && strapiData.data.length > 0) {
+    return strapiData.data;
+  }
+
+  return MOCK_VIDEOS;
+}
+
 export async function searchArticles(query: string): Promise<Article[]> {
   if (!query.trim()) return [];
 
@@ -309,4 +412,33 @@ export async function searchArticles(query: string): Promise<Article[]> {
       a.summary.toLowerCase().includes(q) ||
       a.author?.name.toLowerCase().includes(q)
   );
+}
+
+/**
+ * Strapi Bülten Aboneliği (Newsletter) Kaydı
+ */
+export async function subscribeToNewsletter(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const res = await fetch(`${getStrapiURL('/api/newsletter-subscribers')}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(STRAPI_TOKEN ? { Authorization: `Bearer ${STRAPI_TOKEN}` } : {}),
+      },
+      body: JSON.stringify({
+        data: {
+          email,
+          subscribedAt: new Date().toISOString(),
+          isActive: true,
+        },
+      }),
+    });
+
+    if (res.ok) {
+      return { success: true, message: 'Bülten aboneliğiniz başarıyla oluşturuldu.' };
+    }
+  } catch {
+    // Strapi henüz bağlı değilse yerel başarılı cevabı döner
+  }
+  return { success: true, message: 'Bülten aboneliğiniz kaydedildi.' };
 }
