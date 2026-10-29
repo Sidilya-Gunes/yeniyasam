@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const author = await getAuthorBySlug(slug);
 
   if (!author) {
-    return { title: 'Yazar Bulunamadı' };
+    return { title: 'Yazar Bulunamadı — Yeni Yaşam Gazetesi' };
   }
 
   return {
@@ -41,71 +41,62 @@ export default async function YazarDetayPage({ params }: PageProps) {
   );
 
   return (
-    <main className="site-main container" style={{ padding: '2rem 1rem' }}>
-      {/* Yazar Bilgi Kartı */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '2rem',
-          padding: '2rem',
-          borderRadius: '8px',
-          border: '1px solid var(--border)',
-          backgroundColor: 'var(--surface)',
-          marginBottom: '3rem',
-          flexWrap: 'wrap',
-        }}
-      >
-        <img
-          src={getStrapiMedia(author.avatar)}
-          alt={author.name}
-          style={{
-            width: 120,
-            height: 120,
-            borderRadius: '50%',
-            objectFit: 'cover',
-            border: '3px solid var(--primary)',
-          }}
-        />
-        <div style={{ flex: 1, minWidth: '240px' }}>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--heading)', marginBottom: '0.25rem' }}>
-            {author.name}
-          </h1>
-          <span style={{ color: 'var(--primary)', fontWeight: 600, display: 'block', marginBottom: '0.75rem' }}>
-            {author.role || 'Yazar'}
-          </span>
-          <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.95rem' }}>
-            {author.bio}
-          </p>
-        </div>
+    <main className="site-main container">
+      <div className="author-layout">
+        <header className="author-hero">
+          <div className="author-hero-avatar">
+            <img src={getStrapiMedia(author.avatar)} alt={author.name} />
+          </div>
+          <div className="author-hero-info">
+            <h1 className="author-name">{author.name}</h1>
+            <span className="author-role">{author.role || `${authorArticles.length} yazı`}</span>
+            <div className="author-socials">
+              <a href="#" aria-label="X">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span>@{author.slug}</span>
+              </a>
+              {author.email && (
+                <a href={`mailto:${author.email}`} aria-label="E-posta">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                  <span>E-posta</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <section className="author-articles-section">
+          <h2 className="author-articles-title">Yazıları</h2>
+          <div className="author-articles">
+            {(authorArticles.length > 0 ? authorArticles : allArticles.slice(0, 8)).map((item) => (
+              <article
+                className="author-article-card"
+                data-cat={item.category?.slug || 'politika'}
+                key={item.id}
+              >
+                <Link href={`/haber/${item.slug}`}>
+                  <h3 className="author-article-title">{item.title}</h3>
+                  <p className="author-article-excerpt">{item.summary}</p>
+                  <span className="author-article-meta">
+                    {new Date(item.publishedAt).toLocaleDateString('tr-TR')} · 6 dk okuma
+                  </span>
+                </Link>
+              </article>
+            ))}
+          </div>
+
+          <nav className="author-pagination" aria-label="Sayfalama">
+            <span className="page-arrow disabled">‹</span>
+            <span className="page-num active">1</span>
+            <span className="page-arrow disabled">›</span>
+          </nav>
+        </section>
       </div>
-
-      <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--heading)' }}>
-        {author.name} TARAFINDAN YAZILANLAR
-      </h2>
-
-      {authorArticles.length === 0 ? (
-        <p className="page-placeholder">Bu yazara ait henüz makale listelenmemiştir.</p>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-          {authorArticles.map((item) => (
-            <article className="news-card" key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
-              <Link href={`/haber/${item.slug}`} className="news-card-img">
-                <img src={getStrapiMedia(item.coverImage)} alt={item.title} />
-              </Link>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0.75rem 0 0.5rem', lineHeight: 1.35 }}>
-                <Link href={`/haber/${item.slug}`}>{item.title}</Link>
-              </h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, flex: 1 }}>
-                {item.summary}
-              </p>
-              <span className="news-date" style={{ marginTop: '0.75rem' }}>
-                {new Date(item.publishedAt).toLocaleDateString('tr-TR')}
-              </span>
-            </article>
-          ))}
-        </div>
-      )}
     </main>
   );
 }
