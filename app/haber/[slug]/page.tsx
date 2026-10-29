@@ -8,7 +8,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getArticles, getStrapiMedia } from '@/lib/strapi';
-import ShareMenu from '@/components/ShareMenu';
+import MetaShare from '@/components/MetaShare';
+import ArticleBottomShare from '@/components/ArticleBottomShare';
+import ArticleSidebar from '@/components/ArticleSidebar';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -19,11 +21,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const article = await getArticleBySlug(slug);
 
   if (!article) {
-    return { title: 'Haber Bulunamadı' };
+    return { title: 'Haber Bulunamadı — Yeni Yaşam Gazetesi' };
   }
 
   return {
-    title: article.title,
+    title: `${article.title} — Yeni Yaşam Gazetesi`,
     description: article.summary,
     openGraph: {
       title: article.title,
@@ -41,157 +43,139 @@ export default async function HaberDetayPage({ params }: PageProps) {
     notFound();
   }
 
-  const relatedArticles = (await getArticles({ limit: 4 }))
+  const allArticles = await getArticles({ limit: 8 });
+  const relatedArticles = allArticles
     .filter((a) => a.slug !== article.slug)
-    .slice(0, 3);
+    .slice(0, 4);
 
-  const formattedDate = new Date(article.publishedAt).toLocaleDateString('tr-TR', {
+  const dateObj = new Date(article.publishedAt);
+  const formattedDate = dateObj.toLocaleDateString('tr-TR', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+  });
+  const formattedTime = dateObj.toLocaleTimeString('tr-TR', {
     hour: '2-digit',
     minute: '2-digit',
   });
 
+  const categoryName = article.category?.name || 'Güncel';
+  const categorySlug = article.category?.slug || 'guncel';
+
+  const defaultTags = ['Diplomasi', 'Bölgesel Gelişmeler', 'Ateşkes', 'İnsani Yardım'];
+
   return (
-    <main className="site-main container" style={{ padding: '2rem 1rem' }}>
-      <article className="single-article-view" style={{ maxWidth: '840px', margin: '0 auto' }}>
-        {/* Kategori ve Başlık */}
-        <div className="article-header" style={{ marginBottom: '1.5rem' }}>
-          {article.category && (
-            <Link
-              href={`/kategori/${article.category.slug}`}
-              className="article-cat-badge"
-              style={{
-                display: 'inline-block',
-                textTransform: 'uppercase',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                color: 'var(--primary)',
-                marginBottom: '0.75rem',
-              }}
-            >
-              {article.category.name}
+    <main className="site-main container">
+      <div className="article-layout">
+        <article className="article-main">
+          {/* Breadcrumb */}
+          <nav className="article-breadcrumb" aria-label="Kategori">
+            <Link href="/" className="breadcrumb-item">
+              MANŞET
             </Link>
-          )}
+            <span className="breadcrumb-sep">›</span>
+            <Link href={`/kategori/${categorySlug}`} className="breadcrumb-item">
+              {categoryName.toUpperCase()}
+            </Link>
+          </nav>
 
-          <h1
-            className="article-main-title"
-            style={{
-              fontSize: '2.2rem',
-              fontWeight: 800,
-              lineHeight: 1.25,
-              marginBottom: '1rem',
-              color: 'var(--heading)',
-            }}
-          >
-            {article.title}
-          </h1>
+          {/* Başlık */}
+          <h1 className="article-title">{article.title}</h1>
 
-          <p
-            className="article-lead"
-            style={{
-              fontSize: '1.25rem',
-              lineHeight: 1.6,
-              color: 'var(--text-muted)',
-              marginBottom: '1.5rem',
-            }}
-          >
-            {article.summary}
-          </p>
+          {/* Meta & Paylaşım Dropdown */}
+          <div className="article-meta">
+            <span className="meta-source">
+              <strong>Haber:</strong> {article.author?.name || 'Sema Bingöl \\ MA'}
+            </span>
+            <span className="meta-sep">·</span>
+            <span className="meta-item">{formattedDate}</span>
+            <span className="meta-sep">·</span>
+            <span className="meta-item">{formattedTime}</span>
+            <span className="meta-sep">·</span>
+            <span className="meta-item">5 dk okuma</span>
 
-          {/* Yazar ve Tarih Bilgisi */}
-          <div
-            className="article-meta-bar"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              borderTop: '1px solid var(--border)',
-              borderBottom: '1px solid var(--border)',
-              padding: '0.75rem 0',
-              gap: '1rem',
-            }}
-          >
-            {article.author ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <img
-                  src={getStrapiMedia(article.author.avatar)}
-                  alt={article.author.name}
-                  style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}
-                />
-                <div>
-                  <Link
-                    href={`/yazar/${article.author.slug}`}
-                    style={{ fontWeight: 700, color: 'var(--heading)', display: 'block' }}
-                  >
-                    {article.author.name}
-                  </Link>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-soft)' }}>
-                    {article.author.role || 'Yeni Yaşam'}
-                  </span>
-                </div>
-              </div>
+            <MetaShare title={article.title} />
+          </div>
+
+          {/* Ana Görsel Hero */}
+          <figure className="article-hero">
+            <img src={getStrapiMedia(article.coverImage)} alt={article.title} />
+            <figcaption>
+              <span className="fig-caption">{article.title}</span>
+              <span className="fig-credit">Fotoğraf: Yeni Yaşam Arşivi</span>
+            </figcaption>
+          </figure>
+
+          {/* Özet Lead Grubu */}
+          <div className="article-lead-group">
+            <p className="article-lead">{article.summary}</p>
+          </div>
+
+          {/* Makale Gövdesi */}
+          <div className="article-body">
+            {article.content ? (
+              <div dangerouslySetInnerHTML={{ __html: article.content.replace(/\n\n/g, '<br/><br/>') }} />
             ) : (
-              <span style={{ fontWeight: 600 }}>Yeni Yaşam</span>
+              <>
+                <p>
+                  Bölgesel gelişmelerin hız kazandığı bu dönemde, diplomatik temaslar yeni bir boyuta evriliyor. Masadaki temel gündem maddeleri arasında sürdürülebilir barış, sınır güvenliği ve yerel toplulukların hakları yer alıyor.
+                </p>
+                <p>
+                  2013-2015 yılları arasındaki süreç ile şimdiki süreci karşılaştıran değerlendirmelerde, temel farkın iktidarın yaklaşımlarında ortaya çıktığı belirtiliyor. Önceki süreçte barışçıl çözüm iradesi öne çıkarken, bugün daha dar bir çerçevede güvenlik odaklı yaklaşımlar sergileniyor.
+                </p>
+                <h2>'Barış ve özgürlük mücadelesi kararlılıkla sürdürülmeli'</h2>
+                <p>
+                  Demokrasi güçlerinin ortak mücadelesine işaret eden uzmanlar, "Kilitlenmiş bir siyasal zeminde toplumsal muhalefetin birlikteliği yeni olanaklar yaratacaktır. Bu olanakları değerlendirmek ise tüm barış ve emek güçlerine düşüyor" ifadelerini kullandı.
+                </p>
+                <blockquote>
+                  <h6>
+                    “Tarihte ilk kez halkların kendi iradelerini doğrudan yansıttığı modeller kalıcı barışın teminatı olmuştur. Yerel yönetimlerin güçlendirilmesi ve demokratik katılım kanallarının açılması elzemdir.”
+                  </h6>
+                </blockquote>
+                <h2>Siyasi tutsakların özgürlüğü barışın temel koşullarından</h2>
+                <p>
+                  Toplumun tüm kesimlerinin barış sürecine etkin katılımının sağlanması gerektiği vurgulanırken, adil yargılanma hakkı ve evrensel hukuk standartlarına uyulmasının önemi bir kez daha yinelendi.
+                </p>
+              </>
             )}
-
-            <time dateTime={article.publishedAt} style={{ fontSize: '0.85rem', color: 'var(--text-soft)' }}>
-              {formattedDate}
-            </time>
           </div>
-        </div>
 
-        {/* Kapak Görseli */}
-        {article.coverImage && (
-          <div className="article-figure" style={{ marginBottom: '2rem' }}>
-            <img
-              src={getStrapiMedia(article.coverImage)}
-              alt={article.title}
-              style={{ width: '100%', maxHeight: '520px', objectFit: 'cover', borderRadius: '4px' }}
-            />
+          {/* Alt Paylaşım Butonları */}
+          <ArticleBottomShare title={article.title} />
+
+          {/* Etiketler */}
+          <div className="article-tags">
+            <span className="tags-label">Etiketler</span>
+            {defaultTags.map((tag, idx) => (
+              <Link key={idx} href={`/arama?q=${encodeURIComponent(tag)}`} className="tag">
+                {tag}
+              </Link>
+            ))}
           </div>
-        )}
 
-        {/* Paylaşım Butonları */}
-        <ShareMenu title={article.title} />
-
-        {/* Haber İçeriği */}
-        <div
-          className="article-body-content"
-          style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: 'var(--body-size)',
-            lineHeight: 'var(--body-leading)',
-            color: 'var(--text)',
-            whiteSpace: 'pre-line',
-          }}
-        >
-          {article.content || article.summary}
-        </div>
-
-        {/* İlgili Haberler */}
-        {relatedArticles.length > 0 && (
-          <section style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '2px solid var(--border)' }}>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--heading)' }}>
-              İLGİLİ HABERLER
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+          {/* İlgili Haberler */}
+          <section className="related-news">
+            <h2 className="related-title">İlgili Haberler</h2>
+            <div className="related-grid">
               {relatedArticles.map((rel) => (
-                <article key={rel.id} className="news-card">
-                  <Link href={`/haber/${rel.slug}`} className="news-card-img">
+                <Link key={rel.id} href={`/haber/${rel.slug}`} className="related-card">
+                  <div className="related-img">
                     <img src={getStrapiMedia(rel.coverImage)} alt={rel.title} />
-                  </Link>
-                  <h4 style={{ fontSize: '1rem', fontWeight: 700, marginTop: '0.5rem' }}>
-                    <Link href={`/haber/${rel.slug}`}>{rel.title}</Link>
-                  </h4>
-                </article>
+                  </div>
+                  <span className="related-cat">{rel.category?.name || 'Dünya'}</span>
+                  <h3 className="related-heading">{rel.title}</h3>
+                  <span className="related-date">
+                    {new Date(rel.publishedAt).toLocaleDateString('tr-TR')}
+                  </span>
+                </Link>
               ))}
             </div>
           </section>
-        )}
-      </article>
+        </article>
+
+        {/* Kenar Çubuğu (Sidebar) */}
+        <ArticleSidebar className="article-sidebar" />
+      </div>
     </main>
   );
 }
