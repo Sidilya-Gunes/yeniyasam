@@ -52,7 +52,12 @@ export default function IletisimPage() {
 
             <div style={{ marginBottom: '1.25rem' }}>
               <div style={{ fontWeight: 600, color: 'var(--accent)', fontSize: '0.9rem' }}>ADRES</div>
-              <p style={{ margin: '0.25rem 0' }}>Cağaloğlu, Mollafenari Mah. Babıali Cad. No: 18 Fatih / İstanbul</p>
+              <p style={{ margin: '0.25rem 0' }}>Kocatepe Mah. Receppaşa Cad. ATA-KAR İş Merkezi No:5/5 Beyoğlu / İstanbul</p>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontWeight: 600, color: 'var(--accent)', fontSize: '0.9rem' }}>TELEFON</div>
+              <p style={{ margin: '0.25rem 0' }}>+90 530 153 64 49</p>
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>

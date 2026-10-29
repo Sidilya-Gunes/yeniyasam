@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function KunyePage() {
   const staff = [
-    { title: 'İmtiyaz Sahibi', name: 'Yeni Yaşam Basın Yayın ve Gazetecilik Ltd. Şti.' },
-    { title: 'Sorumlu Yazı İşleri Müdürü', name: 'Ahmet Karataş' },
+    { title: 'İmtiyaz Sahibi / Yayın Sahibi', name: 'Arinna Basın Yayın ve Reklam Sanayi Ticaret Ltd. Şti.' },
+    { title: 'Sorumlu Haber Müdürü', name: 'Ahmet Güneş' },
     { title: 'Genel Yayın Yönetmeni', name: 'Mehmet Ferhat Çelik' },
     { title: 'Haber Koordinatörü', name: 'Derya Okatan' },
     { title: 'Politika Editörü', name: 'Ali Barış Kurt' },
@@ -81,7 +81,8 @@ export default function KunyePage() {
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
             Yönetim & İletişim Bilgileri
           </h3>
-          <p style={{ margin: '0.25rem 0' }}><strong>Adres:</strong> Cağaloğlu, Mollafenari Mah. Babıali Cad. No: 18 Fatih / İstanbul</p>
+          <p style={{ margin: '0.25rem 0' }}><strong>Adres:</strong> Kocatepe Mah. Receppaşa Cad. ATA-KAR İş Merkezi No:5/5 Beyoğlu / İstanbul</p>
+          <p style={{ margin: '0.25rem 0' }}><strong>Telefon:</strong> +90 530 153 64 49</p>
           <p style={{ margin: '0.25rem 0' }}><strong>E-Posta:</strong> yeniyasamgazetesi@gmail.com</p>
           <p style={{ margin: '0.25rem 0' }}><strong>Basım Yeri:</strong> İhlas Gazetecilik A.Ş.</p>
           <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', opacity: 0.75 }}>
