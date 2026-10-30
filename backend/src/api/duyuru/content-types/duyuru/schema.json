@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "duyurular",
+  "info": {
+    "singularName": "duyuru",
+    "pluralName": "duyurular",
+    "displayName": "📢 Duyurular & Son Dakika",
+    "description": "Son dakika bant duyuruları ve önemli bildirimler"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "link": {
+      "type": "string"
+    },
+    "isUrgent": {
+      "type": "boolean",
+      "default": false
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

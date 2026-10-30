@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "videolar",
+  "info": {
+    "singularName": "video",
+    "pluralName": "videolar",
+    "displayName": "📹 Videolar & Medya",
+    "description": "Yeni Yaşam video bülten ve röportajları"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "category": {
+      "type": "string"
+    },
+    "duration": {
+      "type": "string"
+    },
+    "videoUrl": {
+      "type": "string",
+      "required": true
+    },
+    "thumbnail": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}

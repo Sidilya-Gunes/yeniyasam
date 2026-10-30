@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "karikaturler",
+  "info": {
+    "singularName": "karikatur",
+    "pluralName": "karikaturler",
+    "displayName": "🎨 Günün Karikatürü",
+    "description": "Günün karikatür çizimleri ve arşivi"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "artist": {
+      "type": "string",
+      "required": true
+    },
+    "publishDate": {
+      "type": "date",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

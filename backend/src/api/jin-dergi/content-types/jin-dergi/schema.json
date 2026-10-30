@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "jin_dergiler",
+  "info": {
+    "singularName": "jin-dergi",
+    "pluralName": "jin-dergiler",
+    "displayName": "🟣 Jin Dergi (Kadın Eki)",
+    "description": "Haftalık kadın eki kapak ve makaleleri"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "issueNumber": {
+      "type": "string",
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "issueDate": {
+      "type": "date",
+      "required": true
+    },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "pdfFile": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["files"]
+    },
+    "highlightArticles": {
+      "type": "text"
+    }
+  }
+}

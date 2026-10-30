@@ -1,0 +1,9 @@
+# Strapi
+node_modules/
+.tmp/
+build/
+dist/
+.cache/
+.env
+exports/
+public/uploads/

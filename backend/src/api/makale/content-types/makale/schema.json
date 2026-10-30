@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "makaleler",
+  "info": {
+    "singularName": "makale",
+    "pluralName": "makaleler",
+    "displayName": "📝 Köşe Yazıları (Makaleler)",
+    "description": "Yazarların yayınlanan köşe yazıları"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "summary": {
+      "type": "text"
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "yazar": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::yazar.yazar"
+    },
+    "publishDate": {
+      "type": "date"
+    }
+  }
+}

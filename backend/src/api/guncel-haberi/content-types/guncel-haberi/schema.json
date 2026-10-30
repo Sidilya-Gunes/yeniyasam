@@ -1,0 +1,56 @@
+{
+  "kind": "collectionType",
+  "collectionName": "guncel_haberler",
+  "info": {
+    "singularName": "guncel-haberi",
+    "pluralName": "guncel-haberleri",
+    "displayName": "⚡ Güncel Haberler",
+    "description": "Son dakika ve genel güncel gelişmeler"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "summary": {
+      "type": "text",
+      "required": true
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "kicker": {
+      "type": "string"
+    },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "authorName": {
+      "type": "string"
+    },
+    "isHeadline": {
+      "type": "boolean",
+      "default": false
+    },
+    "isFeatured": {
+      "type": "boolean",
+      "default": false
+    },
+    "readTime": {
+      "type": "string"
+    }
+  }
+}

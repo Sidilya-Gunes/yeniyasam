@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "gunun_mansetleri",
+  "info": {
+    "singularName": "gunun-manseti",
+    "pluralName": "gunun-mansetleri",
+    "displayName": "📰 Günün Manşeti (Gazete Baskısı)",
+    "description": "Günlük basılı gazete 1. sayfası ve PDF arşivi"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "issueNumber": {
+      "type": "string",
+      "required": true
+    },
+    "issueDate": {
+      "type": "date",
+      "required": true
+    },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "pdfFile": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["files"]
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}
