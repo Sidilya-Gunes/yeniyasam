@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getArticles, getStrapiMedia } from '@/lib/strapi';
+import { marked } from 'marked';
 import MetaShare from '@/components/MetaShare';
 import ArticleBottomShare from '@/components/ArticleBottomShare';
 import ArticleSidebar from '@/components/ArticleSidebar';
@@ -114,7 +115,7 @@ export default async function HaberDetayPage({ params }: PageProps) {
           {/* Makale Gövdesi */}
           <div className="article-body">
             {article.content ? (
-              <div dangerouslySetInnerHTML={{ __html: article.content.replace(/\n\n/g, '<br/><br/>') }} />
+              <div dangerouslySetInnerHTML={{ __html: marked.parse(article.content) as string }} />
             ) : (
               <>
                 <p>
