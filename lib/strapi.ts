@@ -292,7 +292,8 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
   }
 
   return {
-    id: item.id,
+    id: `${catInfo.slug}-${item.id}`,
+    documentId: item.documentId,
     title: item.title,
     slug: item.slug || `haber-${item.id}`,
     summary: item.summary || '',

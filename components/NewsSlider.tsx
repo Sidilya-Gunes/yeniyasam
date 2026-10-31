@@ -87,7 +87,7 @@ export default function NewsSlider({ articles }: NewsSliderProps) {
         <div className="slider-track">
           {articles.map((item, idx) => (
             <div
-              key={item.id}
+              key={`${item.id}-${idx}`}
               className={`slide-item ${idx === currentIndex ? 'active' : ''}`}
               data-index={idx}
             >
