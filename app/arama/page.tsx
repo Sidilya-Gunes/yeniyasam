@@ -24,6 +24,27 @@ export default async function AramaPage({ searchParams }: SearchPageProps) {
   const { q = 'iklim krizi' } = await searchParams;
   const results = await searchArticles(q);
 
+  const searchCategories = [
+    { name: 'Tüm Haberler', slug: '' },
+    { name: 'Güncel', slug: 'guncel' },
+    { name: 'Politika', slug: 'politika' },
+    { name: 'Kadın', slug: 'kadin' },
+    { name: 'Ekoloji', slug: 'ekoloji' },
+    { name: 'Ekonomi', slug: 'ekonomi' },
+    { name: 'Kültür-Sanat', slug: 'kultur-sanat' },
+    { name: 'Gençlik', slug: 'genclik' },
+    { name: 'Toplum-Yaşam', slug: 'toplum-yasam' },
+    { name: 'Dünya', slug: 'dunya' },
+    { name: 'Söyleşi', slug: 'soylesi' },
+    { name: 'Dosya', slug: 'dosya' },
+    { name: 'Forum', slug: 'forum' },
+    { name: 'Özel Haber', slug: 'ozel-haber' },
+    { name: 'Editörün Seçtikleri', slug: 'editorun-sectikleri' },
+    { name: 'Günün Fotoğrafı', slug: 'gunun-fotografi' },
+    { name: 'Karikatür', slug: 'karikatur' },
+    { name: 'Panorama', slug: 'panorama' },
+  ];
+
   const fallbackResults: Article[] = [
     {
       id: 101,
@@ -251,6 +272,22 @@ export default async function AramaPage({ searchParams }: SearchPageProps) {
         </div>
 
         <aside className="search-sidebar">
+          <div className="sidebar-widget">
+            <h3 className="widget-title">Kategoriler</h3>
+            <div className="popular-searches" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {searchCategories.map((cat, idx) => (
+                <Link
+                  key={idx}
+                  href={cat.slug ? `/kategori/${cat.slug}` : `/arama?q=${encodeURIComponent(q)}`}
+                  className="popular-tag"
+                  style={{ textAlign: 'left', padding: '7px 12px', fontSize: '0.9rem' }}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <div className="sidebar-widget">
             <h3 className="widget-title">Popüler Aramalar</h3>
             <div className="popular-searches">

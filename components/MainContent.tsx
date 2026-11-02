@@ -16,12 +16,14 @@ export default function MainContent({
   categories,
   authors,
 }: MainContentProps) {
-  // Slider için manşet haberleri
-  const headlineArticles = articles.filter((a) => a.isHeadline).length > 0
-    ? articles.filter((a) => a.isHeadline)
-    : articles.slice(0, 7);
+  // Slider için manşet haberleri (En fazla 10 manşet, en yeni 10 haber alınır)
+  const headlineArticles = (
+    articles.filter((a) => a.isHeadline).length > 0
+      ? articles.filter((a) => a.isHeadline)
+      : articles
+  ).slice(0, 10);
 
-  // Sol söyleşi/dosya/forum kartları
+  // Sol söyleşi/dosya/özel haber kartları
   const opinionCards = [
     {
       kicker: 'Söyleşi',
@@ -40,8 +42,8 @@ export default function MainContent({
       slug: 'yerel-yonetimlerde-katilimci-demokrasi-deneyimleri',
     },
     {
-      kicker: 'Forum',
-      cat: 'ekoloji',
+      kicker: 'Özel Haber',
+      cat: 'ozel-haber',
       title: 'Politik alan kolektif yaratım alanıdır',
       author: 'Dilzar Dîlok',
       thumb: '/assets/photos/haber-foto4.jpg',
@@ -79,12 +81,12 @@ export default function MainContent({
           <NewsSlider articles={headlineArticles} />
         </div>
 
-        {/* Sağ Kolon: Günün Yazarları */}
+        {/* Sağ Kolon: Yazarlar */}
         <aside className="column-right-opinions">
           <div className="col-header">
             <h3>
               <Link href="/yazarlar">
-                GÜNÜN YAZARLARI <span>❯</span>
+                YAZARLAR <span>❯</span>
               </Link>
             </h3>
           </div>
@@ -119,7 +121,7 @@ export default function MainContent({
         <div className="daily-features-grid">
           <article className="daily-card daily-card--manset">
             <div className="daily-card-header">
-              <h3>GÜNÜN MANŞETİ</h3>
+              <h3>MANŞET</h3>
               <span className="daily-arrow">❯</span>
             </div>
             <Link href="/manset" className="daily-card-link">
@@ -143,7 +145,7 @@ export default function MainContent({
 
           <article className="daily-card daily-card--karikatur">
             <div className="daily-card-header">
-              <h3>GÜNÜN KARİKATÜRÜ</h3>
+              <h3>KARİKATÜR</h3>
               <span className="daily-arrow">❯</span>
             </div>
             <Link href="/karikatur" className="daily-card-link">
@@ -185,10 +187,10 @@ export default function MainContent({
 
       {/* Kategori Blokları */}
       <div className="custom-news-sections">
-        {/* DÜNYA */}
+        {/* POLİTİKA */}
         <div className="news-block-row">
           <div className="category-col">
-            <h3 className="category-title" data-cat="dunya">DÜNYA</h3>
+            <h3 className="category-title" data-cat="politika">POLİTİKA</h3>
           </div>
           <div className="news-items-grid">
             <article className="news-card">
@@ -278,7 +280,7 @@ export default function MainContent({
         {/* EKOLOJİ */}
         <div className="news-block-row">
           <div className="category-col">
-            <h3 className="category-title" data-cat="cevre">EKOLOJİ</h3>
+            <h3 className="category-title" data-cat="ekoloji">EKOLOJİ</h3>
           </div>
           <div className="news-items-grid">
             <article className="news-card">
@@ -320,10 +322,10 @@ export default function MainContent({
           </div>
         </div>
 
-        {/* FORUM */}
+        {/* ÖZEL HABER */}
         <div className="news-block-row">
           <div className="category-col">
-            <h3 className="category-title" data-cat="forum">FORUM</h3>
+            <h3 className="category-title" data-cat="ozel-haber">ÖZEL HABER</h3>
           </div>
           <div className="features-layout-grid">
             <div className="feature-main-card">
@@ -398,11 +400,11 @@ export default function MainContent({
       {/* 4 Kolonlu Haber Bölümü */}
       <section className="multi-column-news-section">
         <div className="news-four-columns">
-          {/* Politika */}
+          {/* Emek-Ekonomi */}
           <div className="news-col">
             <div className="col-header">
               <h3>
-                <Link href="/kategori/politika">Politika <span>❯</span></Link>
+                <Link href="/kategori/ekonomi">Emek-Ekonomi <span>❯</span></Link>
               </h3>
             </div>
             <article className="col-featured">
@@ -431,11 +433,11 @@ export default function MainContent({
             </div>
           </div>
 
-          {/* Kültür-Sanat */}
+          {/* Toplum-Yaşam */}
           <div className="news-col">
             <div className="col-header">
               <h3>
-                <Link href="/kategori/kultur-sanat">Kültür-Sanat <span>❯</span></Link>
+                <Link href="/kategori/toplum-yasam">Toplum-Yaşam <span>❯</span></Link>
               </h3>
             </div>
             <article className="col-featured">
@@ -464,11 +466,11 @@ export default function MainContent({
             </div>
           </div>
 
-          {/* Emek-Ekonomi */}
+          {/* Gençlik */}
           <div className="news-col">
             <div className="col-header">
               <h3>
-                <Link href="/kategori/ekonomi">Emek-Ekonomi <span>❯</span></Link>
+                <Link href="/kategori/genclik">Gençlik <span>❯</span></Link>
               </h3>
             </div>
             <article className="col-featured">
@@ -497,11 +499,11 @@ export default function MainContent({
             </div>
           </div>
 
-          {/* Toplum-Yaşam */}
+          {/* Dünya */}
           <div className="news-col">
             <div className="col-header">
               <h3>
-                <Link href="/kategori/toplum-yasam">Toplum-Yaşam <span>❯</span></Link>
+                <Link href="/kategori/dunya">Dünya <span>❯</span></Link>
               </h3>
             </div>
             <article className="col-featured">
@@ -611,22 +613,40 @@ export default function MainContent({
                   <span className="editor-picks-meta">8 saat önce</span>
                 </div>
               </article>
+              <article className="editor-picks-item">
+                <div className="editor-picks-item-body">
+                  <span className="editor-picks-cat" data-cat="politika">Politika</span>
+                  <h4 className="editor-picks-item-title">
+                    <Link href="/haber/mecliste-yeni-yasama-donemi">Meclis'te yeni yasama dönemi kritik başlıklarla başlıyor</Link>
+                  </h4>
+                  <span className="editor-picks-meta">9 saat önce</span>
+                </div>
+              </article>
+              <article className="editor-picks-item">
+                <div className="editor-picks-item-body">
+                  <span className="editor-picks-cat" data-cat="kadin">Kadın</span>
+                  <h4 className="editor-picks-item-title">
+                    <Link href="/haber/kadin-hareketinden-ortak-manifesto">Kadın hareketinden şiddete karşı ortak mücadele çağrısı</Link>
+                  </h4>
+                  <span className="editor-picks-meta">10 saat önce</span>
+                </div>
+              </article>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Söyleşi Blok */}
+      {/* SÖYLEŞİ Blok */}
       <section className="news-block block-ecology">
         <div className="col-header">
-          <h3><Link href="/kategori/soylesi">Söyleşi <span>❯</span></Link></h3>
+          <h3><Link href="/kategori/soylesi">SÖYLEŞİ <span>❯</span></Link></h3>
         </div>
         <div className="ecology-grid-3col">
           <article className="eco-card">
             <Link href="/haber/munzur-vadisi-hes-projelerine-karsi-adim" className="eco-card-img">
-              <img src="/assets/photos/haber-foto9.jpg" alt="Eko 1" />
+              <img src="/assets/photos/haber-foto9.jpg" alt="Söyleşi 1" />
             </Link>
-            <span className="card-cat" data-cat="ekoloji">Ekoloji</span>
+            <span className="card-cat" data-cat="soylesi">Söyleşi</span>
             <h3>
               <Link href="/haber/munzur-vadisi-hes-projelerine-karsi-adim">
                 Munzur Vadisi'nde HES projelerine karşı yeni hukuki adım
@@ -635,9 +655,9 @@ export default function MainContent({
           </article>
           <article className="eco-card">
             <Link href="/haber/kaz-daglari-su-kaynaklari" className="eco-card-img">
-              <img src="/assets/photos/haber-foto10.webp" alt="Eko 2" />
+              <img src="/assets/photos/haber-foto10.webp" alt="Söyleşi 2" />
             </Link>
-            <span className="card-cat" data-cat="dunya">Dünya</span>
+            <span className="card-cat" data-cat="soylesi">Söyleşi</span>
             <h3>
               <Link href="/haber/kaz-daglari-su-kaynaklari">
                 Kaz Dağları'nda su kaynakları tehdit altında: Rapor açıklandı
@@ -646,9 +666,9 @@ export default function MainContent({
           </article>
           <article className="eco-card">
             <Link href="/haber/kent-bostanlari-yayginlasiyor" className="eco-card-img">
-              <img src="/assets/photos/haber-foto11.jpeg" alt="Eko 3" />
+              <img src="/assets/photos/haber-foto11.jpeg" alt="Söyleşi 3" />
             </Link>
-            <span className="card-cat" data-cat="yasam">Yaşam</span>
+            <span className="card-cat" data-cat="soylesi">Söyleşi</span>
             <h3>
               <Link href="/haber/kent-bostanlari-yayginlasiyor">
                 Kent bostanları yaygınlaşıyor: Yerel üretim alternatifleri
@@ -658,18 +678,18 @@ export default function MainContent({
         </div>
       </section>
 
-      {/* Güncel Analiz ve Dosyalar */}
+      {/* DOSYA Blok */}
       <section className="news-block block-horizontal">
         <div className="col-header">
-          <h3><Link href="/kategori/dosya">Güncel Analiz ve Dosyalar <span>❯</span></Link></h3>
+          <h3><Link href="/kategori/dosya">DOSYA <span>❯</span></Link></h3>
         </div>
         <div className="horizontal-strip-list">
           <article className="strip-card">
             <Link href="/haber/ortadogu-yeni-dengeler" className="strip-card-img">
-              <img src="/assets/photos/haber-foto12.jpeg" alt="Analiz 1" />
+              <img src="/assets/photos/haber-foto12.jpeg" alt="Dosya 1" />
             </Link>
             <div className="strip-content">
-              <span className="card-cat" data-cat="dunya">Dünya</span>
+              <span className="card-cat" data-cat="dosya">Dosya</span>
               <h3>
                 <Link href="/haber/ortadogu-yeni-dengeler">
                   Ortadoğu'da yeni dengeler ve diplomatik cepheleşmeler
@@ -680,10 +700,10 @@ export default function MainContent({
           </article>
           <article className="strip-card">
             <Link href="/haber/enflasyon-sarmali-ve-dar-gelirli" className="strip-card-img">
-              <img src="/assets/photos/haber-foto13.jpg" alt="Analiz 2" />
+              <img src="/assets/photos/haber-foto13.jpg" alt="Dosya 2" />
             </Link>
             <div className="strip-content">
-              <span className="card-cat" data-cat="ekonomi">Ekonomi</span>
+              <span className="card-cat" data-cat="dosya">Dosya</span>
               <h3>
                 <Link href="/haber/enflasyon-sarmali-ve-dar-gelirli">
                   Enflasyon sarmalında dar gelirlinin yaşam mücadelesi
@@ -695,17 +715,17 @@ export default function MainContent({
         </div>
       </section>
 
-      {/* Spor & Kültür Blok */}
+      {/* ÖZEL HABER Blok */}
       <section className="news-block block-grid4">
         <div className="col-header">
-          <h3><Link href="/kategori/spor">Spor <span>❯</span></Link></h3>
+          <h3><Link href="/kategori/ozel-haber">ÖZEL HABER <span>❯</span></Link></h3>
         </div>
         <div className="grid-4col">
           <article className="standard-card">
             <Link href="/haber/haftanin-karikatur-seckisi" className="standard-card-img">
-              <img src="/assets/photos/haber-foto4.jpg" alt="Kültür 1" />
+              <img src="/assets/photos/haber-foto4.jpg" alt="Özel Haber 1" />
             </Link>
-            <span className="card-cat" data-cat="sanat">Sanat</span>
+            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
             <h4>
               <Link href="/haber/haftanin-karikatur-seckisi">
                 Haftanın karikatür seçkisi yayımlandı
@@ -714,9 +734,9 @@ export default function MainContent({
           </article>
           <article className="standard-card">
             <Link href="/haber/kadin-hareketinden-ortak-manifesto" className="standard-card-img">
-              <img src="/assets/photos/haber-foto13.jpg" alt="Kültür 2" />
+              <img src="/assets/photos/haber-foto13.jpg" alt="Özel Haber 2" />
             </Link>
-            <span className="card-cat" data-cat="kadin">Kadın</span>
+            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
             <h4>
               <Link href="/haber/kadin-hareketinden-ortak-manifesto">
                 Kadın hareketinden ortak manifesto
@@ -725,9 +745,9 @@ export default function MainContent({
           </article>
           <article className="standard-card">
             <Link href="/haber/yeni-cikan-kitaplar" className="standard-card-img">
-              <img src="/assets/photos/haber-foto6.webp" alt="Kültür 3" />
+              <img src="/assets/photos/haber-foto6.webp" alt="Özel Haber 3" />
             </Link>
-            <span className="card-cat" data-cat="edebiyat">Edebiyat</span>
+            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
             <h4>
               <Link href="/haber/yeni-cikan-kitaplar">
                 Yeni çıkan kitaplar ve eleştiri yazıları
@@ -736,9 +756,9 @@ export default function MainContent({
           </article>
           <article className="standard-card">
             <Link href="/haber/bagimsiz-sinema-gunleri" className="standard-card-img">
-              <img src="/assets/photos/haber-foto5.jpg" alt="Kültür 4" />
+              <img src="/assets/photos/haber-foto5.jpg" alt="Özel Haber 4" />
             </Link>
-            <span className="card-cat" data-cat="sanat">Sanat</span>
+            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
             <h4>
               <Link href="/haber/bagimsiz-sinema-gunleri">
                 Bağımsız sinema günleri başlıyor

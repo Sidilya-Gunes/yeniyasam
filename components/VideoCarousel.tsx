@@ -96,8 +96,12 @@ export default function VideoCarousel({ videos = DEFAULT_VIDEOS }: { videos?: Vi
     <section className="video-carousel-section">
       <div className="container">
         <div className="section-title-bar dark">
-          <Link href="/kategori/video">
-            <h2>YENİ YAŞAM MEDYA</h2>
+          <Link href="/kategori/video" className="media-logo-title-link">
+            <img
+              src="/assets/img/ymedia-logo.png"
+              alt="Yeni Yaşam Medya"
+              className="media-section-logo"
+            />
           </Link>
           <div className="carousel-nav">
             <button

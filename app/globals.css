@@ -1122,6 +1122,42 @@ body.dark-mode .daily-photo-section {
     border-bottom: 1px solid rgba(255, 255, 255, 0.12); flex-wrap: wrap;
 }
 .editor-picks-title-wrap { display: flex; flex-direction: column; gap: 6px; }
+.editor-picks-title {
+    font-family: var(--font-heading, inherit);
+    font-size: 1.85rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    text-transform: uppercase;
+    margin: 0;
+}
+.media-section-logo {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+.media-logo-title-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+.category-title[data-cat="politika"] {
+    border-left: 4px solid var(--cat-politika, #dc2626);
+    color: var(--cat-politika, #dc2626);
+}
+.category-title[data-cat="kadin"] {
+    border-left: 4px solid var(--cat-kadin, #8b5cf6);
+    color: var(--cat-kadin, #8b5cf6);
+}
+.category-title[data-cat="ekoloji"] {
+    border-left: 4px solid var(--cat-ekoloji, #10b981);
+    color: var(--cat-ekoloji, #10b981);
+}
+.category-title[data-cat="ozel-haber"] {
+    border-left: 4px solid #f59e0b;
+    color: #f59e0b;
+}
 .editor-picks-more {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 9px 18px; border: 1px solid rgba(255, 255, 255, 0.25);
