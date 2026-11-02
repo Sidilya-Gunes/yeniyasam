@@ -1,8 +1,3 @@
-// Bîsmîllahîr Rahmanîr Rahîm
-// El Hamdu Lîllah î  Rabbul Alemîn
-// Es selatu vesSelamû ala rasûlîna Muhammedîn
-// La îlahe îll Allah
-// Muhammedur Rasûlûllah
 
 import Link from 'next/link';
 import { Article, Category, Author } from '@/types/strapi';

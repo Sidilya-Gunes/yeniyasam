@@ -1,8 +1,4 @@
-// Bîsmîllahîr Rahmanîr Rahîm
-// El Hamdu Lîllah î  Rabbul Alemîn
-// Es selatu vesSelamû ala rasûlîna Muhammedîn
-// La îlahe îll Allah
-// Muhammedur Rasûlûllah
+
 
 /**
  * site.ts — site geneli sabitler ve tip tanımları.
