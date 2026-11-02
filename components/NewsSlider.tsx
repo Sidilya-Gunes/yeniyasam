@@ -93,6 +93,21 @@ export default function NewsSlider({ articles }: NewsSliderProps) {
                     alt={item.title}
                     loading={idx === 0 ? 'eager' : 'lazy'}
                   />
+                  {item.videoUrl && (
+                    <a
+                      href={item.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="slide-video-play-btn"
+                      onClick={(e) => e.stopPropagation()}
+                      title="YouTube'da İzle"
+                      aria-label="Videoyu İzle"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </a>
+                  )}
                 </div>
                 <div className="slide-text">
                   <span

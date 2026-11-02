@@ -60,6 +60,7 @@ export interface Article {
   updatedAt?: string;
   isHeadline?: boolean;
   isFeatured?: boolean;
+  videoUrl?: string;
   readTime?: string;
   views?: number;
 }

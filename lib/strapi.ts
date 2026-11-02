@@ -314,6 +314,7 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
     },
     isHeadline: Boolean(item.isHeadline),
     isFeatured: Boolean(item.isFeatured),
+    videoUrl: item.videoUrl || '',
     readTime: item.readTime || '3 dk',
     publishedAt: item.publishedAt || item.createdAt || new Date().toISOString(),
   };

@@ -36,7 +36,9 @@
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "authorName": {
       "type": "string"
@@ -50,6 +52,9 @@
       "default": false
     },
     "readTime": {
+      "type": "string"
+    },
+    "videoUrl": {
       "type": "string"
     }
   }
