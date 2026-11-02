@@ -41,6 +41,11 @@ export async function fetchStrapi<T>(
   urlParams: Record<string, string | number | boolean> = {},
   options: RequestInit = {}
 ): Promise<StrapiResponse<T> | null> {
+  // Vercel veya canlı ortamda localhost Strapi'ye istek atıp timeout (504/500) almamak için doğrudan mock'a düşür
+  if (STRAPI_URL.includes('localhost') && (process.env.VERCEL || process.env.NODE_ENV === 'production')) {
+    return null;
+  }
+
   try {
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(urlParams)) {
@@ -94,7 +99,7 @@ export const MOCK_AUTHORS: Author[] = [
     name: 'Nezahat Doğan',
     slug: 'nezahat-dogan',
     role: 'Yazar',
-    avatar: '/assets/photos/yazar3.jpeg',
+    avatar: '/assets/photos/yazar3.webp',
     bio: 'Kadın mücadelesi ve insan hakları odaklı köşe yazarı.',
     twitter: '@nezahatdogan',
     articleCount: 42,
@@ -104,7 +109,7 @@ export const MOCK_AUTHORS: Author[] = [
     name: 'Ali Barış Kurt',
     slug: 'ali-baris-kurt',
     role: 'Gazeteci',
-    avatar: '/assets/photos/yazar2.jpeg',
+    avatar: '/assets/photos/yazar2.webp',
     bio: 'Ortadoğu politikası ve güncel siyaset yazarı.',
     twitter: '@alibariskurt',
     articleCount: 89,
@@ -114,7 +119,7 @@ export const MOCK_AUTHORS: Author[] = [
     name: 'Gülcan Dereli',
     slug: 'gulcan-dereli',
     role: 'Yazar',
-    avatar: '/assets/photos/yazar4.jpeg',
+    avatar: '/assets/photos/yazar4.webp',
     bio: 'Ekoloji, çevre hakları ve toplumsal yaşam üzerine yazılar.',
     twitter: '@gulcandereli',
     articleCount: 65,
@@ -248,7 +253,7 @@ export const MOCK_DAILY_FEATURES: Record<string, DailyFeature> = {
     title: 'Günün Manşeti',
     captionTitle: 'Sayı: 2412',
     date: '27 Ekim 2026',
-    image: '/assets/photos/manset-ornek.jpg',
+    image: '/assets/photos/yy.jpg',
   },
   jin: {
     id: 2,
@@ -256,7 +261,7 @@ export const MOCK_DAILY_FEATURES: Record<string, DailyFeature> = {
     title: 'Jin Dergi',
     captionTitle: 'Sayı: 89',
     date: 'Haftalık Kadın Eki',
-    image: '/assets/photos/jin-dergi-ornek.jpg',
+    image: '/assets/photos/jin.jpeg',
   },
   karikatur: {
     id: 3,
@@ -264,7 +269,7 @@ export const MOCK_DAILY_FEATURES: Record<string, DailyFeature> = {
     title: 'Günün Karikatürü',
     captionTitle: 'Çizen: Kemal Gökhan',
     date: '27 Ekim 2026',
-    image: '/assets/photos/karikatur-ornek.jpg',
+    image: '/assets/photos/karikatur.jpeg',
   },
 };
 
