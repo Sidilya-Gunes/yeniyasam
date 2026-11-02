@@ -86,13 +86,15 @@ export default function NewsSlider({ articles }: NewsSliderProps) {
               className={`slide-item ${idx === currentIndex ? 'active' : ''}`}
               data-index={idx}
             >
-              <Link href={`/haber/${item.slug}`} className="slide-link">
+              <div className="slide-content">
                 <div className="slide-figure">
-                  <img
-                    src={getStrapiMedia(item.coverImage)}
-                    alt={item.title}
-                    loading={idx === 0 ? 'eager' : 'lazy'}
-                  />
+                  <Link href={`/haber/${item.slug}`} className="slide-img-link" tabIndex={-1} aria-label={item.title}>
+                    <img
+                      src={getStrapiMedia(item.coverImage)}
+                      alt={item.title}
+                      loading={idx === 0 ? 'eager' : 'lazy'}
+                    />
+                  </Link>
                   {item.videoUrl && (
                     <div className="slide-video-actions">
                       <a
@@ -134,9 +136,13 @@ export default function NewsSlider({ articles }: NewsSliderProps) {
                   >
                     {item.category?.name || 'Güncel'}
                   </span>
-                  <h2 className="slide-title">{item.title}</h2>
+                  <h2 className="slide-title">
+                    <Link href={`/haber/${item.slug}`} className="slide-title-link">
+                      {item.title}
+                    </Link>
+                  </h2>
                 </div>
-              </Link>
+              </div>
             </div>
           ))}
         </div>
