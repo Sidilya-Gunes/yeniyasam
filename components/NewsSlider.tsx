@@ -103,8 +103,14 @@ export default function NewsSlider({ articles }: NewsSliderProps) {
                       title="YouTube'da İzle"
                       aria-label="Videoyu İzle"
                     >
+                      {/* y Media Logosu */}
+                      <img
+                        src="/assets/img/ymedia-logo.png"
+                        alt="y Media"
+                        className="slide-video-logo"
+                      />
                       {/* Video Kamera İkonu */}
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="m22 8-6 4 6 4V8Z" fill="currentColor" />
                         <rect width="14" height="12" x="2" y="6" rx="2" fill="currentColor" />
                       </svg>
