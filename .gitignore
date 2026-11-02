@@ -1,5 +1,3 @@
-
-
 # bağımlılıklar
 node_modules/
 
@@ -7,6 +5,7 @@ node_modules/
 .next/
 out/
 build/
+*.tsbuildinfo
 
 # yardımcı betikler / geçici dosyalar
 tmp/
