@@ -102,6 +102,7 @@ export default function VideoCarousel({ videos = DEFAULT_VIDEOS }: { videos?: Vi
               alt="Yeni Yaşam Medya"
               className="media-section-logo"
             />
+            <span className="media-section-title">YENİ YAŞAM MEDYA</span>
           </Link>
           <div className="carousel-nav">
             <button
