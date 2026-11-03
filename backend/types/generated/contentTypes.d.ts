@@ -927,6 +927,45 @@ export interface ApiSoylesiSoylesi extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiSporHaberiSporHaberi extends Struct.CollectionTypeSchema {
+  collectionName: 'spor_haberleri';
+  info: {
+    description: 'Futbol, kad\u0131n ligleri, amat\u00F6r bran\u015Flar ve sporcu haberleri';
+    displayName: '\u26BD Spor';
+    pluralName: 'spor-haberleri';
+    singularName: 'spor-haberi';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    authorName: Schema.Attribute.String;
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    coverImage: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    kicker: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::spor-haberi.spor-haberi'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    readTime: Schema.Attribute.String;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    summary: Schema.Attribute.Text & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    videoUrl: Schema.Attribute.String;
+  };
+}
+
 export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
   collectionName: 'videolar';
   info: {
@@ -1514,6 +1553,7 @@ declare module '@strapi/strapi' {
       'api::makale.makale': ApiMakaleMakale;
       'api::politika-haberi.politika-haberi': ApiPolitikaHaberiPolitikaHaberi;
       'api::soylesi.soylesi': ApiSoylesiSoylesi;
+      'api::spor-haberi.spor-haberi': ApiSporHaberiSporHaberi;
       'api::video.video': ApiVideoVideo;
       'api::yazar.yazar': ApiYazarYazar;
       'plugin::content-releases.release': PluginContentReleasesRelease;

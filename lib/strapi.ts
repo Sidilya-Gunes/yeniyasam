@@ -138,6 +138,16 @@ export const MOCK_AUTHORS: Author[] = [
     twitter: '@nmetinyegin',
     articleCount: 128,
   },
+  {
+    id: 5,
+    name: 'Hüseyin Kalkan',
+    slug: 'huseyin-kalkan',
+    role: 'Yazar',
+    avatar: '/assets/photos/yazar5.jpeg',
+    bio: 'Kültür, edebiyat ve yakın tarih üzerine haftalık köşe yazıları.',
+    twitter: '@huseyinkalkan',
+    articleCount: 76,
+  },
 ];
 
 export const MOCK_ARTICLES: Article[] = [

@@ -356,14 +356,14 @@ export default function MainContent({
             </article>
             <article className="news-card">
               <Link href="/haber/tarimda-maliyet-krizi" className="news-card-img">
-                <img src="/assets/photos/haber-foto8.jpg" alt="Haber" />
+                <img src="/assets/photos/haber-foto7.jpg" alt="Haber" />
               </Link>
               <h4>
                 <Link href="/haber/tarimda-maliyet-krizi">
                   Tarımda mazot ve gübre maliyeti üreticiyi çıkmaza sürüklüyor
                 </Link>
               </h4>
-              <p>Çiftçiler artan girdi maliyetlerine karşı kamusal destek ve taban fiyat garantisi istiyor...</p>
+              <p>Çiftçiler ve üretici kooperatifleri, artan girdi maliyetlerine karşı acil kamusal destek ve taban fiyat garantisi talep ediyor...</p>
               <span className="news-date">23 Ekim 2026</span>
             </article>
           </div>
