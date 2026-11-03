@@ -269,6 +269,9 @@ export default function Header() {
               <li>
                 <Link href="/kategori/panorama" onClick={closeMenu}>Panorama</Link>
               </li>
+              <li>
+                <Link href="/kategori/spor" onClick={closeMenu}>Spor</Link>
+              </li>
             </ul>
 
             <div className="nav-group nav-group-left">

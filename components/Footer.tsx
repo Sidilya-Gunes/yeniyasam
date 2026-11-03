@@ -76,6 +76,7 @@ export default function Footer() {
               <li><Link href="/kategori/ekonomi">Ekonomi</Link></li>
               <li><Link href="/kategori/kultur-sanat">Kültür-Sanat</Link></li>
               <li><Link href="/kategori/soylesi">Söyleşi</Link></li>
+              <li><Link href="/kategori/spor">Spor</Link></li>
             </ul>
           </div>
 
