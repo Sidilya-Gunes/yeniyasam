@@ -1584,6 +1584,10 @@ body.search-open { overflow: hidden; }
 /* =================================================================
    DRAWER NAV (sağdan açılan)
    ================================================================= */
+body.menu-open {
+    overflow: hidden !important;
+}
+
 .main-nav {
     position: fixed; top: 0; right: 0; left: auto; bottom: 0;
     width: 420px; max-width: 92vw; height: 100vh;
