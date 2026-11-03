@@ -2332,7 +2332,7 @@ body.dark-mode .share-opt { color: var(--heading); }
 .share-btn.facebook:hover { background-color: #1877f2; }
 .share-btn.x:hover         { background-color: #0f172a; }
 .share-btn.whatsapp:hover  { background-color: #25d366; }
-.share-btn.linkedin:hover  { background-color: #0a66c2; }
+.share-btn.telegram:hover  { background-color: #229ED9; }
 .share-btn.copy-link:hover { background-color: var(--primary); }
 .share-btn.copied { background-color: #10b981; border-color: #10b981; color: #fff; }
 body.dark-mode .article-share--bottom .share-label { color: var(--heading); }
