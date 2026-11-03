@@ -222,13 +222,7 @@ export default function Header() {
                 <Link href="/kategori/guncel" onClick={closeMenu}>Güncel</Link>
               </li>
               <li>
-                <Link href="/yazarlar" onClick={closeMenu}>Yazarlar</Link>
-              </li>
-              <li>
-                <Link href="/kategori/video" onClick={closeMenu}>Video</Link>
-              </li>
-              <li>
-                <Link href="/kategori/dunya" onClick={closeMenu}>Dünya</Link>
+                <Link href="/kategori/politika" onClick={closeMenu}>Politika</Link>
               </li>
               <li>
                 <Link href="/kategori/kadin" onClick={closeMenu}>Kadın</Link>
@@ -237,22 +231,43 @@ export default function Header() {
                 <Link href="/kategori/ekoloji" onClick={closeMenu}>Ekoloji</Link>
               </li>
               <li>
-                <Link href="/kategori/soylesi" onClick={closeMenu}>Söyleşi</Link>
-              </li>
-              <li>
-                <Link href="/kategori/forum" onClick={closeMenu}>Forum</Link>
-              </li>
-              <li>
-                <Link href="/kategori/dosya" onClick={closeMenu}>Dosya</Link>
-              </li>
-              <li>
-                <Link href="/kategori/politika" onClick={closeMenu}>Politika</Link>
+                <Link href="/kategori/ekonomi" onClick={closeMenu}>Ekonomi</Link>
               </li>
               <li>
                 <Link href="/kategori/kultur-sanat" onClick={closeMenu}>Kültür-Sanat</Link>
               </li>
               <li>
-                <Link href="/kategori/ekonomi" onClick={closeMenu}>Emek-Ekonomi</Link>
+                <Link href="/kategori/genclik" onClick={closeMenu}>Gençlik</Link>
+              </li>
+              <li>
+                <Link href="/kategori/toplum-yasam" onClick={closeMenu}>Toplum-Yaşam</Link>
+              </li>
+              <li>
+                <Link href="/kategori/dunya" onClick={closeMenu}>Dünya</Link>
+              </li>
+              <li>
+                <Link href="/kategori/soylesi" onClick={closeMenu}>Söyleşi</Link>
+              </li>
+              <li>
+                <Link href="/kategori/dosya" onClick={closeMenu}>Dosya</Link>
+              </li>
+              <li>
+                <Link href="/kategori/forum" onClick={closeMenu}>Forum</Link>
+              </li>
+              <li>
+                <Link href="/kategori/ozel-haber" onClick={closeMenu}>Özel Haber</Link>
+              </li>
+              <li>
+                <Link href="/kategori/editorun-sectikleri" onClick={closeMenu}>Editörün Seçtikleri</Link>
+              </li>
+              <li>
+                <Link href="/kategori/gunun-fotografi" onClick={closeMenu}>Günün Fotoğrafı</Link>
+              </li>
+              <li>
+                <Link href="/karikatur" onClick={closeMenu}>Karikatür</Link>
+              </li>
+              <li>
+                <Link href="/kategori/panorama" onClick={closeMenu}>Panorama</Link>
               </li>
             </ul>
 
