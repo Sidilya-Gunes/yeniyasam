@@ -217,6 +217,16 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+::selection {
+    background-color: #d71920;
+    color: #ffffff;
+}
+
+::-moz-selection {
+    background-color: #d71920;
+    color: #ffffff;
+}
+
 body {
     font-family: var(--font);
     font-size: 1.125rem;
@@ -3009,4 +3019,71 @@ body.dark-mode .error-btn--secondary { color: var(--heading); border-color: var(
     .error-title { font-size: 1.2rem; }
     .error-actions { flex-direction: column; width: 100%; }
     .error-btn { justify-content: center; width: 100%; }
+}
+
+/* =================================================================
+   SCROLL TO TOP BUTONU
+   ================================================================= */
+.scroll-to-top-btn {
+    position: fixed;
+    bottom: 26px;
+    right: 26px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--primary, #d71920);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(215, 25, 32, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px) scale(0.9);
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.scroll-to-top-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.scroll-to-top-btn:hover {
+    background-color: #b9151b;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 18px rgba(215, 25, 32, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-to-top-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.scroll-to-top-btn svg {
+    transition: transform 0.2s ease;
+}
+
+.scroll-to-top-btn:hover svg {
+    transform: translateY(-2px);
+}
+
+body.dark-mode .scroll-to-top-btn {
+    background-color: var(--primary, #d71920);
+    box-shadow: 0 4px 14px rgba(215, 25, 32, 0.5), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+    .scroll-to-top-btn {
+        bottom: 20px;
+        right: 18px;
+        width: 40px;
+        height: 40px;
+    }
 }
