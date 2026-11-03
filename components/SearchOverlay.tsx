@@ -4,7 +4,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -40,11 +39,6 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     if (!query.trim()) return;
     onClose();
     router.push(`/arama?q=${encodeURIComponent(query.trim())}`);
-  };
-
-  const handleHintClick = (hint: string) => {
-    onClose();
-    router.push(`/arama?q=${encodeURIComponent(hint)}`);
   };
 
   if (!isOpen) return null;
@@ -109,13 +103,6 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </button>
-        </div>
-        <div className="search-overlay-hints">
-          <span>Popüler:</span>
-          <button type="button" onClick={() => handleHintClick('dünya')}>Dünya</button>
-          <button type="button" onClick={() => handleHintClick('kadın')}>Kadın</button>
-          <button type="button" onClick={() => handleHintClick('ekoloji')}>Ekoloji</button>
-          <button type="button" onClick={() => handleHintClick('ekonomi')}>Ekonomi</button>
         </div>
       </form>
     </div>

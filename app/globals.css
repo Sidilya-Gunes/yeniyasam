@@ -2799,10 +2799,14 @@ body.dark-mode .author-socials a { background: var(--surface); }
     .author-pagination .page-arrow { min-width: 36px; height: 36px; font-size: 0.85rem; }
 }
 @media (max-width: 480px) {
-    .author-name { font-size: 1.3rem; }
+    .author-hero .author-name { font-size: 1.3rem; }
     .author-hero-avatar { width: 76px; height: 76px; }
     .author-article-title { font-size: 1.05rem; }
     .author-article-excerpt { font-size: 0.88rem; }
+    .opinion-item { grid-template-columns: 46px 1fr; gap: 12px; padding: 10px 0; }
+    .opinion-item .author-avatar { width: 46px; height: 46px; }
+    .opinion-item .author-name { font-size: 0.72rem; letter-spacing: 1.1px; }
+    .opinion-item .opinion-title a { font-size: 0.95rem; }
 }
 
 /* ---- YAZARLAR LİSTESİ ---- */
