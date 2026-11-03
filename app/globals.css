@@ -1143,20 +1143,31 @@ body.dark-mode .daily-photo-section {
     text-decoration: none;
 }
 .category-title[data-cat="politika"] {
-    border-left: 4px solid var(--cat-politika, #dc2626);
-    color: var(--cat-politika, #dc2626);
+    color: var(--heading, #111827);
 }
+.category-title[data-cat="politika"]::before {
+    background-color: var(--cat-politika, #dc2626);
+}
+
 .category-title[data-cat="kadin"] {
-    border-left: 4px solid var(--cat-kadin, #8b5cf6);
-    color: var(--cat-kadin, #8b5cf6);
+    color: var(--heading, #111827);
 }
+.category-title[data-cat="kadin"]::before {
+    background-color: var(--cat-kadin, #8b5cf6);
+}
+
 .category-title[data-cat="ekoloji"] {
-    border-left: 4px solid var(--cat-ekoloji, #10b981);
-    color: var(--cat-ekoloji, #10b981);
+    color: var(--heading, #111827);
 }
+.category-title[data-cat="ekoloji"]::before {
+    background-color: var(--cat-ekoloji, #10b981);
+}
+
 .category-title[data-cat="ozel-haber"] {
-    border-left: 4px solid #f59e0b;
-    color: #f59e0b;
+    color: var(--heading, #111827);
+}
+.category-title[data-cat="ozel-haber"]::before {
+    background-color: #f59e0b;
 }
 .editor-picks-more {
     display: inline-flex; align-items: center; gap: 8px;
