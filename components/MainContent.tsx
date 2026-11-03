@@ -322,6 +322,53 @@ export default function MainContent({
           </div>
         </div>
 
+        {/* EKONOMİ */}
+        <div className="news-block-row">
+          <div className="category-col">
+            <h3 className="category-title" data-cat="ekonomi">
+              <Link href="/kategori/ekonomi" style={{ color: 'inherit', textDecoration: 'none' }}>EKONOMİ</Link>
+            </h3>
+          </div>
+          <div className="news-items-grid">
+            <article className="news-card">
+              <Link href="/haber/asgari-ucret-zirvesi" className="news-card-img">
+                <img src="/assets/photos/haber-foto2.jpeg" alt="Haber" />
+              </Link>
+              <h4>
+                <Link href="/haber/asgari-ucret-zirvesi">
+                  Muhalefet ve sendikalardan ortak asgari ücret ve geçim zirvesi
+                </Link>
+              </h4>
+              <p>Yüksek enflasyon karşısında eriyen ücretler ve hayat pahalılığı için temel gelir güvencesi çağrısı...</p>
+              <span className="news-date">25 Ekim 2026</span>
+            </article>
+            <article className="news-card">
+              <Link href="/haber/enflasyon-ve-gelir-dagilimi" className="news-card-img">
+                <img src="/assets/photos/haber-foto1.jpg" alt="Haber" />
+              </Link>
+              <h4>
+                <Link href="/haber/enflasyon-ve-gelir-dagilimi">
+                  Gelir dağılımında tarihi uçurum: Raporlar ne söylüyor?
+                </Link>
+              </h4>
+              <p>DİSK-AR ve bağımsız ekonomistlerin analizlerine göre emeğin milli gelirden aldığı pay geriledi...</p>
+              <span className="news-date">24 Ekim 2026</span>
+            </article>
+            <article className="news-card">
+              <Link href="/haber/tarimda-maliyet-krizi" className="news-card-img">
+                <img src="/assets/photos/haber-foto8.jpg" alt="Haber" />
+              </Link>
+              <h4>
+                <Link href="/haber/tarimda-maliyet-krizi">
+                  Tarımda mazot ve gübre maliyeti üreticiyi çıkmaza sürüklüyor
+                </Link>
+              </h4>
+              <p>Çiftçiler artan girdi maliyetlerine karşı kamusal destek ve taban fiyat garantisi istiyor...</p>
+              <span className="news-date">23 Ekim 2026</span>
+            </article>
+          </div>
+        </div>
+
         {/* ÖZEL HABER */}
         <div className="news-block-row">
           <div className="category-col">

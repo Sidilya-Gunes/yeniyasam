@@ -1163,11 +1163,18 @@ body.dark-mode .daily-photo-section {
     background-color: var(--cat-ekoloji, #10b981);
 }
 
+.category-title[data-cat="ekonomi"] {
+    color: var(--heading, #111827);
+}
+.category-title[data-cat="ekonomi"]::before {
+    background-color: var(--cat-ekonomi, #f59e0b);
+}
+
 .category-title[data-cat="ozel-haber"] {
     color: var(--heading, #111827);
 }
 .category-title[data-cat="ozel-haber"]::before {
-    background-color: #f59e0b;
+    background-color: #f97316;
 }
 .editor-picks-more {
     display: inline-flex; align-items: center; gap: 8px;
