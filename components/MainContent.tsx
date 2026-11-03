@@ -380,6 +380,7 @@ export default function MainContent({
                 <img src="/assets/photos/haber-foto8.jpg" alt="Manşet Görseli" />
               </Link>
               <div className="feature-content">
+                <span className="feature-kicker">Özel Haber</span>
                 <h3 className="feature-title">
                   <Link href="/haber/dun-erken-yarin-gec">
                     Dün erken, yarın geç, şimdi zamanıdır!
@@ -397,6 +398,7 @@ export default function MainContent({
                   <img src="/assets/photos/haber-foto12.jpeg" alt="Yan 1" />
                 </Link>
                 <div className="side-content">
+                  <span className="feature-kicker">Özel Haber</span>
                   <h4 className="side-title">
                     <Link href="/haber/ozgurluk-neden-once-iliskilerde-baslar">
                       Özgürlük neden önce ilişkilerde başlar?
@@ -410,6 +412,7 @@ export default function MainContent({
                   <img src="/assets/photos/haber-foto13.jpg" alt="Yan 2" />
                 </Link>
                 <div className="side-content">
+                  <span className="feature-kicker">Özel Haber</span>
                   <h4 className="side-title">
                     <Link href="/haber/caylak-filozof">'Çaylak Filozof' okuyucuyla buluştu</Link>
                   </h4>
