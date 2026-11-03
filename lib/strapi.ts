@@ -91,6 +91,10 @@ export const MOCK_CATEGORIES: Category[] = [
   { id: 8, name: 'Söyleşi', slug: 'soylesi', color: 'var(--cat-forum)' },
   { id: 9, name: 'Forum', slug: 'forum', color: 'var(--cat-forum)' },
   { id: 10, name: 'Dosya', slug: 'dosya', color: 'var(--cat-ekonomi)' },
+  { id: 11, name: 'Toplum-Yaşam', slug: 'toplum-yasam', color: 'var(--cat-yasam)' },
+  { id: 12, name: 'Gençlik', slug: 'genclik', color: 'var(--cat-sanat)' },
+  { id: 13, name: 'Spor', slug: 'spor', color: 'var(--cat-spor)' },
+  { id: 14, name: 'Özel Haber', slug: 'ozel-haber', color: 'var(--cat-politika)' },
 ];
 
 export const MOCK_AUTHORS: Author[] = [
@@ -221,6 +225,17 @@ Görüşmelere katılan heyetler, karşılıklı güven artırıcı adımların 
     author: MOCK_AUTHORS[0],
     publishedAt: '2026-10-14T10:50:00Z',
   },
+  {
+    id: 8,
+    title: 'Amedspor ligde zirve yarışını sürdürüyor: Hedef şampiyonluk',
+    slug: 'amedspor-zirve-yarisi',
+    summary: 'Yeşil-kırmızılı ekip ligin kritik haftasında taraftarının desteğiyle sahadan 3 puanla ayrılarak iddiasını perçinledi.',
+    content: 'Amedspor, ligdeki başarılı yürüyüşünü sürdürerek taraftarlarına büyük sevinç yaşattı. Teknik heyet maç sonu değerlendirmesinde takım ruhunun altını çizdi.',
+    coverImage: '/assets/photos/haber-foto7.jpg',
+    category: MOCK_CATEGORIES[12],
+    author: MOCK_AUTHORS[0],
+    publishedAt: '2026-10-27T17:00:00Z',
+  },
 ];
 
 export const MOCK_VIDEOS: VideoMedia[] = [
@@ -283,6 +298,7 @@ const CATEGORY_ENDPOINTS: Record<string, { endpoint: string; name: string; slug:
   'ekonomi': { endpoint: '/ekonomi-haberleri', name: 'Ekonomi', slug: 'ekonomi', color: 'var(--cat-ekonomi)' },
   'kultur-sanat': { endpoint: '/kultur-sanat-haberleri', name: 'Kültür-Sanat', slug: 'kultur-sanat', color: 'var(--cat-kultur-sanat)' },
   'soylesi': { endpoint: '/soylesiler', name: 'Söyleşi', slug: 'soylesi', color: 'var(--cat-forum)' },
+  'spor': { endpoint: '/spor-haberleri', name: 'Spor', slug: 'spor', color: 'var(--cat-spor)' },
 };
 
 function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; color: string }): Article {

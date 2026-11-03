@@ -400,39 +400,6 @@ export default function MainContent({
       {/* 4 Kolonlu Haber Bölümü */}
       <section className="multi-column-news-section">
         <div className="news-four-columns">
-          {/* Emek-Ekonomi */}
-          <div className="news-col">
-            <div className="col-header">
-              <h3>
-                <Link href="/kategori/ekonomi">Emek-Ekonomi <span>❯</span></Link>
-              </h3>
-            </div>
-            <article className="col-featured">
-              <Link href="/haber/mecliste-yeni-yasama-donemi" className="col-featured-img-link">
-                <div className="col-featured-img">
-                  <img src="/assets/photos/haber-foto2.jpeg" alt="Haber" />
-                </div>
-              </Link>
-              <h4>
-                <Link href="/haber/mecliste-yeni-yasama-donemi">
-                  Meclis'te yeni yasama döneminde kritik gündemler
-                </Link>
-              </h4>
-              <p>Yeni dönemin ilk haftasında yerel yönetimler ve anayasa tartışmaları öncelikli başlıklar arasında yer alıyor.</p>
-            </article>
-            <div className="col-sub-list">
-              <article className="sub-news-item">
-                <h4><Link href="/haber/imamoglu-davasi">İmamoğlu davasında istinaf kararının siyasi yankıları sürüyor</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/asgari-ucret-zirvesi">Muhalefet partilerinden ortak asgari ücret ve geçim zirvesi</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/yerel-secim-ittifaklari">Yerel seçim ittifakları için kulisler hareketleniyor</Link></h4>
-              </article>
-            </div>
-          </div>
-
           {/* Toplum-Yaşam */}
           <div className="news-col">
             <div className="col-header">
@@ -441,9 +408,75 @@ export default function MainContent({
               </h3>
             </div>
             <article className="col-featured">
-              <Link href="/haber/ortadoguda-diplomatik-trafik" className="col-featured-img-link">
+              <Link href="/haber/yerel-yonetimlerde-kadin-kooperatifleri" className="col-featured-img-link">
                 <div className="col-featured-img">
                   <img src="/assets/photos/haber-foto3.jpg" alt="Haber" />
+                </div>
+              </Link>
+              <h4>
+                <Link href="/haber/yerel-yonetimlerde-kadin-kooperatifleri">
+                  Yerel yönetimlerde kadın kooperatifleri ve dayanışma ağı
+                </Link>
+              </h4>
+              <p>Bölge genelinde kadın emeğini görünür kılan kooperatifleşme adımları ve yerel ekonomi modelleri yaygınlaşıyor.</p>
+            </article>
+            <div className="col-sub-list">
+              <article className="sub-news-item">
+                <h4><Link href="/haber/ekolojik-koy-projesi">Van'da ekolojik köy projesi: Doğayla uyumlu ortak yaşam</Link></h4>
+              </article>
+              <article className="sub-news-item">
+                <h4><Link href="/haber/deprem-bolgesi-yasam-mucadelesi">Deprem bölgesinde konteyner kentlerdeki yaşam mücadelesi</Link></h4>
+              </article>
+              <article className="sub-news-item">
+                <h4><Link href="/haber/egitimde-anadili-talebi">Eğitimde anadili talebi: 'Çocukların gelişimi için hayati'</Link></h4>
+              </article>
+            </div>
+          </div>
+
+          {/* Gençlik */}
+          <div className="news-col">
+            <div className="col-header">
+              <h3>
+                <Link href="/kategori/genclik">Gençlik <span>❯</span></Link>
+              </h3>
+            </div>
+            <article className="col-featured">
+              <Link href="/haber/universite-ogrencileri-barinma-cikmazi" className="col-featured-img-link">
+                <div className="col-featured-img">
+                  <img src="/assets/photos/haber-foto4.jpg" alt="Haber" />
+                </div>
+              </Link>
+              <h4>
+                <Link href="/haber/universite-ogrencileri-barinma-cikmazi">
+                  Üniversite öğrencilerinin barınma ve geçim çıkmazı büyüyor
+                </Link>
+              </h4>
+              <p>Yüksek yurt ve kira fiyatları gençlerin eğitim hakkını doğrudan tehdit ederken, dayanışma ağları çözüm arıyor.</p>
+            </article>
+            <div className="col-sub-list">
+              <article className="sub-news-item">
+                <h4><Link href="/haber/gencler-kultur-sanat-atolyeleri">Gençler kültür-sanat atölyelerinde bir araya geliyor</Link></h4>
+              </article>
+              <article className="sub-news-item">
+                <h4><Link href="/haber/genc-goc-analizi">Yurt dışına göç eden genç beyinler: Neden gidiyorlar?</Link></h4>
+              </article>
+              <article className="sub-news-item">
+                <h4><Link href="/haber/alternatif-genclik-festivalleri">Bağımsız gençlik festivalleri ve alternatif müzik sahneleri</Link></h4>
+              </article>
+            </div>
+          </div>
+
+          {/* Dünya */}
+          <div className="news-col">
+            <div className="col-header">
+              <h3>
+                <Link href="/kategori/dunya">Dünya <span>❯</span></Link>
+              </h3>
+            </div>
+            <article className="col-featured">
+              <Link href="/haber/ortadoguda-diplomatik-trafik" className="col-featured-img-link">
+                <div className="col-featured-img">
+                  <img src="/assets/photos/haber-foto5.jpg" alt="Haber" />
                 </div>
               </Link>
               <h4>
@@ -451,7 +484,7 @@ export default function MainContent({
                   Ortadoğu'da diplomatik trafik hızlandı: Yeni zirve bekleniyor
                 </Link>
               </h4>
-              <p>Bölgesel aktörler arasında artan gerilimi düşürmek için arabuluculuk girişimleri yoğunlaştı.</p>
+              <p>Bölgesel aktörler arasında artan gerilimi düşürmek için uluslararası arabuluculuk girişimleri yoğunlaştı.</p>
             </article>
             <div className="col-sub-list">
               <article className="sub-news-item">
@@ -466,68 +499,35 @@ export default function MainContent({
             </div>
           </div>
 
-          {/* Gençlik */}
+          {/* Spor */}
           <div className="news-col">
             <div className="col-header">
               <h3>
-                <Link href="/kategori/genclik">Gençlik <span>❯</span></Link>
+                <Link href="/kategori/spor">Spor <span>❯</span></Link>
               </h3>
             </div>
             <article className="col-featured">
-              <Link href="/haber/enflasyon-verileri-piyasalar" className="col-featured-img-link">
+              <Link href="/haber/amedspor-zirve-yarisi" className="col-featured-img-link">
                 <div className="col-featured-img">
-                  <img src="/assets/photos/haber-foto4.jpg" alt="Haber" />
+                  <img src="/assets/photos/haber-foto7.jpg" alt="Haber" />
                 </div>
               </Link>
               <h4>
-                <Link href="/haber/enflasyon-verileri-piyasalar">
-                  Enflasyon verileri sonrası piyasalarda son durum ne?
+                <Link href="/haber/amedspor-zirve-yarisi">
+                  Amedspor ligde zirve yarışını sürdürüyor: Hedef şampiyonluk
                 </Link>
               </h4>
-              <p>Merkez Bankası'nın yıl sonu tahminleri ve döviz kurlarındaki hareketlilik yatırımcıların gözünü bu haftaya çevirdi.</p>
+              <p>Yeşil-kırmızılı ekip ligin kritik haftasında taraftarının desteğiyle sahadan 3 puanla ayrılarak iddiasını perçinledi.</p>
             </article>
             <div className="col-sub-list">
               <article className="sub-news-item">
-                <h4><Link href="/haber/kobi-destek-paketleri">KOBİ'ler için yeni kredi destek paketleri açıklandı</Link></h4>
+                <h4><Link href="/haber/kadin-futbol-ligi-performanslar">Kadın futbol liginde haftanın maçları ve öne çıkanlar</Link></h4>
               </article>
               <article className="sub-news-item">
-                <h4><Link href="/haber/enerji-maliyetleri">Enerji maliyetleri sanayi üretimini nasıl baskılıyor?</Link></h4>
+                <h4><Link href="/haber/bolgesel-amator-ligler-yetenekler">Bölgesel amatör liglerde genç yetenekler dikkat çekiyor</Link></h4>
               </article>
               <article className="sub-news-item">
-                <h4><Link href="/haber/asgari-ucret-takvimi">Asgari ücret görüşmeleri takvimi netleşiyor</Link></h4>
-              </article>
-            </div>
-          </div>
-
-          {/* Dünya */}
-          <div className="news-col">
-            <div className="col-header">
-              <h3>
-                <Link href="/kategori/dunya">Dünya <span>❯</span></Link>
-              </h3>
-            </div>
-            <article className="col-featured">
-              <Link href="/haber/uluslararasi-belgesel-film-festivali" className="col-featured-img-link">
-                <div className="col-featured-img">
-                  <img src="/assets/photos/haber-foto5.jpg" alt="Haber" />
-                </div>
-              </Link>
-              <h4>
-                <Link href="/haber/uluslararasi-belgesel-film-festivali">
-                  Uluslararası Belgesel Film Festivali kapılarını açıyor
-                </Link>
-              </h4>
-              <p>Dünyanın dört bir yanından bağımsız yapımların katıldığı festival bu yıl zengin bir seçki sunuyor.</p>
-            </article>
-            <div className="col-sub-list">
-              <article className="sub-news-item">
-                <h4><Link href="/haber/kurt-edebiyati">Kürt edebiyatında son dönem çeviri eserlerin yükselişi</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/istanbul-modern-sanat">İstanbul'un tarihi mekanlarında sergilenen modern sanat projeleri</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/bagimsiz-tiyatrolar">Bağımsız tiyatroların yeni sezon sahnede karşılaştığı zorluklar</Link></h4>
+                <h4><Link href="/haber/tribunlerde-baris-kardeslik-cagrisi">Tribünlerde barış ve kardeşlik sesleri: Ortak çağrı</Link></h4>
               </article>
             </div>
           </div>
