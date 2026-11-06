@@ -2055,6 +2055,7 @@ body.dark-mode .archive-card-img { background: var(--bg-soft); }
     background: transparent; border: 1px solid transparent;
     padding: 6px 12px; border-radius: 4px;
     cursor: pointer; transition: all 0.2s ease;
+    user-select: none; -webkit-user-select: none; outline: none;
 }
 .search-filter-tab:hover { color: var(--heading); background: var(--bg-soft); }
 .search-filter-tab.active {

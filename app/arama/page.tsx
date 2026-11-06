@@ -6,11 +6,12 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { searchArticles, getStrapiMedia } from '@/lib/strapi';
+import { searchArticles, searchAuthors } from '@/lib/strapi';
 import { Article } from '@/types/strapi';
+import SearchResultsView from '@/components/SearchResultsView';
 
 interface SearchPageProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; tab?: string; sort?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
@@ -21,8 +22,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 }
 
 export default async function AramaPage({ searchParams }: SearchPageProps) {
-  const { q = 'iklim krizi' } = await searchParams;
+  const { q = 'iklim krizi', tab, sort } = await searchParams;
   const results = await searchArticles(q);
+  const matchingAuthors = await searchAuthors(q);
 
   const searchCategories = [
     { name: 'Tüm Haberler', slug: '' },
@@ -147,8 +149,19 @@ export default async function AramaPage({ searchParams }: SearchPageProps) {
     { time: '12:30', title: 'Uluslararası Belgesel Film Festivali kapılarını açıyor', slug: 'uluslararasi-belgesel-film-festivali' },
   ];
 
-  const displayList: Article[] = results.length > 0 ? results : fallbackResults;
-  const count = displayList.length;
+  let displayList: Article[] = results;
+  if (displayList.length === 0) {
+    const qLower = q.trim().toLocaleLowerCase('tr-TR');
+    const filteredFallback = fallbackResults.filter(
+      (a) =>
+        a.title.toLocaleLowerCase('tr-TR').includes(qLower) ||
+        a.summary.toLocaleLowerCase('tr-TR').includes(qLower) ||
+        (a.author?.name && a.author.name.toLocaleLowerCase('tr-TR').includes(qLower)) ||
+        (a.category?.name && a.category.name.toLocaleLowerCase('tr-TR').includes(qLower))
+    );
+    displayList = filteredFallback.length > 0 ? filteredFallback : fallbackResults;
+  }
+  const count = displayList.length + matchingAuthors.length;
 
   return (
     <main className="site-main container">
@@ -196,80 +209,13 @@ export default async function AramaPage({ searchParams }: SearchPageProps) {
       </section>
 
       <div className="search-layout">
-        <div className="search-main">
-          <div className="search-filters">
-            <div className="search-filter-tabs">
-              <button type="button" className="search-filter-tab active">
-                Tümü <span className="search-filter-count">{count}</span>
-              </button>
-              <button type="button" className="search-filter-tab">
-                Haberler <span className="search-filter-count">{Math.max(1, Math.floor(count * 0.7))}</span>
-              </button>
-              <button type="button" className="search-filter-tab">
-                Söyleşi <span className="search-filter-count">{Math.max(1, Math.floor(count * 0.2))}</span>
-              </button>
-              <button type="button" className="search-filter-tab">
-                Yazarlar <span className="search-filter-count">{Math.max(1, Math.floor(count * 0.1))}</span>
-              </button>
-            </div>
-            <div className="search-sort">
-              <label htmlFor="searchSort">Sırala:</label>
-              <select id="searchSort" defaultValue="En yeni">
-                <option value="En yeni">En yeni</option>
-                <option value="En eski">En eski</option>
-                <option value="En alakalı">En alakalı</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="search-results">
-            {displayList.map((item) => (
-              <article className="search-result-item" key={item.id}>
-                <Link
-                  href={`/haber/${item.slug}`}
-                  className="search-result-img"
-                >
-                  <img
-                    src={getStrapiMedia(item.coverImage)}
-                    alt={item.title}
-                  />
-                </Link>
-                <div className="search-result-body">
-                  <span className="search-result-cat">
-                    {item.category?.name || 'Güncel'}
-                  </span>
-                  <h3 className="search-result-title">
-                    <Link href={`/haber/${item.slug}`}>{item.title}</Link>
-                  </h3>
-                  <p className="search-result-excerpt">
-                    {item.summary}
-                  </p>
-                  <div className="search-result-meta">
-                    <span>
-                      {new Date(item.publishedAt).toLocaleDateString('tr-TR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </span>
-                    <span className="search-meta-sep">·</span>
-                    <span>{item.author?.name || 'Yeni Yaşam'}</span>
-                    <span className="search-meta-sep">·</span>
-                    <span>6 dk okuma</span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <nav className="archive-pagination" aria-label="Sayfalama">
-            <span className="page-arrow disabled">‹</span>
-            <span className="page-num active">1</span>
-            <a href="#" className="page-num">2</a>
-            <a href="#" className="page-num">3</a>
-            <a href="#" className="page-arrow" aria-label="Sonraki sayfa">›</a>
-          </nav>
-        </div>
+        <SearchResultsView
+          query={q}
+          articles={displayList}
+          matchingAuthors={matchingAuthors}
+          initialTab={tab}
+          initialSort={sort}
+        />
 
         <aside className="search-sidebar">
           <div className="sidebar-widget">
