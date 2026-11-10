@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { Article, Category, Author, DailyFeature } from '@/types/strapi';
+import { Article, Category, Author, DailyFeature, VideoMedia } from '@/types/strapi';
 import { getStrapiMedia } from '@/lib/strapi';
 import NewsSlider from '@/components/NewsSlider';
 import VideoCarousel from '@/components/VideoCarousel';
@@ -14,6 +14,7 @@ interface MainContentProps {
     jin: DailyFeature;
     karikatur: DailyFeature;
   };
+  videos?: VideoMedia[];
 }
 
 export default function MainContent({
@@ -21,6 +22,7 @@ export default function MainContent({
   categories,
   authors,
   dailyFeatures,
+  videos,
 }: MainContentProps) {
   // Slider için manşet haberleri (En fazla 10 manşet, en yeni 10 haber alınır)
   const headlineArticles = (
@@ -179,7 +181,7 @@ export default function MainContent({
       </section>
 
       {/* Video Carousel */}
-      <VideoCarousel />
+      <VideoCarousel videos={videos} />
 
       {/* Günlük Özellikler (Manşet, Jin, Karikatür, Abone Ol) */}
       <section className="daily-features-section">

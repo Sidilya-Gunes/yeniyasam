@@ -1,20 +1,21 @@
-
+// Bîsmîllahîr Rahmanîr Rahîm
+// El Hamdu Lîllah î  Rabbul Alemîn
+// Es selatu vesSelamû ala rasûlîna Muhammedîn
+// La îlahe îll Allah
+// Muhammedur Rasûlûllah
 
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
+import type { VideoMedia } from '@/types/strapi';
+import { getStrapiMedia } from '@/lib/strapi';
 
-interface VideoItem {
-  id: string | number;
-  title: string;
-  category: string;
-  duration: string;
-  thumbnail: string;
-  slug: string;
+interface VideoCarouselProps {
+  videos?: VideoMedia[];
 }
 
-const DEFAULT_VIDEOS: VideoItem[] = [
+const DEFAULT_VIDEOS: VideoMedia[] = [
   {
     id: 1,
     title: "Pervin Buldan ve heyetten Barış Anneleri'ne anlamlı ziyaret",
@@ -89,23 +90,25 @@ const DEFAULT_VIDEOS: VideoItem[] = [
   },
 ];
 
-export default function VideoCarousel({ videos = DEFAULT_VIDEOS }: { videos?: VideoItem[] }) {
+export default function VideoCarousel({ videos }: VideoCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const displayVideos = (videos && videos.length > 0) ? videos : DEFAULT_VIDEOS;
 
   const checkScroll = () => {
     if (!trackRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = trackRef.current;
     setCanScrollLeft(scrollLeft > 5);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+    setCanScrollRight(scrollWidth > clientWidth && scrollLeft < scrollWidth - clientWidth - 5);
   };
 
   useEffect(() => {
     checkScroll();
     window.addEventListener('resize', checkScroll);
     return () => window.removeEventListener('resize', checkScroll);
-  }, []);
+  }, [displayVideos]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (!trackRef.current) return;
@@ -156,21 +159,24 @@ export default function VideoCarousel({ videos = DEFAULT_VIDEOS }: { videos?: Vi
           ref={trackRef}
           onScroll={checkScroll}
         >
-          {videos.map((item) => (
-            <article className="video-carousel-card" key={item.id}>
-              <Link href={`/video/${item.slug}`} className="vcc-link">
-                <div className="vcc-thumb">
-                  <img src={item.thumbnail} alt={item.title} loading="lazy" />
-                  <div className="play-btn-overlay">
-                    <span>▶</span>
+          {displayVideos.map((item) => {
+            const thumbUrl = getStrapiMedia(item.thumbnail, item.id);
+            return (
+              <article className="video-carousel-card" key={item.id}>
+                <Link href={`/video/${item.slug}`} className="vcc-link">
+                  <div className="vcc-thumb">
+                    <img src={thumbUrl} alt={item.title} loading="lazy" />
+                    <div className="play-btn-overlay">
+                      <span>▶</span>
+                    </div>
+                    <span className="vcc-duration">{item.duration || '05:00'}</span>
                   </div>
-                  <span className="vcc-duration">{item.duration}</span>
-                </div>
-                <h3 className="vcc-title">{item.title}</h3>
-                <span className="vcc-cat">{item.category}</span>
-              </Link>
-            </article>
-          ))}
+                  <h3 className="vcc-title">{item.title}</h3>
+                  <span className="vcc-cat">{item.category || 'Genel'}</span>
+                </Link>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

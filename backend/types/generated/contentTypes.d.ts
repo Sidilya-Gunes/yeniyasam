@@ -443,67 +443,6 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiAboneAbone extends Struct.CollectionTypeSchema {
-  collectionName: 'aboneler';
-  info: {
-    description: 'Yeni Ya\u015Fam dijital e-gazete ve dayan\u0131\u015Fma aboneleri';
-    displayName: '\uD83D\uDCCB Aboneler & \u00DCyelikler';
-    pluralName: 'aboneler';
-    singularName: 'abone';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    currency: Schema.Attribute.Enumeration<['TRY', 'EUR', 'USD']> &
-      Schema.Attribute.DefaultTo<'TRY'>;
-    email: Schema.Attribute.Email &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
-    endDate: Schema.Attribute.Date;
-    fullName: Schema.Attribute.String & Schema.Attribute.Required;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::abone.abone'> &
-      Schema.Attribute.Private;
-    notes: Schema.Attribute.Text;
-    orderId: Schema.Attribute.String;
-    paymentMethod: Schema.Attribute.String &
-      Schema.Attribute.DefaultTo<'iyzico'>;
-    phone: Schema.Attribute.String;
-    plan: Schema.Attribute.Enumeration<
-      [
-        'Yurt \u0130\u00E7i 6 Ayl\u0131k E-Abonelik',
-        'Yurt \u0130\u00E7i Y\u0131ll\u0131k E-Abonelik',
-        'Yurt \u0130\u00E7i Y\u0131ll\u0131k Destek (1)',
-        'Yurt \u0130\u00E7i Y\u0131ll\u0131k Destek (2)',
-        'Yurt \u0130\u00E7i Y\u0131ll\u0131k Destek (3)',
-        'Yurt D\u0131\u015F\u0131 6 Ayl\u0131k E-Abonelik',
-        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k E-Abonelik',
-        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k Destek (1)',
-        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k Destek (2)',
-        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k Destek (3)',
-        '\u00D6zel / Kurumsal / Bas\u0131l\u0131',
-      ]
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'Yurt \u0130\u00E7i Y\u0131ll\u0131k E-Abonelik'>;
-    price: Schema.Attribute.Decimal;
-    publishedAt: Schema.Attribute.DateTime;
-    startDate: Schema.Attribute.Date;
-    status: Schema.Attribute.Enumeration<
-      ['Aktif', 'S\u00FCresi Doldu', 'Beklemede', '\u0130ptal Edildi']
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'Aktif'>;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-  };
-}
-
 export interface ApiDunyaHaberiDunyaHaberi extends Struct.CollectionTypeSchema {
   collectionName: 'dunya_haberleri';
   info: {
@@ -1612,7 +1551,6 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::abone.abone': ApiAboneAbone;
       'api::dunya-haberi.dunya-haberi': ApiDunyaHaberiDunyaHaberi;
       'api::ekoloji-haberi.ekoloji-haberi': ApiEkolojiHaberiEkolojiHaberi;
       'api::ekonomi-haberi.ekonomi-haberi': ApiEkonomiHaberiEkonomiHaberi;
