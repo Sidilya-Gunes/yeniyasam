@@ -20,7 +20,7 @@ export function getStrapiURL(path = ''): string {
   return `${STRAPI_URL}${path}`;
 }
 
-export function getStrapiMedia(media?: string | StrapiMedia | null, fallbackId?: string | number): string {
+export function getStrapiMedia(media?: any, fallbackId?: string | number): string {
   const getFallbackPhoto = () => {
     const rawNum = fallbackId ? Number(fallbackId.toString().replace(/\D/g, '') || 1) : 1;
     const idx = (Math.abs(rawNum * 31) % 13) + 1;
@@ -34,7 +34,21 @@ export function getStrapiMedia(media?: string | StrapiMedia | null, fallbackId?:
     return getFallbackPhoto();
   }
 
-  const rawUrl = typeof media === 'string' ? media : media.url || '';
+  let rawUrl = '';
+  if (typeof media === 'string') {
+    rawUrl = media;
+  } else if (media && typeof media === 'object') {
+    if (typeof media.url === 'string') {
+      rawUrl = media.url;
+    } else if (media.data?.attributes?.url) {
+      rawUrl = media.data.attributes.url;
+    } else if (Array.isArray(media.data) && media.data[0]?.attributes?.url) {
+      rawUrl = media.data[0].attributes.url;
+    } else if (Array.isArray(media) && media[0]?.url) {
+      rawUrl = media[0].url;
+    }
+  }
+
   if (!rawUrl) return getFallbackPhoto();
 
   // Filter out any default Strapi template placeholder like pexels_eberhardgross
@@ -171,10 +185,22 @@ const CATEGORY_ENDPOINTS: Record<string, { endpoint: string; name: string; slug:
 };
 
 function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; color: string }): Article {
-  let cover = getStrapiMedia(item.coverImage || item.thumbnail, item.id);
+  const yazarObj = item.yazar?.data ? { id: item.yazar.data.id, ...item.yazar.data.attributes } : item.yazar;
+  const authorName = yazarObj?.name || item.authorName || 'Yeni Yaşam';
+  const authorSlug = yazarObj?.slug || (authorName !== 'Yeni Yaşam' ? authorName.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'yeni-yasam');
+  const authorAvatar = (yazarObj?.avatar && (yazarObj.avatar.url || typeof yazarObj.avatar === 'string' || yazarObj.avatar.data))
+    ? getStrapiMedia(yazarObj.avatar)
+    : getAuthorAvatar(authorName, authorSlug);
 
-  const authorName = item.yazar?.name || item.authorName || 'Yeni Yaşam';
-  const authorSlug = item.yazar?.slug || (item.authorName ? item.authorName.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'yeni-yasam');
+  const rawImage = item.coverImage || item.thumbnail || item.image || item.gorsel;
+  let cover: string;
+  if (rawImage) {
+    cover = getStrapiMedia(rawImage, item.id);
+  } else if (catInfo.slug === 'yazarlar' || catInfo.slug === 'makale' || yazarObj) {
+    cover = authorAvatar;
+  } else {
+    cover = getStrapiMedia(null, item.id);
+  }
 
   return {
     id: `${catInfo.slug}-${item.id}`,
@@ -186,11 +212,11 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
     kicker: item.kicker || '',
     coverImage: cover,
     author: {
-      id: item.yazar?.id || 1,
+      id: yazarObj?.id || 1,
       name: authorName,
       slug: authorSlug,
-      role: item.yazar?.role || '',
-      avatar: (item.yazar?.avatar && (item.yazar.avatar.url || typeof item.yazar.avatar === 'string')) ? getStrapiMedia(item.yazar.avatar) : getAuthorAvatar(authorName, authorSlug),
+      role: yazarObj?.role || '',
+      avatar: authorAvatar,
     },
     category: {
       id: 1,
@@ -202,7 +228,7 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
     isFeatured: Boolean(item.isFeatured),
     videoUrl: item.videoUrl || '',
     readTime: item.readTime || item.duration || '3 dk',
-    publishedAt: item.publishedAt || item.createdAt || new Date().toISOString(),
+    publishedAt: item.publishedAt || item.publishDate || item.createdAt || new Date().toISOString(),
   };
 }
 
@@ -298,10 +324,14 @@ export async function getArticles(filter?: {
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
   if (!slug) return null;
 
-  // Benzersiz kategori koleksiyonlarında paralel olarak ara
-  const uniqueCategories = Array.from(
-    new Map(Object.values(CATEGORY_ENDPOINTS).map((c) => [c.endpoint, c])).values()
-  );
+  // Benzersiz kategori koleksiyonlarında paralel olarak ara (ana kategorileri koruyarak)
+  const uniqueEndpointsMap = new Map<string, (typeof CATEGORY_ENDPOINTS)[string]>();
+  for (const cat of Object.values(CATEGORY_ENDPOINTS)) {
+    if (!uniqueEndpointsMap.has(cat.endpoint)) {
+      uniqueEndpointsMap.set(cat.endpoint, cat);
+    }
+  }
+  const uniqueCategories = Array.from(uniqueEndpointsMap.values());
 
   const promises = uniqueCategories.map(async (cat) => {
     try {
@@ -610,7 +640,7 @@ export async function getVideos(): Promise<VideoMedia[]> {
         slug: v.slug || `video-${v.id}`,
         category: v.category || 'Genel',
         duration: v.duration || '05:00',
-        thumbnail: v.thumbnail ? getStrapiMedia(v.thumbnail) : '/assets/photos/haber-foto1.jpg',
+        thumbnail: (v.thumbnail || v.coverImage || v.image) ? getStrapiMedia(v.thumbnail || v.coverImage || v.image) : '/assets/photos/haber-foto1.jpg',
         videoUrl: v.videoUrl || 'https://www.youtube.com',
         description: v.description || '',
         publishedAt: v.createdAt || new Date().toISOString(),
@@ -640,7 +670,7 @@ export async function getVideoBySlug(slug: string): Promise<VideoMedia | null> {
         slug: v.slug || `video-${v.id}`,
         category: v.category || 'Genel',
         duration: v.duration || '05:00',
-        thumbnail: v.thumbnail ? getStrapiMedia(v.thumbnail) : '/assets/photos/haber-foto1.jpg',
+        thumbnail: (v.thumbnail || v.coverImage || v.image) ? getStrapiMedia(v.thumbnail || v.coverImage || v.image) : '/assets/photos/haber-foto1.jpg',
         videoUrl: v.videoUrl || 'https://www.youtube.com',
         description: v.description || '',
         publishedAt: v.createdAt || new Date().toISOString(),
