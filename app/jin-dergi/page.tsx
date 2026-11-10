@@ -138,9 +138,14 @@ export default async function JinDergiPage() {
                 PDF Olarak Oku / İndir
               </a>
             )}
-            <Link href="/abone" className="error-btn error-btn--secondary">
+            <a
+              href="https://eyeniyasam.com/urunler/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="error-btn error-btn--secondary"
+            >
               Abone Ol
-            </Link>
+            </a>
           </div>
         </div>
       </div>

@@ -8,12 +8,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { SUBSCRIPTION_PRODUCTS, SubscriptionProduct } from '@/lib/subscription-products';
-import SubscriptionModal from './SubscriptionModal';
+import { SUBSCRIPTION_PRODUCTS } from '@/lib/subscription-products';
 
 export default function SubscriptionView() {
   const [activeTab, setActiveTab] = useState<'domestic' | 'international'>('domestic');
-  const [selectedProduct, setSelectedProduct] = useState<SubscriptionProduct | null>(null);
 
   const products = SUBSCRIPTION_PRODUCTS.filter((p) => p.type === activeTab);
   const standardProducts = products.filter((p) => p.category === 'standard');
@@ -21,13 +19,118 @@ export default function SubscriptionView() {
 
   return (
     <div>
+      {/* Hızlı Erişim & Bilgilendirme Kartları */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '1.25rem',
+          marginBottom: '3rem',
+        }}
+      >
+        <a
+          href="https://eyeniyasam.com/urunler/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            backgroundColor: 'var(--primary, #b91c1c)',
+            color: '#ffffff',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            textDecoration: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 16px rgba(185, 28, 28, 0.2)',
+            transition: 'transform 0.15s ease',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🛍️</div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 0.35rem 0', color: '#fff' }}>
+              Abonelik Satın Al
+            </h3>
+            <p style={{ fontSize: '0.88rem', margin: 0, opacity: 0.9, lineHeight: 1.4 }}>
+              1 Aylık, 3 Aylık, 6 Aylık, Yıllık veya Dayanışma paketlerini güvenli İyzico altyapısıyla satın alın.
+            </p>
+          </div>
+          <div style={{ marginTop: '1.25rem', fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            Paketleri İncele & Satın Al <span>→</span>
+          </div>
+        </a>
+
+        <a
+          href="https://eyeniyasam.com/epanel/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            backgroundColor: 'var(--surface, #ffffff)',
+            color: 'var(--text-main, #1e293b)',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            textDecoration: 'none',
+            border: '1px solid var(--border, #e2e8f0)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+            transition: 'transform 0.15s ease',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>📖</div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 0.35rem 0', color: 'var(--heading, #0f172a)' }}>
+              Abone Girişi & E-Gazete
+            </h3>
+            <p style={{ fontSize: '0.88rem', margin: 0, color: 'var(--text-muted, #64748b)', lineHeight: 1.4 }}>
+              Mevcut abonelerimiz e-Panel üzerinden her gün saat 06:00'da çıkan günün e-gazetesini okuyabilir veya PDF indirebilir.
+            </p>
+          </div>
+          <div style={{ marginTop: '1.25rem', fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary, #b91c1c)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            E-Panele Giriş Yap <span>→</span>
+          </div>
+        </a>
+
+        <a
+          href="https://eyeniyasam.com/kategori/arsiv/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            backgroundColor: 'var(--surface, #ffffff)',
+            color: 'var(--text-main, #1e293b)',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            textDecoration: 'none',
+            border: '1px solid var(--border, #e2e8f0)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+            transition: 'transform 0.15s ease',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🗄️</div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 0.35rem 0', color: 'var(--heading, #0f172a)' }}>
+              Gazete Arşivi (2018-2026)
+            </h3>
+            <p style={{ fontSize: '0.88rem', margin: 0, color: 'var(--text-muted, #64748b)', lineHeight: 1.4 }}>
+              Yeni Yaşam Gazetesi'nin 2018 yılından bugüne kadar yayınlanan binlerce sayılık dijital gazete arşivini tarayın.
+            </p>
+          </div>
+          <div style={{ marginTop: '1.25rem', fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary, #b91c1c)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            Tüm Arşivi İncele <span>→</span>
+          </div>
+        </a>
+      </div>
+
       {/* Tab Değiştirici */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'center',
           gap: '12px',
-          marginBottom: '3rem',
+          marginBottom: '2.5rem',
           flexWrap: 'wrap',
         }}
       >
@@ -92,9 +195,9 @@ export default function SubscriptionView() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '2rem',
-            maxWidth: '860px',
+            maxWidth: '1000px',
             margin: '0 auto',
           }}
         >
@@ -109,43 +212,41 @@ export default function SubscriptionView() {
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
-                boxShadow: p.popular ? '0 12px 30px rgba(185, 28, 28, 0.12)' : '0 4px 12px rgba(0,0,0,0.03)',
-                transition: 'transform 0.2s ease',
+                boxShadow: p.popular ? '0 8px 24px rgba(185, 28, 28, 0.12)' : '0 4px 12px rgba(0,0,0,0.04)',
               }}
             >
               {p.popular && (
-                <span
+                <div
                   style={{
                     position: 'absolute',
-                    top: '-13px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
+                    top: '-12px',
+                    right: '20px',
                     backgroundColor: 'var(--primary, #b91c1c)',
-                    color: '#fff',
+                    color: '#ffffff',
                     fontSize: '0.75rem',
                     fontWeight: 800,
-                    letterSpacing: '1px',
-                    padding: '4px 14px',
+                    padding: '4px 12px',
                     borderRadius: '20px',
+                    letterSpacing: '0.5px',
                     textTransform: 'uppercase',
                   }}
                 >
                   En Çok Tercih Edilen
-                </span>
+                </div>
               )}
 
               <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--heading, #0f172a)', marginBottom: '0.5rem' }}>
                 {p.name}
               </h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted, #64748b)', minHeight: '48px', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.88rem', color: 'var(--text-muted, #64748b)', minHeight: '44px', marginBottom: '1.5rem', lineHeight: 1.4 }}>
                 {p.description}
               </p>
 
-              <div style={{ display: 'flex', alignItems: 'baseline', marginBottom: '1.5rem' }}>
-                <span style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--heading, #0f172a)' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', marginBottom: '1.75rem' }}>
+                <span style={{ fontSize: '2.4rem', fontWeight: 900, color: 'var(--primary, #b91c1c)' }}>
                   {p.currencySymbol}{p.price.toLocaleString('tr-TR')}
                 </span>
-                <span style={{ fontSize: '1rem', color: 'var(--text-muted, #64748b)', marginLeft: '6px' }}>
+                <span style={{ fontSize: '0.95rem', color: 'var(--text-muted, #64748b)', marginLeft: '6px' }}>
                   / {p.period}
                 </span>
               </div>
@@ -159,11 +260,13 @@ export default function SubscriptionView() {
                 ))}
               </ul>
 
-              <button
-                type="button"
-                onClick={() => setSelectedProduct(p)}
+              <a
+                href="https://eyeniyasam.com/urunler/"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   width: '100%',
+                  textAlign: 'center',
                   padding: '12px 20px',
                   borderRadius: '6px',
                   backgroundColor: p.popular ? 'var(--primary, #b91c1c)' : 'var(--surface-variant, #f1f5f9)',
@@ -171,12 +274,13 @@ export default function SubscriptionView() {
                   fontWeight: 700,
                   fontSize: '0.95rem',
                   border: p.popular ? 'none' : '1px solid var(--border, #cbd5e1)',
-                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'block',
                   transition: 'opacity 0.2s',
                 }}
               >
-                Hemen Abone Ol
-              </button>
+                Hemen Abone Ol (e-YeniYaşam) ›
+              </a>
             </div>
           ))}
         </div>
@@ -208,7 +312,7 @@ export default function SubscriptionView() {
             Yıllık Destek ve Dayanışma Paketleri
           </h2>
           <p style={{ color: 'var(--text-muted, #64748b)', fontSize: '0.95rem', lineHeight: 1.5 }}>
-            Bu paketler Yıllık Abonelik haklarının tamamını içerir. Ek bedeller doğrudan bağımsız halk haberciliği, askıda gazete fonu ve sansürsüz yayıncılık için kullanılmaktadır.
+            Bu paketler Yıllık Abonelik haklarının tamamını içerir. Paketin amacı Yeni Yaşam Gazetesi ile dayanışmayı ve bağımsız haberciliği büyütmektir.
           </p>
         </div>
 
@@ -257,11 +361,13 @@ export default function SubscriptionView() {
                 ))}
               </ul>
 
-              <button
-                type="button"
-                onClick={() => setSelectedProduct(p)}
+              <a
+                href="https://eyeniyasam.com/urunler/"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   width: '100%',
+                  textAlign: 'center',
                   padding: '10px 16px',
                   borderRadius: '6px',
                   backgroundColor: 'var(--primary, #b91c1c)',
@@ -269,12 +375,13 @@ export default function SubscriptionView() {
                   fontWeight: 700,
                   fontSize: '0.9rem',
                   border: 'none',
-                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'block',
                   transition: 'opacity 0.2s',
                 }}
               >
-                Dayanışmaya Katıl
-              </button>
+                Dayanışmaya Katıl (e-YeniYaşam) ›
+              </a>
             </div>
           ))}
         </div>
@@ -296,7 +403,7 @@ export default function SubscriptionView() {
             💳 Güvenli Ödeme Altyapısı
           </h4>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted, #64748b)', lineHeight: 1.5 }}>
-            Ödemeleriniz BDDK ve TCMB lisanslı <strong>İyzico</strong> altyapısı ile 256-Bit SSL ve 3D Secure güvencesiyle doğrudan site içinde tamamlanır. Kredi kartı bilgileriniz sunucularımızda asla tutulmaz.
+            Ödemeleriniz BDDK ve TCMB lisanslı <strong>İyzico</strong> altyapısı ile 256-Bit SSL ve 3D Secure güvencesiyle <strong>e-YeniYaşam (eyeniyasam.com)</strong> üzerinden gerçekleştirilir. Kredi kartı bilgileriniz sunucularda asla tutulmaz.
           </p>
         </div>
 
@@ -305,7 +412,7 @@ export default function SubscriptionView() {
             📰 Gazeteye Nasıl Erişirim?
           </h4>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted, #64748b)', lineHeight: 1.5 }}>
-            Ödemeniz onaylandığı anda hesabınız otomatik olarak aktifleşir. Her sabah saat 06:00'da günün e-gazetesini PDF olarak indirebilir veya dijital arşivden tüm geçmiş sayılara ulaşabilirsiniz.
+            Ödemeniz onaylandığı anda hesabınız otomatik olarak aktifleşir. Her sabah saat 06:00'da günün e-gazetesini PDF olarak indirebilir veya dijital arşivden (2018-2026) tüm geçmiş sayılara ulaşabilirsiniz.
           </p>
         </div>
 
@@ -322,12 +429,6 @@ export default function SubscriptionView() {
           </p>
         </div>
       </div>
-
-      {/* Ödeme Modalı */}
-      <SubscriptionModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-      />
     </div>
   );
 }

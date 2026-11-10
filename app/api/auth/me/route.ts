@@ -32,7 +32,29 @@ export async function GET(req: NextRequest) {
     }
 
     const user = await strapiRes.json();
-    return NextResponse.json({ user }, { status: 200 });
+
+    let subscription = null;
+    try {
+      const aboneRes = await fetch(
+        `${STRAPI_URL}/api/aboneler?filters[email][$eq]=${encodeURIComponent(user.email)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        }
+      );
+      if (aboneRes.ok) {
+        const aboneData = await aboneRes.json();
+        if (aboneData?.data && aboneData.data.length > 0) {
+          subscription = aboneData.data[0];
+        }
+      }
+    } catch {
+      // sessizce geç
+    }
+
+    return NextResponse.json({ user, subscription }, { status: 200 });
   } catch (error) {
     console.error('Auth me error:', error);
     return NextResponse.json({ user: null }, { status: 200 });

@@ -42,7 +42,16 @@ export default async function MansetPage() {
               Sayı: {latest.issueNumber || '—'} · {latest.issueDate || ''} · {latest.description || 'Günlük Siyasi Gazete'}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <a
+              href="https://eyeniyasam.com/kategori/arsiv/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="error-btn error-btn--secondary"
+              style={{ fontSize: '0.8rem', padding: '10px 18px', textDecoration: 'none' }}
+            >
+              Tüm Gazete Arşivi (2018-2026) ›
+            </a>
             <a
               href={latest.coverImage}
               target="_blank"

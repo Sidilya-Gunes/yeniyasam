@@ -29,47 +29,53 @@ export default function MainContent({
       : articles
   ).slice(0, 10);
 
-  // Sol söyleşi/dosya/özel haber kartları
-  const soylesiList = articles.filter((a) => a.category?.slug === 'soylesi');
-  const opinionCards = soylesiList.length >= 3
-    ? soylesiList.slice(0, 3).map((item) => ({
-        kicker: item.kicker || 'Söyleşi',
-        cat: 'soylesi',
-        title: item.title,
-        author: item.author?.name || 'Yeni Yaşam',
-        thumb: getStrapiMedia(item.coverImage, item.id),
-        slug: item.slug,
-      }))
-    : [
-        {
-          kicker: 'Söyleşi',
-          cat: 'kadin',
-          title: 'Bizleri birleştiren noktalara dikkat kesilmeliyiz',
-          author: 'Nezahat Doğan',
-          thumb: '/assets/photos/haber-foto12.jpeg',
-          slug: 'bizleri-birlestiren-noktalara-dikkat-kesilmeliyiz',
-        },
-        {
-          kicker: 'Dosya',
-          cat: 'ekonomi',
-          title: 'Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri',
-          author: 'Ahmet Kaya',
-          thumb: '/assets/photos/haber-foto1.jpg',
-          slug: 'yerel-yonetimlerde-katilimci-demokrasi-deneyimleri',
-        },
-        {
-          kicker: 'Özel Haber',
-          cat: 'ozel-haber',
-          title: 'Politik alan kolektif yaratım alanıdır',
-          author: 'Dilzar Dîlok',
-          thumb: '/assets/photos/haber-foto4.jpg',
-          slug: 'politik-alan-kolektif-yaratim-alanidir',
-        },
-      ];
+  // Sol söyleşi/dosya/özel haber kartları (Strapi'den gelenler öncelikli, eksik kalanlar fallback ile tamamlanır)
+  const defaultOpinionCards = [
+    {
+      kicker: 'Söyleşi',
+      cat: 'kadin',
+      title: 'Bizleri birleştiren noktalara dikkat kesilmeliyiz',
+      author: 'Nezahat Doğan',
+      thumb: '/assets/photos/haber-foto12.jpeg',
+      slug: 'bizleri-birlestiren-noktalara-dikkat-kesilmeliyiz',
+    },
+    {
+      kicker: 'Dosya',
+      cat: 'ekonomi',
+      title: 'Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri',
+      author: 'Ahmet Kaya',
+      thumb: '/assets/photos/haber-foto1.jpg',
+      slug: 'yerel-yonetimlerde-katilimci-demokrasi-deneyimleri',
+    },
+    {
+      kicker: 'Özel Haber',
+      cat: 'ozel-haber',
+      title: 'Politik alan kolektif yaratım alanıdır',
+      author: 'Dilzar Dîlok',
+      thumb: '/assets/photos/haber-foto4.jpg',
+      slug: 'politik-alan-kolektif-yaratim-alanidir',
+    },
+  ];
+
+  const soylesiList = articles.filter((a) => a.category?.slug === 'soylesi' || a.category?.slug === 'forum');
+  const liveOpinionCards = soylesiList.map((item) => ({
+    kicker: item.kicker || item.category?.name || 'Söyleşi',
+    cat: item.category?.slug || 'soylesi',
+    title: item.title,
+    author: item.author?.name || 'Yeni Yaşam',
+    thumb: getStrapiMedia(item.coverImage, item.id),
+    slug: item.slug,
+  }));
+  const opinionCards = [
+    ...liveOpinionCards,
+    ...defaultOpinionCards.filter((d) => !liveOpinionCards.some((l) => l.slug === d.slug)),
+  ].slice(0, 3);
 
   const renderCategoryRow = (catTitle: string, catSlug: string, fallbackCards: any[]) => {
     const catArticles = articles.filter((a) => a.category?.slug === catSlug);
-    const displayItems = catArticles.length >= 3 ? catArticles.slice(0, 3) : fallbackCards;
+    const displayItems = catArticles.length > 0
+      ? [...catArticles, ...fallbackCards.filter((f) => !catArticles.some((c) => c.slug === f.slug))].slice(0, 3)
+      : fallbackCards.slice(0, 3);
 
     return (
       <div className="news-block-row" key={catSlug}>
@@ -355,83 +361,140 @@ export default function MainContent({
           },
         ])}
 
-        {/* ÖZEL HABER */}
-        <div className="news-block-row">
-          <div className="category-col">
-            <h3 className="category-title" data-cat="ozel-haber">ÖZEL HABER</h3>
-          </div>
-          <div className="features-layout-grid">
-            <div className="feature-main-card">
-              <Link href="/haber/dun-erken-yarin-gec" className="feature-img-link">
-                <img src="/assets/photos/haber-foto8.jpg" alt="Manşet Görseli" />
-              </Link>
-              <div className="feature-content">
-                <span className="feature-kicker">Özel Haber</span>
-                <h3 className="feature-title">
-                  <Link href="/haber/dun-erken-yarin-gec">
-                    Dün erken, yarın geç, şimdi zamanıdır!
+                {/* ÖZEL HABER */}
+        {(() => {
+          const ozelList = articles.filter(
+            (a) => a.category?.slug === 'ozel-haber' || (a.kicker && a.kicker.toLowerCase().includes('özel'))
+          );
+          const defaultFeatureMain = {
+            title: 'Dün erken, yarın geç, şimdi zamanıdır!',
+            slug: 'dun-erken-yarin-gec',
+            summary:
+              'Demokratik toplumun/ulusun inşa hamlesi risk ve fırsatı iç içe barındırıyor. Bu sefer rolümüzü layıkıyla oynamak için hem riski hem fırsatı...',
+            author: { name: 'Ergin Atabey' },
+            coverImage: '/assets/photos/haber-foto8.jpg',
+            kicker: 'Özel Haber',
+          };
+          const defaultSideList = [
+            {
+              title: 'Özgürlük neden önce ilişkilerde başlar?',
+              slug: 'ozgurluk-neden-once-iliskilerde-baslar',
+              author: { name: 'Nimet Sevim' },
+              coverImage: '/assets/photos/haber-foto12.jpeg',
+              kicker: 'Özel Haber',
+            },
+            {
+              title: "'Çaylak Filozof' okuyucuyla buluştu",
+              slug: 'caylak-filozof',
+              author: { name: 'Ayhan Kavak' },
+              coverImage: '/assets/photos/haber-foto13.jpg',
+              kicker: 'Özel Haber',
+            },
+          ];
+
+          const mainItem: any = ozelList[0] || defaultFeatureMain;
+          const sideItems: any[] = [
+            ...ozelList.slice(1, 3),
+            ...defaultSideList.filter(
+              (d) => d.slug !== mainItem.slug && !ozelList.slice(1, 3).some((o) => o.slug === d.slug)
+            ),
+          ].slice(0, 2);
+
+          return (
+            <div className="news-block-row">
+              <div className="category-col">
+                <h3 className="category-title" data-cat="ozel-haber">
+                  <Link href="/kategori/ozel-haber" style={{ color: 'inherit', textDecoration: 'none' }}>
+                    ÖZEL HABER
                   </Link>
                 </h3>
-                <p className="feature-excerpt">
-                  Demokratik toplumun/ulusun inşa hamlesi risk ve fırsatı iç içe barındırıyor. Bu sefer rolümüzü layıkıyla oynamak için hem riski hem fırsatı...
-                </p>
-                <span className="feature-author">Ergin Atabey</span>
               </div>
-            </div>
-            <div className="feature-side-list">
-              <div className="feature-side-card">
-                <Link href="/haber/ozgurluk-neden-once-iliskilerde-baslar" className="side-img-link">
-                  <img src="/assets/photos/haber-foto12.jpeg" alt="Yan 1" />
-                </Link>
-                <div className="side-content">
-                  <span className="feature-kicker">Özel Haber</span>
-                  <h4 className="side-title">
-                    <Link href="/haber/ozgurluk-neden-once-iliskilerde-baslar">
-                      Özgürlük neden önce ilişkilerde başlar?
-                    </Link>
-                  </h4>
-                  <span className="side-author">Nimet Sevim</span>
+              <div className="features-layout-grid">
+                <div className="feature-main-card">
+                  <Link href={`/haber/${mainItem.slug}`} className="feature-img-link">
+                    <img src={getStrapiMedia(mainItem.coverImage, mainItem.id || 1)} alt={mainItem.title} />
+                  </Link>
+                  <div className="feature-content">
+                    <span className="feature-kicker">{mainItem.kicker || 'Özel Haber'}</span>
+                    <h3 className="feature-title">
+                      <Link href={`/haber/${mainItem.slug}`}>{mainItem.title}</Link>
+                    </h3>
+                    <p className="feature-excerpt">
+                      {(mainItem.summary || '').slice(0, 160)}...
+                    </p>
+                    <span className="feature-author">{mainItem.author?.name || 'Yeni Yaşam'}</span>
+                  </div>
+                </div>
+                <div className="feature-side-list">
+                  {sideItems.map((item: any, idx: number) => (
+                    <div className="feature-side-card" key={item.id || idx}>
+                      <Link href={`/haber/${item.slug}`} className="side-img-link">
+                        <img src={getStrapiMedia(item.coverImage, item.id || idx)} alt={item.title} />
+                      </Link>
+                      <div className="side-content">
+                        <span className="feature-kicker">{item.kicker || 'Özel Haber'}</span>
+                        <h4 className="side-title">
+                          <Link href={`/haber/${item.slug}`}>{item.title}</Link>
+                        </h4>
+                        <span className="side-author">{item.author?.name || 'Yeni Yaşam'}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="feature-side-card">
-                <Link href="/haber/caylak-filozof" className="side-img-link">
-                  <img src="/assets/photos/haber-foto13.jpg" alt="Yan 2" />
-                </Link>
-                <div className="side-content">
-                  <span className="feature-kicker">Özel Haber</span>
-                  <h4 className="side-title">
-                    <Link href="/haber/caylak-filozof">'Çaylak Filozof' okuyucuyla buluştu</Link>
-                  </h4>
-                  <span className="side-author">Ayhan Kavak</span>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
-      {/* Günün Fotosu */}
-      <section className="daily-photo-section">
-        <div className="container">
-          <div className="daily-photo-header">
-            <h2>GÜNÜN FOTOSU</h2>
-            <span className="daily-arrow">❯</span>
-          </div>
-          <div className="daily-photo-grid">
-            <div className="daily-photo-img-wrap">
-              <img src="/assets/photos/3556.jpg" alt="Günün Fotosu" />
+
+
+            {/* Günün Fotosu */}
+      {(() => {
+        const photoArticle = articles.find((a) => a.category?.slug === 'gunun-fotografi');
+        const photoImg = photoArticle ? getStrapiMedia(photoArticle.coverImage, photoArticle.id) : '/assets/photos/3556.jpg';
+        const photoTitle = photoArticle ? photoArticle.title : "Kuzey Suriye'de gerginlik sürüyor";
+        const photoSummary = photoArticle
+          ? photoArticle.summary
+          : 'Bölgede devam eden çatışmalar sivil halkı zorluyor. Yerel kaynaklara göre son 24 saatte onlarca aile yerinden edildi.';
+        const photoDate = photoArticle
+          ? new Date(photoArticle.publishedAt).toLocaleDateString('tr-TR')
+          : '27.10.2026';
+        const photoSlug = photoArticle?.slug;
+
+        return (
+          <section className="daily-photo-section">
+            <div className="container">
+              <div className="daily-photo-header">
+                <h2>
+                  <Link href="/kategori/kultur-sanat" style={{ color: 'inherit', textDecoration: 'none' }}>
+                    GÜNÜN FOTOSU <span>❯</span>
+                  </Link>
+                </h2>
+              </div>
+              <div className="daily-photo-grid">
+                <div className="daily-photo-img-wrap">
+                  {photoSlug ? (
+                    <Link href={`/haber/${photoSlug}`}>
+                      <img src={photoImg} alt={photoTitle} />
+                    </Link>
+                  ) : (
+                    <img src={photoImg} alt={photoTitle} />
+                  )}
+                </div>
+                <div className="daily-photo-caption">
+                  <span className="caption-tag">FOTOĞRAFIN HİKAYESİ</span>
+                  <h3 className="caption-title">
+                    {photoSlug ? <Link href={`/haber/${photoSlug}`}>{photoTitle}</Link> : photoTitle}
+                  </h3>
+                  <p className="caption-desc">{photoSummary}</p>
+                  <span className="caption-meta">Fotoğraf: Yeni Yaşam Arşivi · {photoDate}</span>
+                </div>
+              </div>
             </div>
-            <div className="daily-photo-caption">
-              <span className="caption-tag">FOTOĞRAFIN HİKAYESİ</span>
-              <h3 className="caption-title">Kuzey Suriye'de gerginlik sürüyor</h3>
-              <p className="caption-desc">
-                Bölgede devam eden çatışmalar sivil halkı zorluyor. Yerel kaynaklara göre son 24 saatte onlarca aile yerinden edildi.
-              </p>
-              <span className="caption-meta">Fotoğraf: Yeni Yaşam Arşivi · 27.10.2026</span>
-            </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* 4 Kolonlu Haber Bölümü */}
       <section className="multi-column-news-section">
@@ -637,215 +700,217 @@ export default function MainContent({
               </svg>
             </Link>
           </div>
-          <div className="editor-picks-grid">
-            <article className="editor-picks-hero">
-              <Link href="/haber/pervin-buldan-baris-anneleri-ziyaret" className="editor-picks-hero-img">
-                <img src="/assets/photos/haber-foto5.jpg" alt="Manşet" />
-              </Link>
-              <div className="editor-picks-hero-body">
-                <span className="editor-picks-cat" data-cat="politika">Politika</span>
-                <h3 className="editor-picks-hero-title">
-                  <Link href="/haber/pervin-buldan-baris-anneleri-ziyaret">
-                    Pervin Buldan ve heyetten Barış Anneleri'ne anlamlı ziyaret
-                  </Link>
-                </h3>
-                <p className="editor-picks-hero-excerpt">
-                  Ziyaret sırasında tecridin kaldırılması ve barış mücadelesinin ortaklaştırılması gerektiği vurgulandı.
-                </p>
-                <span className="editor-picks-meta">4 saat önce · 5 dk okuma</span>
+                    {(() => {
+            const featuredArticles = articles.filter(
+              (a) => a.isFeatured || a.category?.slug === 'editorun-sectikleri'
+            );
+            const fallbackPool = articles.filter((a) => !featuredArticles.some((f) => f.slug === a.slug));
+            const editorPicks = [...featuredArticles, ...fallbackPool].slice(0, 6);
+
+            const hero = editorPicks[0];
+            const list = editorPicks.slice(1, 6);
+
+            return (
+              <div className="editor-picks-grid">
+                {hero && (
+                  <article className="editor-picks-hero">
+                    <Link href={`/haber/${hero.slug}`} className="editor-picks-hero-img">
+                      <img src={getStrapiMedia(hero.coverImage, hero.id)} alt={hero.title} />
+                    </Link>
+                    <div className="editor-picks-hero-body">
+                      <span className="editor-picks-cat" data-cat={hero.category?.slug || 'politika'}>
+                        {hero.category?.name || 'Politika'}
+                      </span>
+                      <h3 className="editor-picks-hero-title">
+                        <Link href={`/haber/${hero.slug}`}>{hero.title}</Link>
+                      </h3>
+                      <p className="editor-picks-hero-excerpt">
+                        {(hero.summary || '').slice(0, 160)}...
+                      </p>
+                      <span className="editor-picks-meta">
+                        {new Date(hero.publishedAt).toLocaleDateString('tr-TR')} · {hero.readTime || '5 dk okuma'}
+                      </span>
+                    </div>
+                  </article>
+                )}
+                <div className="editor-picks-list">
+                  {list.map((item, idx) => (
+                    <article className="editor-picks-item" key={item.id || idx}>
+                      <div className="editor-picks-item-body">
+                        <span className="editor-picks-cat" data-cat={item.category?.slug || 'gundem'}>
+                          {item.category?.name || 'Güncel'}
+                        </span>
+                        <h4 className="editor-picks-item-title">
+                          <Link href={`/haber/${item.slug}`}>{item.title}</Link>
+                        </h4>
+                        <span className="editor-picks-meta">
+                          {new Date(item.publishedAt).toLocaleDateString('tr-TR')}
+                        </span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
-            </article>
-            <div className="editor-picks-list">
-              <article className="editor-picks-item">
-                <div className="editor-picks-item-body">
-                  <span className="editor-picks-cat" data-cat="gundem">Gündem</span>
-                  <h4 className="editor-picks-item-title">
-                    <Link href="/haber/ihd-hak-ihlalleri-raporu">İHD'den hak ihlalleri raporu: Adalet çağrısı yinelendi</Link>
-                  </h4>
-                  <span className="editor-picks-meta">3 saat önce</span>
-                </div>
-              </article>
-              <article className="editor-picks-item">
-                <div className="editor-picks-item-body">
-                  <span className="editor-picks-cat" data-cat="yerel">Yerel</span>
-                  <h4 className="editor-picks-item-title">
-                    <Link href="/haber/diyarbakir-kultur-sanat">Diyarbakır'da kültür-sanat sezonu açılıyor</Link>
-                  </h4>
-                  <span className="editor-picks-meta">5 saat önce</span>
-                </div>
-              </article>
-              <article className="editor-picks-item">
-                <div className="editor-picks-item-body">
-                  <span className="editor-picks-cat" data-cat="ekonomi">Ekonomi</span>
-                  <h4 className="editor-picks-item-title">
-                    <Link href="/haber/tarim-ureticileri-tepki">Tarım üreticilerinden artan girdi maliyetlerine tepki</Link>
-                  </h4>
-                  <span className="editor-picks-meta">6 saat önce</span>
-                </div>
-              </article>
-              <article className="editor-picks-item">
-                <div className="editor-picks-item-body">
-                  <span className="editor-picks-cat" data-cat="ekoloji">Ekoloji</span>
-                  <h4 className="editor-picks-item-title">
-                    <Link href="/haber/kaz-daglari-su-kaynaklari">Kaz Dağları'nda su kaynakları tehdit altında</Link>
-                  </h4>
-                  <span className="editor-picks-meta">8 saat önce</span>
-                </div>
-              </article>
-              <article className="editor-picks-item">
-                <div className="editor-picks-item-body">
-                  <span className="editor-picks-cat" data-cat="politika">Politika</span>
-                  <h4 className="editor-picks-item-title">
-                    <Link href="/haber/mecliste-yeni-yasama-donemi">Meclis'te yeni yasama dönemi kritik başlıklarla başlıyor</Link>
-                  </h4>
-                  <span className="editor-picks-meta">9 saat önce</span>
-                </div>
-              </article>
-              <article className="editor-picks-item">
-                <div className="editor-picks-item-body">
-                  <span className="editor-picks-cat" data-cat="kadin">Kadın</span>
-                  <h4 className="editor-picks-item-title">
-                    <Link href="/haber/kadin-hareketinden-ortak-manifesto">Kadın hareketinden şiddete karşı ortak mücadele çağrısı</Link>
-                  </h4>
-                  <span className="editor-picks-meta">10 saat önce</span>
-                </div>
-              </article>
-            </div>
-          </div>
+            );
+          })()}
         </div>
       </section>
 
       {/* SÖYLEŞİ Blok */}
-      <section className="news-block block-ecology">
-        <div className="col-header">
-          <h3><Link href="/kategori/soylesi">SÖYLEŞİ <span>❯</span></Link></h3>
-        </div>
-        <div className="ecology-grid-3col">
-          <article className="eco-card">
-            <Link href="/haber/munzur-vadisi-hes-projelerine-karsi-adim" className="eco-card-img">
-              <img src="/assets/photos/haber-foto9.jpg" alt="Söyleşi 1" />
-            </Link>
-            <span className="card-cat" data-cat="soylesi">Söyleşi</span>
-            <h3>
-              <Link href="/haber/munzur-vadisi-hes-projelerine-karsi-adim">
-                Munzur Vadisi'nde HES projelerine karşı yeni hukuki adım
-              </Link>
-            </h3>
-          </article>
-          <article className="eco-card">
-            <Link href="/haber/kaz-daglari-su-kaynaklari" className="eco-card-img">
-              <img src="/assets/photos/haber-foto10.webp" alt="Söyleşi 2" />
-            </Link>
-            <span className="card-cat" data-cat="soylesi">Söyleşi</span>
-            <h3>
-              <Link href="/haber/kaz-daglari-su-kaynaklari">
-                Kaz Dağları'nda su kaynakları tehdit altında: Rapor açıklandı
-              </Link>
-            </h3>
-          </article>
-          <article className="eco-card">
-            <Link href="/haber/kent-bostanlari-yayginlasiyor" className="eco-card-img">
-              <img src="/assets/photos/haber-foto11.jpeg" alt="Söyleşi 3" />
-            </Link>
-            <span className="card-cat" data-cat="soylesi">Söyleşi</span>
-            <h3>
-              <Link href="/haber/kent-bostanlari-yayginlasiyor">
-                Kent bostanları yaygınlaşıyor: Yerel üretim alternatifleri
-              </Link>
-            </h3>
-          </article>
-        </div>
-      </section>
+      {(() => {
+        const soylesiItems = articles.filter(
+          (a) => a.category?.slug === 'soylesi' || a.category?.slug === 'forum'
+        );
+        const fallbackSoylesi = [
+          {
+            slug: 'munzur-vadisi-hes-projelerine-karsi-adim',
+            coverImage: '/assets/photos/haber-foto9.jpg',
+            title: "Munzur Vadisi'nde HES projelerine karşı yeni hukuki adım",
+          },
+          {
+            slug: 'kaz-daglari-su-kaynaklari',
+            coverImage: '/assets/photos/haber-foto10.webp',
+            title: "Kaz Dağları'nda su kaynakları tehdit altında: Rapor açıklandı",
+          },
+          {
+            slug: 'kent-bostanlari-yayginlasiyor',
+            coverImage: '/assets/photos/haber-foto11.jpeg',
+            title: "Kent bostanları yaygınlaşıyor: Yerel üretim alternatifleri",
+          },
+        ];
+        const displaySoylesi = [
+          ...soylesiItems,
+          ...fallbackSoylesi.filter((f) => !soylesiItems.some((s) => s.slug === f.slug)),
+        ].slice(0, 3);
+
+        return (
+          <section className="news-block block-ecology">
+            <div className="col-header">
+              <h3>
+                <Link href="/kategori/soylesi">SÖYLEŞİ <span>❯</span></Link>
+              </h3>
+            </div>
+            <div className="ecology-grid-3col">
+              {displaySoylesi.map((item: any, idx: number) => (
+                <article className="eco-card" key={item.id || idx}>
+                  <Link href={`/haber/${item.slug}`} className="eco-card-img">
+                    <img src={getStrapiMedia(item.coverImage, item.id || idx)} alt={item.title} />
+                  </Link>
+                  <span className="card-cat" data-cat="soylesi">Söyleşi</span>
+                  <h3>
+                    <Link href={`/haber/${item.slug}`}>{item.title}</Link>
+                  </h3>
+                </article>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* DOSYA Blok */}
-      <section className="news-block block-horizontal">
-        <div className="col-header">
-          <h3><Link href="/kategori/dosya">DOSYA <span>❯</span></Link></h3>
-        </div>
-        <div className="horizontal-strip-list">
-          <article className="strip-card">
-            <Link href="/haber/ortadogu-yeni-dengeler" className="strip-card-img">
-              <img src="/assets/photos/haber-foto12.jpeg" alt="Dosya 1" />
-            </Link>
-            <div className="strip-content">
-              <span className="card-cat" data-cat="dosya">Dosya</span>
+      {(() => {
+        const dosyaItems = articles.filter((a) => a.category?.slug === 'dosya');
+        const fallbackDosya = [
+          {
+            slug: 'ortadogu-yeni-dengeler',
+            coverImage: '/assets/photos/haber-foto12.jpeg',
+            title: "Ortadoğu'da yeni dengeler ve diplomatik cepheleşmeler",
+            summary: 'Bölgesel aktörlerin son hamleleri küresel ölçekte nasıl yankı buluyor?',
+          },
+          {
+            slug: 'enflasyon-sarmali-ve-dar-gelirli',
+            coverImage: '/assets/photos/haber-foto13.jpg',
+            title: 'Enflasyon sarmalında dar gelirlinin yaşam mücadelesi',
+            summary: 'Temel tüketim maddelerindeki artış bütçeleri eritmeye devam ediyor.',
+          },
+        ];
+        const displayDosya = [
+          ...dosyaItems,
+          ...fallbackDosya.filter((f) => !dosyaItems.some((d) => d.slug === f.slug)),
+        ].slice(0, 2);
+
+        return (
+          <section className="news-block block-horizontal">
+            <div className="col-header">
               <h3>
-                <Link href="/haber/ortadogu-yeni-dengeler">
-                  Ortadoğu'da yeni dengeler ve diplomatik cepheleşmeler
-                </Link>
+                <Link href="/kategori/dosya">DOSYA <span>❯</span></Link>
               </h3>
-              <p>Bölgesel aktörlerin son hamleleri küresel ölçekte nasıl yankı buluyor?</p>
             </div>
-          </article>
-          <article className="strip-card">
-            <Link href="/haber/enflasyon-sarmali-ve-dar-gelirli" className="strip-card-img">
-              <img src="/assets/photos/haber-foto13.jpg" alt="Dosya 2" />
-            </Link>
-            <div className="strip-content">
-              <span className="card-cat" data-cat="dosya">Dosya</span>
-              <h3>
-                <Link href="/haber/enflasyon-sarmali-ve-dar-gelirli">
-                  Enflasyon sarmalında dar gelirlinin yaşam mücadelesi
-                </Link>
-              </h3>
-              <p>Temel tüketim maddelerindeki artış bütçeleri eritmeye devam ediyor.</p>
+            <div className="horizontal-strip-list">
+              {displayDosya.map((item: any, idx: number) => (
+                <article className="strip-card" key={item.id || idx}>
+                  <Link href={`/haber/${item.slug}`} className="strip-card-img">
+                    <img src={getStrapiMedia(item.coverImage, item.id || idx)} alt={item.title} />
+                  </Link>
+                  <div className="strip-content">
+                    <span className="card-cat" data-cat="dosya">Dosya</span>
+                    <h3>
+                      <Link href={`/haber/${item.slug}`}>{item.title}</Link>
+                    </h3>
+                    <p>{item.summary}</p>
+                  </div>
+                </article>
+              ))}
             </div>
-          </article>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* ÖZEL HABER Blok */}
-      <section className="news-block block-grid4">
-        <div className="col-header">
-          <h3><Link href="/kategori/ozel-haber">ÖZEL HABER <span>❯</span></Link></h3>
-        </div>
-        <div className="grid-4col">
-          <article className="standard-card">
-            <Link href="/haber/haftanin-karikatur-seckisi" className="standard-card-img">
-              <img src="/assets/photos/haber-foto4.jpg" alt="Özel Haber 1" />
-            </Link>
-            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
-            <h4>
-              <Link href="/haber/haftanin-karikatur-seckisi">
-                Haftanın karikatür seçkisi yayımlandı
-              </Link>
-            </h4>
-          </article>
-          <article className="standard-card">
-            <Link href="/haber/kadin-hareketinden-ortak-manifesto" className="standard-card-img">
-              <img src="/assets/photos/haber-foto13.jpg" alt="Özel Haber 2" />
-            </Link>
-            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
-            <h4>
-              <Link href="/haber/kadin-hareketinden-ortak-manifesto">
-                Kadın hareketinden ortak manifesto
-              </Link>
-            </h4>
-          </article>
-          <article className="standard-card">
-            <Link href="/haber/yeni-cikan-kitaplar" className="standard-card-img">
-              <img src="/assets/photos/haber-foto6.webp" alt="Özel Haber 3" />
-            </Link>
-            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
-            <h4>
-              <Link href="/haber/yeni-cikan-kitaplar">
-                Yeni çıkan kitaplar ve eleştiri yazıları
-              </Link>
-            </h4>
-          </article>
-          <article className="standard-card">
-            <Link href="/haber/bagimsiz-sinema-gunleri" className="standard-card-img">
-              <img src="/assets/photos/haber-foto5.jpg" alt="Özel Haber 4" />
-            </Link>
-            <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
-            <h4>
-              <Link href="/haber/bagimsiz-sinema-gunleri">
-                Bağımsız sinema günleri başlıyor
-              </Link>
-            </h4>
-          </article>
-        </div>
-      </section>
+      {(() => {
+        const ozelItems = articles.filter(
+          (a) => a.category?.slug === 'ozel-haber' || (a.kicker && a.kicker.toLowerCase().includes('özel'))
+        );
+        const fallbackOzel = [
+          {
+            slug: 'haftanin-karikatur-seckisi',
+            coverImage: '/assets/photos/haber-foto4.jpg',
+            title: 'Haftanın karikatür seçkisi yayımlandı',
+          },
+          {
+            slug: 'kadin-hareketinden-ortak-manifesto',
+            coverImage: '/assets/photos/haber-foto13.jpg',
+            title: 'Kadın hareketinden ortak manifesto',
+          },
+          {
+            slug: 'yeni-cikan-kitaplar',
+            coverImage: '/assets/photos/haber-foto6.webp',
+            title: 'Yeni çıkan kitaplar ve eleştiri yazıları',
+          },
+          {
+            slug: 'bagimsiz-sinema-gunleri',
+            coverImage: '/assets/photos/haber-foto5.jpg',
+            title: 'Bağımsız sinema günleri başlıyor',
+          },
+        ];
+        const displayOzel = [
+          ...ozelItems,
+          ...fallbackOzel.filter((f) => !ozelItems.some((o) => o.slug === f.slug)),
+        ].slice(0, 4);
+
+        return (
+          <section className="news-block block-grid4">
+            <div className="col-header">
+              <h3>
+                <Link href="/kategori/ozel-haber">ÖZEL HABER <span>❯</span></Link>
+              </h3>
+            </div>
+            <div className="grid-4col">
+              {displayOzel.map((item: any, idx: number) => (
+                <article className="standard-card" key={item.id || idx}>
+                  <Link href={`/haber/${item.slug}`} className="standard-card-img">
+                    <img src={getStrapiMedia(item.coverImage, item.id || idx)} alt={item.title} />
+                  </Link>
+                  <span className="card-cat" data-cat="ozel-haber">Özel Haber</span>
+                  <h4>
+                    <Link href={`/haber/${item.slug}`}>{item.title}</Link>
+                  </h4>
+                </article>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
     </>
   );
 }

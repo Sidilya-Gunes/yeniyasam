@@ -138,6 +138,10 @@ export async function fetchCurrentUser(_unusedToken?: string): Promise<StrapiUse
       return null;
     }
 
+    if (data.subscription) {
+      data.user.subscription = data.subscription;
+    }
+
     if (typeof window !== 'undefined') {
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     }

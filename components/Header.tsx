@@ -218,9 +218,18 @@ export default function Header() {
                         <div style={{ fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {user.email}
                         </div>
+                        {user.subscription && (
+                          <div style={{ marginTop: '5px' }}>
+                            <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: 700, display: 'inline-block' }}>
+                              ✓ {user.subscription.status === 'Aktif' ? 'Aktif Abone' : user.subscription.status}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <Link
-                        href="/abone"
+                        href="https://eyeniyasam.com/urunler/"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={() => setIsUserMenuOpen(false)}
                         style={{
                           display: 'block',
@@ -256,9 +265,26 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <Link href="/giris" className="btn-login">
-                  Giriş Yap
-                </Link>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <a
+                    href="https://eyeniyasam.com/urunler/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-subscribe"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    E-Gazete & Abone Ol
+                  </a>
+                  <a
+                    href="https://eyeniyasam.com/epanel/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-login"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    Giriş Yap
+                  </a>
+                </div>
               )}
             </div>
           </div>
@@ -313,14 +339,16 @@ export default function Header() {
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                    <Link
-                      href="/abone"
+                    <a
+                      href="https://eyeniyasam.com/urunler/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="btn-subscribe"
                       onClick={closeMenu}
                       style={{ flex: 1, textAlign: 'center', padding: '6px 12px' }}
                     >
                       Abonelik
-                    </Link>
+                    </a>
                     <button
                       type="button"
                       onClick={() => {
@@ -336,9 +364,9 @@ export default function Header() {
                 </div>
               ) : (
                 <>
-                  <Link href="/abone" className="btn-subscribe" onClick={closeMenu}>
+                  <a href="https://eyeniyasam.com/urunler/" target="_blank" rel="noopener noreferrer" className="btn-subscribe" onClick={closeMenu}>
                     Abone Ol
-                  </Link>
+                  </a>
                   <Link href="/giris" className="btn-login" onClick={closeMenu}>
                     Giriş Yap
                   </Link>

@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -45,11 +45,8 @@ function GirisContent() {
     try {
       const res = await login(identifier.trim(), password);
       if (res.success) {
-        setSuccessMessage('Giriş başarılı! Yönlendiriliyorsunuz...');
-        setTimeout(() => {
-          router.push(redirectUrl);
-          router.refresh();
-        }, 800);
+        router.push(redirectUrl);
+        router.refresh();
       } else {
         setErrorMessage(res.error || 'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.');
       }
@@ -74,84 +71,15 @@ function GirisContent() {
     });
   };
 
-  // If already logged in
+  // Oturum zaten açıksa doğrudan ana sayfaya yönlendir
+  useEffect(() => {
+    if (!isAuthLoading && user) {
+      router.replace(redirectUrl || '/');
+    }
+  }, [isAuthLoading, user, redirectUrl, router]);
+
   if (!isAuthLoading && user) {
-    return (
-      <main
-        className="site-main container"
-        style={{
-          padding: '3rem 1rem',
-          minHeight: '65vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '440px',
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '10px',
-            padding: '2.5rem 2rem',
-            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.06)',
-            textAlign: 'center',
-          }}
-        >
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(34, 197, 94, 0.12)',
-              color: '#16a34a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.25rem',
-            }}
-          >
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-
-          <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--heading)', marginBottom: '0.5rem' }}>
-            Oturum Açık
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1.5rem' }}>
-            <strong>{user.username || user.email}</strong> olarak giriş yapmış durumdasınız.
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <Link
-              href="/"
-              className="error-btn error-btn--primary"
-              style={{ justifyContent: 'center', padding: '11px', textDecoration: 'none' }}
-            >
-              Ana Sayfaya Dön
-            </Link>
-            <button
-              type="button"
-              onClick={logout}
-              style={{
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'transparent',
-                color: 'var(--heading)',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Farklı Bir Hesapla Giriş Yap (Çıkış)
-            </button>
-          </div>
-        </div>
-      </main>
-    );
+    return null;
   }
 
   return (
@@ -450,9 +378,14 @@ function GirisContent() {
           }}
         >
           Henüz hesabınız yok mu?{' '}
-          <Link href="/abone" style={{ color: 'var(--primary)', fontWeight: 700 }}>
+          <a
+            href="https://eyeniyasam.com/urunler/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--primary)', fontWeight: 700 }}
+          >
             Abone Olun
-          </Link>
+          </a>
         </div>
       </div>
     </main>

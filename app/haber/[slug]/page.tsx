@@ -14,6 +14,11 @@ import DOMPurify from 'isomorphic-dompurify';
 import ArticleBottomShare from '@/components/ArticleBottomShare';
 import ArticleSidebar from '@/components/ArticleSidebar';
 
+marked.use({
+  breaks: true,
+  gfm: true,
+});
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

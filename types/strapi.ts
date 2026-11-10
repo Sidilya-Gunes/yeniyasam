@@ -10,6 +10,17 @@ export interface StrapiUser {
   blocked?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  subscription?: {
+    id?: number | string;
+    fullName?: string;
+    email?: string;
+    plan?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    price?: number;
+    currency?: string;
+  };
 }
 
 export interface StrapiAuthResponse {

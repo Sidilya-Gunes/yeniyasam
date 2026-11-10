@@ -63,11 +63,11 @@ export const SUBSCRIPTION_PRODUCTS: SubscriptionProduct[] = [
     period: '1 Yıl',
     type: 'domestic',
     category: 'support',
-    description: "Yeni Yaşam Gazetesi ile dayanışmayı büyütmek ve bağımsız gazeteciliğe güç katmak için oluşturulmuş yıllık destek paketidir.",
+    description: "Yeni Yaşam Gazetesi ile dayanışmayı büyütmek ve bağımsız gazeteciliğe güç katmak için oluşturulmuş yıllık destek paketidir. Bu paket Yurt İçi Yıllık Abonelik Paketi ile tamamen aynı hakları kapsar.",
     features: [
       'Tüm Yurt İçi Yıllık E-Abonelik hakları dahil',
-      'Özgür ve bağımsız haberciliğe doğrudan dayanışma katkısı',
-      'Öğrenciler ve cezaevleri için askıda gazete fonuna destek',
+      '1 yıl boyunca kesintisiz e-gazete ve arşiv erişimi',
+      'Yeni Yaşam Gazetesi ile dayanışma katkısı',
     ],
   },
   {
@@ -79,12 +79,11 @@ export const SUBSCRIPTION_PRODUCTS: SubscriptionProduct[] = [
     period: '1 Yıl',
     type: 'domestic',
     category: 'support',
-    description: "Yeni Yaşam Gazetesi ile dayanışmayı büyütmek için yıllık dayanışma katkısı paketi.",
+    description: "Yeni Yaşam Gazetesi ile dayanışmayı büyütmek için yıllık dayanışma katkısı paketidir. Bu paket Yurt İçi Yıllık Abonelik Paketi ile tamamen aynı hakları kapsar.",
     features: [
       'Tüm Yurt İçi Yıllık E-Abonelik hakları dahil',
-      'Bağımsız halk haberciliğine güçlü dayanışma desteği',
-      'Askıda gazete fonuna çift destek',
-      'Tüm geçmiş dijital arşiv erişimi',
+      '1 yıl boyunca kesintisiz e-gazete ve arşiv erişimi',
+      'Yeni Yaşam Gazetesi ile dayanışma katkısı',
     ],
   },
   {
@@ -96,12 +95,11 @@ export const SUBSCRIPTION_PRODUCTS: SubscriptionProduct[] = [
     period: '1 Yıl',
     type: 'domestic',
     category: 'support',
-    description: "Yeni Yaşam Gazetesi ile en üst düzey dayanışma ve destek paketi.",
+    description: "Yeni Yaşam Gazetesi ile en üst düzey dayanışma ve destek paketidir. Bu paket Yurt İçi Yıllık Abonelik Paketi ile tamamen aynı hakları kapsar.",
     features: [
       'Tüm Yurt İçi Yıllık E-Abonelik hakları dahil',
-      'Özgür basına ve halkın haber alma hakkına maksimum dayanışma',
-      'Genişletilmiş askıda gazete desteği',
-      'Özel içerik ve buluşmalara davet',
+      '1 yıl boyunca kesintisiz e-gazete ve arşiv erişimi',
+      'Yeni Yaşam Gazetesi ile dayanışma katkısı',
     ],
   },
 
@@ -148,11 +146,11 @@ export const SUBSCRIPTION_PRODUCTS: SubscriptionProduct[] = [
     period: '1 Yıl',
     type: 'international',
     category: 'support',
-    description: "Yurt dışından Yeni Yaşam Gazetesi ile dayanışmayı büyütmek için yıllık destek paketi.",
+    description: "Yurt dışından Yeni Yaşam Gazetesi ile dayanışmayı büyütmek için yıllık destek paketidir. Bu paket Yurt Dışı Yıllık Abonelik Paketi ile tamamen aynı hakları kapsar.",
     features: [
       'Tüm Yurt Dışı Yıllık Abonelik hakları dahil',
-      'Diasporadan özgür basına doğrudan dayanışma katkısı',
-      'Askıda gazete dayanışma fonuna katkı',
+      '1 yıl boyunca her gün e-gazete ve arşiv erişimi',
+      'Yeni Yaşam Gazetesi ile dayanışma katkısı',
     ],
   },
   {
@@ -164,11 +162,11 @@ export const SUBSCRIPTION_PRODUCTS: SubscriptionProduct[] = [
     period: '1 Yıl',
     type: 'international',
     category: 'support',
-    description: "Yurt dışından bağımsız haberciliğe güçlü dayanışma paketi.",
+    description: "Yurt dışından bağımsız haberciliğe güçlü dayanışma paketidir. Bu paket Yurt Dışı Yıllık Abonelik Paketi ile tamamen aynı hakları kapsar.",
     features: [
       'Tüm Yurt Dışı Yıllık Abonelik hakları dahil',
-      'Özgür basın mücadelesine güçlü uluslararası destek',
-      'Genişletilmiş askıda gazete desteği',
+      '1 yıl boyunca her gün e-gazete ve arşiv erişimi',
+      'Yeni Yaşam Gazetesi ile dayanışma katkısı',
     ],
   },
   {
@@ -180,12 +178,11 @@ export const SUBSCRIPTION_PRODUCTS: SubscriptionProduct[] = [
     period: '1 Yıl',
     type: 'international',
     category: 'support',
-    description: "Yurt dışından Yeni Yaşam Gazetesi'ne en üst düzey dayanışma paketi.",
+    description: "Yurt dışından Yeni Yaşam Gazetesi'ne en üst düzey dayanışma paketidir. Bu paket Yurt Dışı Yıllık Abonelik Paketi ile tamamen aynı hakları kapsar.",
     features: [
       'Tüm Yurt Dışı Yıllık Abonelik hakları dahil',
-      'Sansüre ve baskılara karşı özgür basına maksimum dayanışma',
-      'Kapsamlı askıda gazete desteği',
-      'Özel etkinlik ve bülten erişimi',
+      '1 yıl boyunca her gün e-gazete ve arşiv erişimi',
+      'Yeni Yaşam Gazetesi ile dayanışma katkısı',
     ],
   },
 ];

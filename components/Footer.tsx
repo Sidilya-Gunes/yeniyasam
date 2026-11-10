@@ -91,7 +91,9 @@ export default function Footer() {
               <li><Link href="/kategori/ozel-haber">Özel Haber</Link></li>
               <li><Link href="/kategori/dosya">Dosya</Link></li>
               <li><Link href="/kategori/editorun-sectikleri">Editörün Seçtikleri</Link></li>
-              <li><Link href="/abone">Abone Ol</Link></li>
+              <li><a href="https://eyeniyasam.com/urunler/" target="_blank" rel="noopener noreferrer">E-Gazete Aboneliği</a></li>
+              <li><a href="https://eyeniyasam.com/kategori/arsiv/" target="_blank" rel="noopener noreferrer">Gazete Arşivi (2018-2026)</a></li>
+              <li><a href="https://eyeniyasam.com/epanel/" target="_blank" rel="noopener noreferrer">Abone Girişi</a></li>
             </ul>
           </div>
 
