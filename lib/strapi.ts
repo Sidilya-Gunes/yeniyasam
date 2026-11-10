@@ -231,10 +231,14 @@ export async function getArticles(filter?: {
         : items;
     }
   } else {
-    // Tekrar eden endpoint isteklerini ve mükerrer haberleri önlemek için benzersiz endpoint'leri al
-    const uniqueCategories = Array.from(
-      new Map(Object.values(CATEGORY_ENDPOINTS).map((c) => [c.endpoint, c])).values()
-    );
+    // Tekrar eden endpoint isteklerini önlemek için benzersiz endpoint'leri al (ana kategorileri koruyarak)
+    const uniqueEndpointsMap = new Map<string, (typeof CATEGORY_ENDPOINTS)[string]>();
+    for (const cat of Object.values(CATEGORY_ENDPOINTS)) {
+      if (!uniqueEndpointsMap.has(cat.endpoint)) {
+        uniqueEndpointsMap.set(cat.endpoint, cat);
+      }
+    }
+    const uniqueCategories = Array.from(uniqueEndpointsMap.values());
 
     const promises = uniqueCategories.map(async (cat) => {
       const data = await fetchStrapi<any[]>(cat.endpoint, {

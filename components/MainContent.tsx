@@ -231,7 +231,7 @@ export default function MainContent({
                   Yeni Yaşam'a<br />Abone Ol
                 </h3>
                 <p className="abone-desc">Bağımsız haberciliğe güç kat.</p>
-                <Link href="/abone" className="abone-cta">
+                <a href="https://eyeniyasam.com/urunler/" target="_blank" rel="noopener noreferrer" className="abone-cta">
                   <span>Abone Ol</span>
                   <svg
                     width="16"
@@ -246,7 +246,7 @@ export default function MainContent({
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
                   </svg>
-                </Link>
+                </a>
               </div>
             </div>
           </article>
@@ -438,9 +438,11 @@ export default function MainContent({
         <div className="news-four-columns">
           {/* Güncel */}
           {(() => {
-            const guncelList = articles.filter((a) => a.category?.slug === 'guncel');
-            const featured = guncelList[0];
-            const subs = guncelList.slice(1, 4);
+            const guncelList = articles.filter((a) => a.category?.slug === 'guncel' || a.category?.slug === 'toplum-yasam' || a.category?.name?.toLowerCase().includes('güncel'));
+            const fallbackGuncel = articles.slice(0, 4);
+            const activeGuncel = guncelList.length > 0 ? guncelList : fallbackGuncel;
+            const featured = activeGuncel[0];
+            const subs = activeGuncel.slice(1, 4);
             return (
               <div className="news-col">
                 <div className="col-header">
@@ -474,9 +476,11 @@ export default function MainContent({
 
           {/* Kültür-Sanat */}
           {(() => {
-            const kulturList = articles.filter((a) => a.category?.slug === 'kultur-sanat');
-            const featured = kulturList[0];
-            const subs = kulturList.slice(1, 4);
+            const kulturList = articles.filter((a) => a.category?.slug === 'kultur-sanat' || a.category?.slug === 'genclik' || a.category?.slug === 'gunun-fotografi' || a.category?.name?.toLowerCase().includes('kültür'));
+            const fallbackKultur = articles.slice(4, 8);
+            const activeKultur = kulturList.length > 0 ? kulturList : fallbackKultur;
+            const featured = activeKultur[0];
+            const subs = activeKultur.slice(1, 4);
             return (
               <div className="news-col">
                 <div className="col-header">
@@ -510,9 +514,11 @@ export default function MainContent({
 
           {/* Dünya */}
           {(() => {
-            const dunyaList = articles.filter((a) => a.category?.slug === 'dunya');
-            const featured = dunyaList[0];
-            const subs = dunyaList.slice(1, 4);
+            const dunyaList = articles.filter((a) => a.category?.slug === 'dunya' || a.category?.slug === 'panorama' || a.category?.name?.toLowerCase().includes('dünya'));
+            const fallbackDunya = articles.slice(8, 12);
+            const activeDunya = dunyaList.length > 0 ? dunyaList : fallbackDunya;
+            const featured = activeDunya[0];
+            const subs = activeDunya.slice(1, 4);
             return (
               <div className="news-col">
                 <div className="col-header">
@@ -546,7 +552,7 @@ export default function MainContent({
 
           {/* Spor */}
           {(() => {
-            const sporList = articles.filter((a) => a.category?.slug === 'spor');
+            const sporList = articles.filter((a) => a.category?.slug === 'spor' || a.category?.name?.toLowerCase().includes('spor'));
             const featured = sporList[0];
             const subs = sporList.slice(1, 4);
             return (
