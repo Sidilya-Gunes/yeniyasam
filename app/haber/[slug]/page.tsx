@@ -10,7 +10,6 @@ import { notFound } from 'next/navigation';
 import { getArticleBySlug, getArticles, getStrapiMedia } from '@/lib/strapi';
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
-import MetaShare from '@/components/MetaShare';
 import ArticleBottomShare from '@/components/ArticleBottomShare';
 import ArticleSidebar from '@/components/ArticleSidebar';
 
@@ -82,7 +81,7 @@ export default async function HaberDetayPage({ params }: PageProps) {
           {/* Başlık */}
           <h1 className="article-title">{article.title}</h1>
 
-          {/* Meta & Paylaşım Dropdown */}
+          {/* Meta */}
           <div className="article-meta">
             <span className="meta-source">
               <strong>Haber:</strong> {article.author?.name || 'Sema Bingöl \\ MA'}
@@ -93,8 +92,6 @@ export default async function HaberDetayPage({ params }: PageProps) {
             <span className="meta-item">{formattedTime}</span>
             <span className="meta-sep">·</span>
             <span className="meta-item">5 dk okuma</span>
-
-            <MetaShare title={article.title} />
           </div>
 
           {/* Ana Görsel Hero */}
