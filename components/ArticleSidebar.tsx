@@ -36,6 +36,7 @@ export default async function ArticleSidebar({
       time,
       title: item.title,
       slug: item.slug,
+      catSlug: item.category?.slug || 'guncel',
     };
   });
 
@@ -69,13 +70,13 @@ export default async function ArticleSidebar({
 
   // Fallback şablon verisi
   const fallbackLatest = [
-    { id: 'fl1', time: '14:45', title: "Pervin Buldan ve heyetten Barış Anneleri'ne anlamlı ziyaret", slug: 'pervin-buldan-baris-anneleri-ziyaret' },
-    { id: 'fl2', time: '14:12', title: "Munzur Vadisi'nde HES projelerine karşı yeni hukuki adım", slug: 'munzur-vadisi-hes-projelerine-karsi-adim' },
-    { id: 'fl3', time: '13:38', title: 'Enflasyon verileri sonrası piyasalarda son durum ne?', slug: 'enflasyon-verileri-piyasalar' },
-    { id: 'fl4', time: '13:05', title: "Kaz Dağları'nda su kaynakları tehdit altında: Rapor açıklandı", slug: 'kaz-daglari-su-kaynaklari' },
-    { id: 'fl5', time: '12:30', title: 'Uluslararası Belgesel Film Festivali kapılarını açıyor', slug: 'uluslararasi-belgesel-film-festivali' },
-    { id: 'fl6', time: '11:58', title: 'Kürt edebiyatında son dönem çeviri eserlerin yükselişi', slug: 'kurt-edebiyati' },
-    { id: 'fl7', time: '11:22', title: 'Yerel yönetimlerden ortak kalkınma hamlesi ve yeni projeler', slug: 'yerel-yonetimlerden-ortak-kalkinma-hamlesi' },
+    { id: 'fl1', time: '14:45', title: "Pervin Buldan ve heyetten Barış Anneleri'ne anlamlı ziyaret", slug: 'pervin-buldan-baris-anneleri-ziyaret', catSlug: 'politika' },
+    { id: 'fl2', time: '14:12', title: "Munzur Vadisi'nde HES projelerine karşı yeni hukuki adım", slug: 'munzur-vadisi-hes-projelerine-karsi-adim', catSlug: 'ekoloji' },
+    { id: 'fl3', time: '13:38', title: 'Enflasyon verileri sonrası piyasalarda son durum ne?', slug: 'enflasyon-verileri-piyasalar', catSlug: 'ekonomi' },
+    { id: 'fl4', time: '13:05', title: "Kaz Dağları'nda su kaynakları tehdit altında: Rapor açıklandı", slug: 'kaz-daglari-su-kaynaklari', catSlug: 'ekoloji' },
+    { id: 'fl5', time: '12:30', title: 'Uluslararası Belgesel Film Festivali kapılarını açıyor', slug: 'uluslararasi-belgesel-film-festivali', catSlug: 'kultur-sanat' },
+    { id: 'fl6', time: '11:58', title: 'Kürt edebiyatında son dönem çeviri eserlerin yükselişi', slug: 'kurt-edebiyati', catSlug: 'kultur-sanat' },
+    { id: 'fl7', time: '11:22', title: 'Yerel yönetimlerden ortak kalkınma hamlesi ve yeni projeler', slug: 'yerel-yonetimlerden-ortak-kalkinma-hamlesi', catSlug: 'politika' },
   ];
 
   const fallbackEditor = [
@@ -123,7 +124,7 @@ export default async function ArticleSidebar({
         <ul className="latest-list">
           {displayLatest.map((item, idx) => (
             <li className="latest-item" key={item.id || idx}>
-              <Link href={`/haber/${item.slug}`}>
+              <Link href={item.catSlug === 'video' ? `/video/${item.slug}` : `/haber/${item.slug}`}>
                 <span className="latest-time">{item.time}</span>
                 <span className="latest-heading">{item.title}</span>
               </Link>
@@ -137,7 +138,7 @@ export default async function ArticleSidebar({
         <ul className="editor-picks-list">
           {displayEditor.map((item, idx) => (
             <li className="editor-picks-item" data-cat={item.catSlug} key={item.id || idx}>
-              <Link href={`/haber/${item.slug}`}>
+              <Link href={item.catSlug === 'video' ? `/video/${item.slug}` : `/haber/${item.slug}`}>
                 <div className="editor-picks-thumb">
                   <img src={item.thumb} alt={item.title} />
                 </div>

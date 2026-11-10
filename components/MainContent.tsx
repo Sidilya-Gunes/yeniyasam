@@ -617,9 +617,13 @@ export default function MainContent({
 
           {/* Spor */}
           {(() => {
-            const sporList = articles.filter((a) => a.category?.slug === 'spor' || a.category?.name?.toLowerCase().includes('spor'));
-            const featured = sporList[0];
-            const subs = sporList.slice(1, 4);
+            const sporList = articles.filter(
+              (a) => a.category?.slug === 'spor' || a.category?.name?.toLowerCase().includes('spor')
+            );
+            const fallbackSpor = articles.slice(12, 16);
+            const activeSpor = sporList.length > 0 ? sporList : fallbackSpor;
+            const featured = activeSpor[0];
+            const subs = activeSpor.slice(1, 4);
             return (
               <div className="news-col">
                 <div className="col-header">
@@ -627,7 +631,7 @@ export default function MainContent({
                     <Link href="/kategori/spor">Spor <span>❯</span></Link>
                   </h3>
                 </div>
-                {featured ? (
+                {featured && (
                   <article className="col-featured">
                     <Link href={`/haber/${featured.slug}`} className="col-featured-img-link">
                       <div className="col-featured-img">
@@ -639,38 +643,13 @@ export default function MainContent({
                     </h4>
                     <p>{(featured.summary || '').slice(0, 110)}...</p>
                   </article>
-                ) : (
-                  <article className="col-featured">
-                    <Link href="/haber/amedspor-zirve-yarisi" className="col-featured-img-link">
-                      <div className="col-featured-img">
-                        <img src="/assets/photos/haber-foto7.jpg" alt="Haber" />
-                      </div>
-                    </Link>
-                    <h4>
-                      <Link href="/haber/amedspor-zirve-yarisi">
-                        Amedspor ligde zirve yarışını sürdürüyor: Hedef şampiyonluk
-                      </Link>
-                    </h4>
-                    <p>Yeşil-kırmızılı ekip ligin kritik haftasında taraftarının desteğiyle sahadan 3 puanla ayrıldı.</p>
-                  </article>
                 )}
                 <div className="col-sub-list">
-                  {subs.length > 0 ? (
-                    subs.map((item) => (
-                      <article className="sub-news-item" key={item.id}>
-                        <h4><Link href={`/haber/${item.slug}`}>{item.title}</Link></h4>
-                      </article>
-                    ))
-                  ) : (
-                    <>
-                      <article className="sub-news-item">
-                        <h4><Link href="/kategori/spor">Kadın futbol liginde haftanın maçları ve öne çıkanlar</Link></h4>
-                      </article>
-                      <article className="sub-news-item">
-                        <h4><Link href="/kategori/spor">Bölgesel amatör liglerde genç yetenekler dikkat çekiyor</Link></h4>
-                      </article>
-                    </>
-                  )}
+                  {subs.map((item) => (
+                    <article className="sub-news-item" key={item.id}>
+                      <h4><Link href={`/haber/${item.slug}`}>{item.title}</Link></h4>
+                    </article>
+                  ))}
                 </div>
               </div>
             );
