@@ -20,7 +20,7 @@ const DEFAULT_VIDEOS: VideoItem[] = [
     title: "Pervin Buldan ve heyetten Barış Anneleri'ne anlamlı ziyaret",
     category: 'Politika',
     duration: '08:42',
-    thumbnail: '/assets/photos/haber-foto1.jpg',
+    thumbnail: '/assets/photos/haber-foto5.jpg',
     slug: 'pervin-buldan-baris-anneleri-ziyaret',
   },
   {
@@ -36,7 +36,7 @@ const DEFAULT_VIDEOS: VideoItem[] = [
     title: "Ortadoğu'da yeni dengeler ve cepheleşmeler",
     category: 'Dünya',
     duration: '05:42',
-    thumbnail: '/assets/photos/haber-foto3.jpg',
+    thumbnail: '/assets/photos/haber-foto12.jpeg',
     slug: 'ortadogu-yeni-dengeler',
   },
   {
@@ -49,6 +49,30 @@ const DEFAULT_VIDEOS: VideoItem[] = [
   },
   {
     id: 5,
+    title: "Yaşam'da Politika'da bu hafta bütçeyi konuştuk",
+    category: 'Genel',
+    duration: '18:17',
+    thumbnail: '/assets/photos/haber-foto1.jpg',
+    slug: 'yasamda-politikada-bu-hafta-butceyi-konustuk',
+  },
+  {
+    id: 6,
+    title: 'Süreç hapishanelere uğramıyor',
+    category: 'Güncel',
+    duration: '12:45',
+    thumbnail: '/assets/photos/haber-foto6.webp',
+    slug: 'surec-hapishanelere-ugramiyor',
+  },
+  {
+    id: 7,
+    title: "Mekke Paktı ve Türkiye, İran ile Yemen Savaşı'na mı sürükleniyor?",
+    category: 'Manşet',
+    duration: '14:20',
+    thumbnail: '/assets/photos/haber-foto3.jpg',
+    slug: 'mekke-pakti-ve-turkiye-iran-yemen-savasi',
+  },
+  {
+    id: 8,
     title: "Meclis'te yeni yasama dönemi başlarken kritik gündem",
     category: 'Politika',
     duration: '11:47',
@@ -56,7 +80,7 @@ const DEFAULT_VIDEOS: VideoItem[] = [
     slug: 'mecliste-yeni-yasama-donemi',
   },
   {
-    id: 6,
+    id: 9,
     title: 'Uluslararası Belgesel Film Festivali kapılarını açıyor',
     category: 'Kültür-Sanat',
     duration: '11:47',
@@ -96,7 +120,7 @@ export default function VideoCarousel({ videos = DEFAULT_VIDEOS }: { videos?: Vi
     <section className="video-carousel-section">
       <div className="container">
         <div className="section-title-bar dark">
-          <Link href="/kategori/video" className="media-logo-title-link">
+          <Link href="/video" className="media-logo-title-link">
             <img
               src="/assets/img/ymedia-logo.png"
               alt="Yeni Yaşam Medya"
@@ -134,7 +158,7 @@ export default function VideoCarousel({ videos = DEFAULT_VIDEOS }: { videos?: Vi
         >
           {videos.map((item) => (
             <article className="video-carousel-card" key={item.id}>
-              <Link href={`/haber/${item.slug}`} className="vcc-link">
+              <Link href={`/video/${item.slug}`} className="vcc-link">
                 <div className="vcc-thumb">
                   <img src={item.thumbnail} alt={item.title} loading="lazy" />
                   <div className="play-btn-overlay">

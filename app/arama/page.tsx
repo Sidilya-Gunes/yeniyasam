@@ -22,9 +22,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 }
 
 export default async function AramaPage({ searchParams }: SearchPageProps) {
-  const { q = 'iklim krizi', tab, sort } = await searchParams;
-  const results = await searchArticles(q);
-  const matchingAuthors = await searchAuthors(q);
+  const { q = '', tab, sort } = await searchParams;
+  const results = q.trim() ? await searchArticles(q) : [];
+  const matchingAuthors = q.trim() ? await searchAuthors(q) : [];
 
   const searchCategories = [
     { name: 'Tüm Haberler', slug: '' },
@@ -149,18 +149,7 @@ export default async function AramaPage({ searchParams }: SearchPageProps) {
     { time: '12:30', title: 'Uluslararası Belgesel Film Festivali kapılarını açıyor', slug: 'uluslararasi-belgesel-film-festivali' },
   ];
 
-  let displayList: Article[] = results;
-  if (displayList.length === 0) {
-    const qLower = q.trim().toLocaleLowerCase('tr-TR');
-    const filteredFallback = fallbackResults.filter(
-      (a) =>
-        a.title.toLocaleLowerCase('tr-TR').includes(qLower) ||
-        a.summary.toLocaleLowerCase('tr-TR').includes(qLower) ||
-        (a.author?.name && a.author.name.toLocaleLowerCase('tr-TR').includes(qLower)) ||
-        (a.category?.name && a.category.name.toLocaleLowerCase('tr-TR').includes(qLower))
-    );
-    displayList = filteredFallback.length > 0 ? filteredFallback : fallbackResults;
-  }
+  const displayList: Article[] = results;
   const count = displayList.length + matchingAuthors.length;
 
   return (
@@ -203,8 +192,14 @@ export default async function AramaPage({ searchParams }: SearchPageProps) {
         </form>
 
         <div className="search-stats">
-          <strong>"{q}"</strong> için <strong>{count}</strong> sonuç bulundu{' '}
-          <span className="search-stats-time">(0.12 saniye)</span>
+          {q ? (
+            <>
+              <strong>"{q}"</strong> için <strong>{count}</strong> sonuç bulundu{' '}
+              <span className="search-stats-time">(0.08 saniye)</span>
+            </>
+          ) : (
+            <span>Lütfen aramak istediğiniz kelime veya başlığı yazınız.</span>
+          )}
         </div>
       </section>
 

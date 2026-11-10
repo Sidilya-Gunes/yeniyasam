@@ -36,6 +36,12 @@
       "required": false,
       "allowedTypes": ["files"]
     },
+    "description": {
+      "type": "text"
+    },
+    "sectionTitle": {
+      "type": "string"
+    },
     "highlightArticles": {
       "type": "text"
     }

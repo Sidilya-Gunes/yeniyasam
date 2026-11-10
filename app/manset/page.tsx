@@ -6,19 +6,26 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getMansetList } from '@/lib/strapi';
 
 export const metadata: Metadata = {
   title: 'Günün Manşeti — Yeni Yaşam Gazetesi',
   description: 'Yeni Yaşam Gazetesi günlük basılı manşeti, birinci sayfa arşivi ve e-gazete.',
 };
 
-export default function MansetPage() {
-  const pastIssues = [
-    { date: '28 Ekim 2026', issue: '3555', img: '/assets/photos/yy.jpg' },
-    { date: '27 Ekim 2026', issue: '3554', img: '/assets/photos/yy.jpg' },
-    { date: '26 Ekim 2026', issue: '3553', img: '/assets/photos/yy.jpg' },
-    { date: '25 Ekim 2026', issue: '3552', img: '/assets/photos/yy.jpg' },
-  ];
+export const revalidate = 60;
+
+export default async function MansetPage() {
+  const mansetler = await getMansetList();
+  const latest = mansetler[0] || {
+    id: 1,
+    issueNumber: '3556',
+    issueDate: '29 Ekim 2026',
+    coverImage: '/assets/photos/yy.jpg',
+    pdfFile: '/assets/photos/yy.jpg',
+    description: 'Günlük Siyasi Gazete',
+  };
+  const pastIssues = mansetler.slice(1);
 
   return (
     <main className="site-main container" style={{ padding: '2rem 1rem' }}>
@@ -32,12 +39,12 @@ export default function MansetPage() {
           <div>
             <h1 className="archive-title" style={{ margin: 0 }}>Günün Manşeti</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-              Sayı: 3556 · 29 Ekim 2026 Perşembe · Günlük Siyasi Gazete
+              Sayı: {latest.issueNumber || '—'} · {latest.issueDate || ''} · {latest.description || 'Günlük Siyasi Gazete'}
             </p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <a
-              href="/assets/photos/yy.jpg"
+              href={latest.coverImage}
               target="_blank"
               rel="noopener noreferrer"
               className="error-btn error-btn--primary"
@@ -45,13 +52,18 @@ export default function MansetPage() {
             >
               Tam Boyut İncele
             </a>
-            <a
-              href="#"
-              className="error-btn error-btn--secondary"
-              style={{ fontSize: '0.8rem', padding: '10px 18px' }}
-            >
-              PDF İndir
-            </a>
+            {latest.pdfFile && (
+              <a
+                href={latest.pdfFile}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={`yeni-yasam-${latest.issueNumber || 'manset'}.pdf`}
+                className="error-btn error-btn--secondary"
+                style={{ fontSize: '0.8rem', padding: '10px 18px' }}
+              >
+                PDF İndir
+              </a>
+            )}
           </div>
         </div>
       </header>
@@ -68,48 +80,52 @@ export default function MansetPage() {
           }}
         >
           <img
-            src="/assets/photos/yy.jpg"
-            alt="Yeni Yaşam Gazetesi 1. Sayfa"
+            src={latest.coverImage}
+            alt={`Yeni Yaşam Gazetesi Sayı ${latest.issueNumber || ''}`}
             style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px' }}
           />
         </div>
       </section>
 
       {/* Önceki Günlerin Manşetleri */}
-      <section style={{ borderTop: '2px solid var(--border)', paddingTop: '2.5rem' }}>
-        <div className="section-title-bar" style={{ marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--heading)' }}>
-            ÖNCEKİ SAYILARIN MANŞETLERİ
-          </h2>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          {pastIssues.map((item, idx) => (
-            <div
-              key={idx}
-              style={{
-                backgroundColor: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '6px',
-                padding: '0.75rem',
-                textAlign: 'center',
-                transition: 'transform 0.2s',
-              }}
-            >
-              <img
-                src={item.img}
-                alt={item.date}
-                style={{ width: '100%', height: 'auto', borderRadius: '4px', marginBottom: '0.75rem' }}
-              />
-              <span style={{ display: 'block', fontWeight: 700, color: 'var(--heading)', fontSize: '0.9rem' }}>
-                {item.date}
-              </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-soft)' }}>
-                Sayı: {item.issue}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
+      {pastIssues.length > 0 && (
+        <section style={{ borderTop: '2px solid var(--border)', paddingTop: '2.5rem' }}>
+          <div className="section-title-bar" style={{ marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--heading)' }}>
+              ÖNCEKİ SAYILARIN MANŞETLERİ
+            </h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+            {pastIssues.map((item, idx) => (
+              <div
+                key={item.id || idx}
+                style={{
+                  backgroundColor: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  padding: '0.75rem',
+                  textAlign: 'center',
+                  transition: 'transform 0.2s',
+                }}
+              >
+                <a href={item.coverImage} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={item.coverImage}
+                    alt={item.issueDate || `Sayı ${item.issueNumber}`}
+                    style={{ width: '100%', height: 'auto', borderRadius: '4px', marginBottom: '0.75rem' }}
+                  />
+                </a>
+                <span style={{ display: 'block', fontWeight: 700, color: 'var(--heading)', fontSize: '0.9rem' }}>
+                  {item.issueDate}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-soft)' }}>
+                  Sayı: {item.issueNumber}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

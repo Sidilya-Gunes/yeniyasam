@@ -7,3 +7,4 @@ dist/
 .env
 exports/
 public/uploads/
+public/assets/

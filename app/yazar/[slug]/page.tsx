@@ -7,10 +7,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getAuthorBySlug, getArticles, getStrapiMedia } from '@/lib/strapi';
+import { getAuthorBySlug, getArticlesByAuthor, getStrapiMedia } from '@/lib/strapi';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -27,18 +28,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function YazarDetayPage({ params }: PageProps) {
+export default async function YazarDetayPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || '1', 10));
+  const pageSize = 10;
+
   const author = await getAuthorBySlug(slug);
 
   if (!author) {
     notFound();
   }
 
-  const allArticles = await getArticles({ limit: 20 });
-  const authorArticles = allArticles.filter(
-    (a) => a.author?.slug === author.slug || a.author?.name === author.name
-  );
+  const { articles: authorArticles, total } = await getArticlesByAuthor(slug, currentPage, pageSize);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <main className="site-main container">
@@ -49,52 +52,82 @@ export default async function YazarDetayPage({ params }: PageProps) {
           </div>
           <div className="author-hero-info">
             <h1 className="author-name">{author.name}</h1>
-            <span className="author-role">{author.role || `${authorArticles.length} yazı`}</span>
             <div className="author-socials">
-              <a href="#" aria-label="X">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-                <span>@{author.slug}</span>
-              </a>
-              {author.email && (
-                <a href={`mailto:${author.email}`} aria-label="E-posta">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect width="20" height="16" x="2" y="4" rx="2" />
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                  </svg>
-                  <span>E-posta</span>
-                </a>
-              )}
+              <span className="author-handle">
+                {total} Makale
+              </span>
             </div>
           </div>
         </header>
 
         <section className="author-articles-section">
-          <h2 className="author-articles-title">Yazıları</h2>
+          <h2 className="author-articles-title">Yazıları ({total})</h2>
           <div className="author-articles">
-            {(authorArticles.length > 0 ? authorArticles : allArticles.slice(0, 8)).map((item) => (
-              <article
-                className="author-article-card"
-                data-cat={item.category?.slug || 'politika'}
-                key={item.id}
-              >
-                <Link href={`/haber/${item.slug}`}>
-                  <h3 className="author-article-title">{item.title}</h3>
-                  <p className="author-article-excerpt">{item.summary}</p>
-                  <span className="author-article-meta">
-                    {new Date(item.publishedAt).toLocaleDateString('tr-TR')} · 6 dk okuma
-                  </span>
-                </Link>
-              </article>
-            ))}
+            {authorArticles.length > 0 ? (
+              authorArticles.map((item) => (
+                <article
+                  className="author-article-card"
+                  data-cat="politika"
+                  key={item.id}
+                >
+                  <Link href={`/haber/${item.slug}`}>
+                    <h3 className="author-article-title">{item.title}</h3>
+                    <p className="author-article-excerpt">{item.summary}</p>
+                    <span className="author-article-meta">
+                      {new Date(item.publishedAt).toLocaleDateString('tr-TR')} · 5 dk okuma
+                    </span>
+                  </Link>
+                </article>
+              ))
+            ) : (
+              <p style={{ color: 'var(--text-soft)', padding: '2rem 0' }}>
+                Bu yazara ait henüz yayınlanmış yazı bulunmuyor.
+              </p>
+            )}
           </div>
 
-          <nav className="author-pagination" aria-label="Sayfalama">
-            <span className="page-arrow disabled">‹</span>
-            <span className="page-num active">1</span>
-            <span className="page-arrow disabled">›</span>
-          </nav>
+          {totalPages > 1 && (
+            <nav className="author-pagination" aria-label="Sayfalama">
+              {currentPage > 1 ? (
+                <Link
+                  href={`/yazar/${slug}?page=${currentPage - 1}`}
+                  className="page-arrow"
+                  aria-label="Önceki sayfa"
+                >
+                  ‹
+                </Link>
+              ) : (
+                <span className="page-arrow disabled">‹</span>
+              )}
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 10).map((p) => {
+                if (p === currentPage) {
+                  return (
+                    <span key={p} className="page-num active">
+                      {p}
+                    </span>
+                  );
+                }
+                return (
+                  <Link key={p} href={`/yazar/${slug}?page=${p}`} className="page-num">
+                    {p}
+                  </Link>
+                );
+              })}
+
+              {currentPage < totalPages ? (
+                <Link
+                  href={`/yazar/${slug}?page=${currentPage + 1}`}
+                  className="page-arrow"
+                  aria-label="Sonraki sayfa"
+                >
+                  ›
+                </Link>
+              ) : (
+                <span className="page-arrow disabled">›</span>
+              )}
+            </nav>
+          )}
         </section>
       </div>
     </main>

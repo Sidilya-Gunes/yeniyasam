@@ -56,6 +56,11 @@
     },
     "videoUrl": {
       "type": "string"
+    },
+    "yazar": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::yazar.yazar"
     }
   }
 }

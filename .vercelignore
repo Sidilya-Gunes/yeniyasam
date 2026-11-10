@@ -1,0 +1,9 @@
+# Hassas Veriler & Abone Listeleri
+all-subscribers.json
+migration_report.json
+*.sqlite
+*.db
+backend/.tmp
+test_*.js
+test*.js
+scripts/

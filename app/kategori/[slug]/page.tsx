@@ -51,8 +51,7 @@ export default async function KategoriDetayPage({ params, searchParams }: PagePr
 
   const isFirstPage = currentPage === 1;
   const pageSize = isFirstPage ? 13 : 12;
-  const categoryArticles = await getArticles({ categorySlug: slug, page: currentPage, limit: pageSize });
-  const articles = categoryArticles.length > 0 ? categoryArticles : await getArticles({ page: currentPage, limit: pageSize });
+  const articles = await getArticles({ categorySlug: slug, page: currentPage, limit: pageSize });
   const featured = isFirstPage && articles.length > 0 ? articles[0] : null;
   const listCards = isFirstPage ? articles.slice(1) : articles;
 
@@ -98,6 +97,17 @@ export default async function KategoriDetayPage({ params, searchParams }: PagePr
               </article>
             ) : null}
 
+            {articles.length === 0 && (
+              <div style={{ padding: '3.5rem 1rem', textAlign: 'center', backgroundColor: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <p style={{ fontSize: '1.1rem', color: 'var(--text-soft)', marginBottom: '1.25rem' }}>
+                  <strong>{category.name}</strong> kategorisinde henüz yayınlanmış haber bulunmuyor.
+                </p>
+                <Link href="/" className="error-btn error-btn--primary">
+                  Ana Sayfaya Dön
+                </Link>
+              </div>
+            )}
+
             {listCards.length > 0 && (
               <div className="archive-grid">
                 {listCards.map((item) => (
@@ -120,42 +130,33 @@ export default async function KategoriDetayPage({ params, searchParams }: PagePr
               </div>
             )}
 
-            <nav className="archive-pagination" aria-label="Sayfalama">
-              {currentPage > 1 ? (
-                <Link
-                  href={`/kategori/${slug}?page=${currentPage - 1}`}
-                  className="page-arrow"
-                  aria-label="Önceki sayfa"
-                >
-                  ‹
-                </Link>
-              ) : (
-                <span className="page-arrow disabled">‹</span>
-              )}
-
-              {[1, 2, 3, 4, 5].map((p) => {
-                if (p === currentPage) {
-                  return (
-                    <span key={p} className="page-num active">
-                      {p}
-                    </span>
-                  );
-                }
-                return (
-                  <Link key={p} href={`/kategori/${slug}?page=${p}`} className="page-num">
-                    {p}
+            {(articles.length >= pageSize || currentPage > 1) && (
+              <nav className="archive-pagination" aria-label="Sayfalama">
+                {currentPage > 1 ? (
+                  <Link
+                    href={`/kategori/${slug}?page=${currentPage - 1}`}
+                    className="page-arrow"
+                    aria-label="Önceki sayfa"
+                  >
+                    ‹
                   </Link>
-                );
-              })}
+                ) : (
+                  <span className="page-arrow disabled">‹</span>
+                )}
 
-              <Link
-                href={`/kategori/${slug}?page=${currentPage + 1}`}
-                className="page-arrow"
-                aria-label="Sonraki sayfa"
-              >
-                ›
-              </Link>
-            </nav>
+                <span className="page-num active">{currentPage}</span>
+
+                {articles.length >= pageSize && (
+                  <Link
+                    href={`/kategori/${slug}?page=${currentPage + 1}`}
+                    className="page-arrow"
+                    aria-label="Sonraki sayfa"
+                  >
+                    ›
+                  </Link>
+                )}
+              </nav>
+            )}
           </div>
 
           <ArticleSidebar className="archive-sidebar" />

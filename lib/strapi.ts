@@ -5,6 +5,9 @@ import {
   Author,
   VideoMedia,
   DailyFeature,
+  GununManseti,
+  JinDergi,
+  Karikatur,
   StrapiMedia,
   StrapiResponse,
 } from '@/types/strapi';
@@ -105,7 +108,6 @@ export {
   MOCK_ARTICLES,
   MOCK_VIDEOS,
   getCategoryBySlug,
-  getVideoBySlug,
   generateFallbackArticle,
 } from './mock-data';
 
@@ -115,7 +117,6 @@ import {
   MOCK_ARTICLES,
   MOCK_VIDEOS,
   getCategoryBySlug,
-  getVideoBySlug,
   generateFallbackArticle,
 } from './mock-data';
 
@@ -230,12 +231,16 @@ export async function getArticles(filter?: {
         : items;
     }
   } else {
-    // Tüm kategorilerden haberleri topla
-    const promises = Object.values(CATEGORY_ENDPOINTS).map(async (cat) => {
+    // Tekrar eden endpoint isteklerini ve mükerrer haberleri önlemek için benzersiz endpoint'leri al
+    const uniqueCategories = Array.from(
+      new Map(Object.values(CATEGORY_ENDPOINTS).map((c) => [c.endpoint, c])).values()
+    );
+
+    const promises = uniqueCategories.map(async (cat) => {
       const data = await fetchStrapi<any[]>(cat.endpoint, {
         populate: '*',
         sort: 'createdAt:desc',
-        'pagination[pageSize]': 10,
+        'pagination[pageSize]': 12,
       });
       if (data && Array.isArray(data.data)) {
         return data.data.map((i) => normalizeStrapiItem(i, cat));
@@ -244,8 +249,14 @@ export async function getArticles(filter?: {
     });
 
     const results = await Promise.all(promises);
+    const seenSlugs = new Set<string>();
     for (const r of results) {
-      articles.push(...r);
+      for (const item of r) {
+        if (!seenSlugs.has(item.slug)) {
+          seenSlugs.add(item.slug);
+          articles.push(item);
+        }
+      }
     }
   }
 
@@ -283,8 +294,12 @@ export async function getArticles(filter?: {
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
   if (!slug) return null;
 
-  // Bütün kategori koleksiyonlarında ara
-  for (const cat of Object.values(CATEGORY_ENDPOINTS)) {
+  // Benzersiz kategori koleksiyonlarında paralel olarak ara
+  const uniqueCategories = Array.from(
+    new Map(Object.values(CATEGORY_ENDPOINTS).map((c) => [c.endpoint, c])).values()
+  );
+
+  const promises = uniqueCategories.map(async (cat) => {
     try {
       const data = await fetchStrapi<any[]>(cat.endpoint, {
         'filters[slug][$eq]': slug,
@@ -294,14 +309,19 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
         return normalizeStrapiItem(data.data[0], cat);
       }
     } catch {
-      // ignore
+      return null;
     }
-  }
+    return null;
+  });
+
+  const results = await Promise.all(promises);
+  const foundArticle = results.find(Boolean);
+  if (foundArticle) return foundArticle;
 
   const found = MOCK_ARTICLES.find((a) => a.slug === slug);
   if (found) return found;
 
-  return generateFallbackArticle(slug);
+  return null;
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -516,22 +536,26 @@ export async function getAuthorBySlug(slug: string): Promise<Author | null> {
   const found = MOCK_AUTHORS.find((author) => author.slug === slug);
   if (found) return found;
 
-  // Fallback: Check authorPhotosMap or generate
-  const name = slug
-    .split('-')
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1))
-    .join(' ');
+  const photos = authorPhotosMap as Record<string, string>;
+  if (photos[slug]) {
+    const name = slug
+      .split('-')
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1))
+      .join(' ');
 
-  return {
-    id: slug,
-    name,
-    slug,
-    role: 'Yazar',
-    bio: `${name} — Yeni Yaşam Gazetesi köşe yazarı ve değerlendirmeleri.`,
-    avatar: getAuthorAvatar(name, slug),
-    articleCount: 15,
-  };
+    return {
+      id: slug,
+      name,
+      slug,
+      role: 'Yazar',
+      bio: `${name} — Yeni Yaşam Gazetesi yazarı.`,
+      avatar: photos[slug],
+      articleCount: 1,
+    };
+  }
+
+  return null;
 }
 
 export async function getArticlesByAuthor(
@@ -565,17 +589,7 @@ export async function getArticlesByAuthor(
     return { articles: matchingArticles, total: matchingArticles.length };
   }
 
-  const sampleArticles = MOCK_ARTICLES.slice(0, 4).map((a, idx) => ({
-    ...a,
-    id: `${authorSlug}-${idx}`,
-    author: {
-      id: authorSlug,
-      name: authorSlug.split('-').map(w => w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1)).join(' '),
-      slug: authorSlug,
-      avatar: getAuthorAvatar(authorSlug, authorSlug),
-    },
-  }));
-  return { articles: sampleArticles, total: sampleArticles.length };
+  return { articles: [], total: 0 };
 }
 
 export async function getVideos(): Promise<VideoMedia[]> {
@@ -605,31 +619,122 @@ export async function getVideos(): Promise<VideoMedia[]> {
   return MOCK_VIDEOS;
 }
 
-export async function searchArticles(query: string): Promise<Article[]> {
-  if (!query.trim()) return [];
+export async function getVideoBySlug(slug: string): Promise<VideoMedia | null> {
+  if (!slug) return null;
 
-  const articles = await getArticles();
-  const q = query.trim().toLocaleLowerCase('tr-TR');
-  return articles.filter(
+  try {
+    const strapiData = await fetchStrapi<any[]>('/videolar', {
+      'filters[slug][$eq]': slug,
+      populate: '*',
+    });
+
+    if (strapiData && Array.isArray(strapiData.data) && strapiData.data[0]) {
+      const v = strapiData.data[0];
+      return {
+        id: v.id,
+        title: v.title,
+        slug: v.slug || `video-${v.id}`,
+        category: v.category || 'Genel',
+        duration: v.duration || '05:00',
+        thumbnail: v.thumbnail ? getStrapiMedia(v.thumbnail) : '/assets/photos/haber-foto1.jpg',
+        videoUrl: v.videoUrl || 'https://www.youtube.com',
+        description: v.description || '',
+        publishedAt: v.createdAt || new Date().toISOString(),
+      };
+    }
+  } catch {
+    // fallback
+  }
+
+  const all = await getVideos();
+  return all.find((v) => v.slug === slug) || null;
+}
+
+export async function searchArticles(query: string): Promise<Article[]> {
+  const q = query.trim();
+  if (!q) return [];
+
+  // Strapi'deki tüm kategori koleksiyonlarında veritabanı düzeyinde filtreleme yap
+  const searchEndpoints = [
+    { endpoint: '/guncel-haberleri', name: 'Güncel', slug: 'guncel', color: 'var(--cat-gundem)' },
+    { endpoint: '/politika-haberleri', name: 'Politika', slug: 'politika', color: 'var(--cat-politika)' },
+    { endpoint: '/ekonomi-haberleri', name: 'Ekonomi', slug: 'ekonomi', color: 'var(--cat-ekonomi)' },
+    { endpoint: '/dunya-haberleri', name: 'Dünya', slug: 'dunya', color: 'var(--cat-dunya)' },
+    { endpoint: '/kadin-haberleri', name: 'Kadın', slug: 'kadin', color: 'var(--cat-kadin)' },
+    { endpoint: '/ekoloji-haberleri', name: 'Ekoloji', slug: 'ekoloji', color: 'var(--cat-ekoloji)' },
+    { endpoint: '/kultur-sanat-haberleri', name: 'Kültür-Sanat', slug: 'kultur-sanat', color: 'var(--cat-kultur-sanat)' },
+    { endpoint: '/soylesiler', name: 'Söyleşi', slug: 'soylesi', color: 'var(--cat-forum)' },
+    { endpoint: '/spor-haberleri', name: 'Spor', slug: 'spor', color: 'var(--cat-spor)' },
+    { endpoint: '/makaleler', name: 'Köşe Yazısı', slug: 'yazarlar', color: 'var(--cat-politika)' },
+  ];
+
+  try {
+    const promises = searchEndpoints.map(async (cat) => {
+      const data = await fetchStrapi<any[]>(cat.endpoint, {
+        'filters[$or][0][title][$containsi]': q,
+        'filters[$or][1][summary][$containsi]': q,
+        populate: '*',
+        sort: 'createdAt:desc',
+        'pagination[pageSize]': 30,
+      });
+
+      if (data && Array.isArray(data.data)) {
+        return data.data.map((i) => normalizeStrapiItem(i, cat));
+      }
+      return [];
+    });
+
+    const results = (await Promise.all(promises)).flat();
+    if (results.length > 0) {
+      return results.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    }
+  } catch {
+    // Strapi bağlantı hatası durumunda fallback
+  }
+
+  // Strapi erişilemiyorsa veya sonuç çıkmadıysa mock verilerde ara
+  const qLower = q.toLocaleLowerCase('tr-TR');
+  return MOCK_ARTICLES.filter(
     (a) =>
-      a.title.toLocaleLowerCase('tr-TR').includes(q) ||
-      a.summary.toLocaleLowerCase('tr-TR').includes(q) ||
-      (a.author?.name && a.author.name.toLocaleLowerCase('tr-TR').includes(q)) ||
-      (a.category?.name && a.category.name.toLocaleLowerCase('tr-TR').includes(q))
+      a.title.toLocaleLowerCase('tr-TR').includes(qLower) ||
+      a.summary.toLocaleLowerCase('tr-TR').includes(qLower) ||
+      (a.author?.name && a.author.name.toLocaleLowerCase('tr-TR').includes(qLower)) ||
+      (a.category?.name && a.category.name.toLocaleLowerCase('tr-TR').includes(qLower))
   );
 }
 
 export async function searchAuthors(query: string): Promise<Author[]> {
-  if (!query.trim()) return [];
+  const q = query.trim();
+  if (!q) return [];
 
   try {
+    const strapiData = await fetchStrapi<any[]>('/yazarlar', {
+      'filters[$or][0][name][$containsi]': q,
+      'filters[$or][1][bio][$containsi]': q,
+      'filters[$or][2][role][$containsi]': q,
+      populate: '*',
+      'pagination[pageSize]': 20,
+    });
+
+    if (strapiData && Array.isArray(strapiData.data) && strapiData.data.length > 0) {
+      return strapiData.data.map((y: any) => ({
+        id: y.id,
+        name: y.name,
+        slug: y.slug || `yazar-${y.id}`,
+        role: y.role || 'Yazar',
+        bio: y.bio || '',
+        avatar: (y.avatar && (y.avatar.url || typeof y.avatar === 'string')) ? getStrapiMedia(y.avatar) : getAuthorAvatar(y.name, y.slug),
+        articleCount: 1,
+      }));
+    }
+
     const authors = await getAllAuthors();
-    const q = query.trim().toLocaleLowerCase('tr-TR');
+    const qLower = q.toLocaleLowerCase('tr-TR');
     return authors.filter(
       (a) =>
-        a.name.toLocaleLowerCase('tr-TR').includes(q) ||
-        (a.bio && a.bio.toLocaleLowerCase('tr-TR').includes(q)) ||
-        (a.role && a.role.toLocaleLowerCase('tr-TR').includes(q))
+        a.name.toLocaleLowerCase('tr-TR').includes(qLower) ||
+        (a.bio && a.bio.toLocaleLowerCase('tr-TR').includes(qLower)) ||
+        (a.role && a.role.toLocaleLowerCase('tr-TR').includes(qLower))
     );
   } catch {
     return [];
@@ -641,4 +746,226 @@ export async function searchAuthors(query: string): Promise<Author[]> {
  */
 export async function subscribeToNewsletter(email: string): Promise<{ success: boolean; message: string }> {
   return { success: true, message: 'Bülten aboneliğiniz kaydedildi.' };
+}
+
+/**
+ * Günün Manşeti (Gazete Baskısı) Fonksiyonları
+ */
+export async function getMansetList(): Promise<GununManseti[]> {
+  try {
+    const res = await fetchStrapi<any[]>('/gunun-mansetleri', {
+      populate: '*',
+      sort: 'issueDate:desc,createdAt:desc',
+    });
+
+    if (res && Array.isArray(res.data) && res.data.length > 0) {
+      return res.data.map((m: any) => ({
+        id: m.id,
+        documentId: m.documentId,
+        issueNumber: m.issueNumber || '',
+        issueDate: m.issueDate || '',
+        coverImage: m.coverImage ? getStrapiMedia(m.coverImage) : '/assets/photos/yy.jpg',
+        pdfFile: m.pdfFile ? getStrapiMedia(m.pdfFile) : null,
+        description: m.description || '',
+      }));
+    }
+  } catch {
+    // fallback
+  }
+
+  return [
+    {
+      id: 'default-1',
+      issueNumber: '3556',
+      issueDate: '29 Ekim 2026',
+      coverImage: '/assets/photos/yy.jpg',
+      pdfFile: '/assets/photos/yy.jpg',
+      description: 'Günlük Siyasi Gazete',
+    },
+    {
+      id: 'default-2',
+      issueNumber: '3555',
+      issueDate: '28 Ekim 2026',
+      coverImage: '/assets/photos/yy.jpg',
+      pdfFile: '/assets/photos/yy.jpg',
+      description: 'Günlük Siyasi Gazete',
+    },
+    {
+      id: 'default-3',
+      issueNumber: '3554',
+      issueDate: '27 Ekim 2026',
+      coverImage: '/assets/photos/yy.jpg',
+      pdfFile: '/assets/photos/yy.jpg',
+      description: 'Günlük Siyasi Gazete',
+    },
+    {
+      id: 'default-4',
+      issueNumber: '3553',
+      issueDate: '26 Ekim 2026',
+      coverImage: '/assets/photos/yy.jpg',
+      pdfFile: '/assets/photos/yy.jpg',
+      description: 'Günlük Siyasi Gazete',
+    },
+  ];
+}
+
+export async function getLatestManset(): Promise<GununManseti> {
+  const list = await getMansetList();
+  return list[0];
+}
+
+/**
+ * Jin Dergi (Kadın Eki) Fonksiyonları
+ */
+export async function getJinDergiList(): Promise<JinDergi[]> {
+  try {
+    const res = await fetchStrapi<any[]>('/jin-dergiler', {
+      populate: '*',
+      sort: 'issueDate:desc,createdAt:desc',
+    });
+
+    if (res && Array.isArray(res.data) && res.data.length > 0) {
+      return res.data.map((j: any) => ({
+        id: j.id,
+        documentId: j.documentId,
+        issueNumber: j.issueNumber || '',
+        title: j.title || 'Jin Dergi',
+        issueDate: j.issueDate || '',
+        coverImage: j.coverImage ? getStrapiMedia(j.coverImage) : '/assets/photos/jin.jpeg',
+        pdfFile: j.pdfFile ? getStrapiMedia(j.pdfFile) : null,
+        description: j.description || '',
+        sectionTitle: j.sectionTitle || '',
+        highlightArticles: j.highlightArticles || '',
+      }));
+    }
+  } catch {
+    // fallback
+  }
+
+  return [
+    {
+      id: 'default-jin-1',
+      issueNumber: '114',
+      title: 'Kadın, Yaşam, Özgürlük',
+      issueDate: '29 Ekim 2026',
+      coverImage: '/assets/photos/jin.jpeg',
+      pdfFile: '/assets/photos/jin.jpeg',
+      description: '',
+      sectionTitle: '',
+      highlightArticles: '',
+    },
+  ];
+}
+
+export async function getLatestJinDergi(): Promise<JinDergi> {
+  const list = await getJinDergiList();
+  return list[0];
+}
+
+/**
+ * Günün Karikatürü Fonksiyonları
+ */
+export async function getKarikaturList(): Promise<Karikatur[]> {
+  try {
+    const res = await fetchStrapi<any[]>('/karikaturler', {
+      populate: '*',
+      sort: 'publishDate:desc,createdAt:desc',
+    });
+
+    if (res && Array.isArray(res.data) && res.data.length > 0) {
+      return res.data.map((k: any) => ({
+        id: k.id,
+        documentId: k.documentId,
+        title: k.title || 'Günün Karikatürü',
+        artist: k.artist || 'Yeni Yaşam Mizah',
+        publishDate: k.publishDate || '',
+        image: k.image ? getStrapiMedia(k.image) : '/assets/photos/karikatur.jpeg',
+        description: k.description || '',
+      }));
+    }
+  } catch {
+    // fallback
+  }
+
+  return [
+    {
+      id: 'default-k-1',
+      title: 'Günün Karikatürü',
+      artist: 'Yeni Yaşam Mizah Kolektifi',
+      publishDate: '29 Ekim 2026',
+      image: '/assets/photos/karikatur.jpeg',
+      description: 'Haftalık ve günlük siyasetin çizgilerle ifadesi.',
+    },
+    {
+      id: 'default-k-2',
+      title: 'Bütçe görüşmeleri ve halkın sofrası',
+      artist: 'Yeni Yaşam Mizah',
+      publishDate: '28 Ekim 2026',
+      image: '/assets/photos/karikatur.jpeg',
+      description: '',
+    },
+    {
+      id: 'default-k-3',
+      title: 'Diplomatik temaslar ve masadaki gerçekler',
+      artist: 'Yeni Yaşam Mizah',
+      publishDate: '27 Ekim 2026',
+      image: '/assets/photos/karikatur.jpeg',
+      description: '',
+    },
+    {
+      id: 'default-k-4',
+      title: 'Ekoloji ve ranta karşı direniş',
+      artist: 'Yeni Yaşam Mizah',
+      publishDate: '26 Ekim 2026',
+      image: '/assets/photos/karikatur.jpeg',
+      description: '',
+    },
+  ];
+}
+
+export async function getLatestKarikatur(): Promise<Karikatur> {
+  const list = await getKarikaturList();
+  return list[0];
+}
+
+/**
+ * Ana Sayfadaki Günlük Özellikler (Manşet, Jin Dergi, Karikatür)
+ */
+export async function getDailyFeatures(): Promise<{
+  manset: DailyFeature;
+  jin: DailyFeature;
+  karikatur: DailyFeature;
+}> {
+  const [latestManset, latestJin, latestKarikatur] = await Promise.all([
+    getLatestManset(),
+    getLatestJinDergi(),
+    getLatestKarikatur(),
+  ]);
+
+  return {
+    manset: {
+      id: latestManset.id,
+      type: 'manset',
+      title: 'Günün Manşeti',
+      captionTitle: latestManset.issueNumber ? `Sayı: ${latestManset.issueNumber}` : 'Günün Manşeti',
+      date: latestManset.issueDate || 'Bugün',
+      image: latestManset.coverImage,
+    },
+    jin: {
+      id: latestJin.id,
+      type: 'jin',
+      title: latestJin.title || 'Jin Dergi',
+      captionTitle: latestJin.issueNumber ? `Sayı: ${latestJin.issueNumber}` : 'Haftalık Kadın Eki',
+      date: latestJin.issueDate || 'Haftalık Kadın Eki',
+      image: latestJin.coverImage,
+    },
+    karikatur: {
+      id: latestKarikatur.id,
+      type: 'karikatur',
+      title: latestKarikatur.title || 'Günün Karikatürü',
+      captionTitle: latestKarikatur.artist ? `Çizen: ${latestKarikatur.artist}` : 'Günün Karikatürü',
+      date: latestKarikatur.publishDate || 'Bugün',
+      image: latestKarikatur.image,
+    },
+  };
 }

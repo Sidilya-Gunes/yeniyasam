@@ -22,7 +22,30 @@
       "required": true
     },
     "category": {
-      "type": "string"
+      "type": "enumeration",
+      "enum": [
+        "Genel",
+        "Politika",
+        "Güncel",
+        "Dünya",
+        "Kadın",
+        "Ekoloji",
+        "Ekonomi",
+        "Kültür-Sanat",
+        "Söyleşi",
+        "Dosya",
+        "Forum",
+        "Özel Haber",
+        "Toplum-Yaşam",
+        "Gençlik",
+        "Spor",
+        "Manşet",
+        "Analiz"
+      ],
+      "default": "Genel"
+    },
+    "description": {
+      "type": "text"
     },
     "duration": {
       "type": "string"

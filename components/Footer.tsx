@@ -77,6 +77,21 @@ export default function Footer() {
               <li><Link href="/kategori/kultur-sanat">Kültür-Sanat</Link></li>
               <li><Link href="/kategori/soylesi">Söyleşi</Link></li>
               <li><Link href="/kategori/spor">Spor</Link></li>
+              <li><Link href="/video">Video</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h4 className="footer-col-title">Yayınlar</h4>
+            <ul className="footer-links">
+              <li><Link href="/yazarlar">Yazarlar</Link></li>
+              <li><Link href="/manset">Günün Manşeti</Link></li>
+              <li><Link href="/jin-dergi">Jin Dergi</Link></li>
+              <li><Link href="/karikatur">Karikatür</Link></li>
+              <li><Link href="/kategori/ozel-haber">Özel Haber</Link></li>
+              <li><Link href="/kategori/dosya">Dosya</Link></li>
+              <li><Link href="/kategori/editorun-sectikleri">Editörün Seçtikleri</Link></li>
+              <li><Link href="/abone">Abone Ol</Link></li>
             </ul>
           </div>
 

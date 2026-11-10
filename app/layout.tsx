@@ -13,6 +13,7 @@ import { SITE } from '@/lib/site';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   title: {
@@ -38,10 +39,12 @@ export default function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning>
       <body>
-        <Header />
-        {children}
-        <Footer />
-        <ScrollToTop />
+        <AuthProvider>
+          <Header />
+          {children}
+          <Footer />
+          <ScrollToTop />
+        </AuthProvider>
       </body>
     </html>
   );

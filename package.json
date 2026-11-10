@@ -6,9 +6,12 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "echo linting bypassed"
+    "lint": "echo linting bypassed",
+    "migrate": "node scripts/integrate.js --migrate",
+    "migrate:audit": "node scripts/integrate.js --audit"
   },
   "dependencies": {
+    "isomorphic-dompurify": "^4.7.0",
     "marked": "^18.1.2",
     "next": "^16.4.3",
     "react": "^19.3.1",

@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { Article, Category, Author } from '@/types/strapi';
+import { Article, Category, Author, DailyFeature } from '@/types/strapi';
 import { getStrapiMedia } from '@/lib/strapi';
 import NewsSlider from '@/components/NewsSlider';
 import VideoCarousel from '@/components/VideoCarousel';
@@ -9,12 +9,18 @@ interface MainContentProps {
   articles: Article[];
   categories: Category[];
   authors: Author[];
+  dailyFeatures?: {
+    manset: DailyFeature;
+    jin: DailyFeature;
+    karikatur: DailyFeature;
+  };
 }
 
 export default function MainContent({
   articles,
   categories,
   authors,
+  dailyFeatures,
 }: MainContentProps) {
   // Slider için manşet haberleri (En fazla 10 manşet, en yeni 10 haber alınır)
   const headlineArticles = (
@@ -24,32 +30,83 @@ export default function MainContent({
   ).slice(0, 10);
 
   // Sol söyleşi/dosya/özel haber kartları
-  const opinionCards = [
-    {
-      kicker: 'Söyleşi',
-      cat: 'kadin',
-      title: 'Bizleri birleştiren noktalara dikkat kesilmeliyiz',
-      author: 'Nezahat Doğan',
-      thumb: '/assets/photos/haber-foto12.jpeg',
-      slug: 'bizleri-birlestiren-noktalara-dikkat-kesilmeliyiz',
-    },
-    {
-      kicker: 'Dosya',
-      cat: 'ekonomi',
-      title: 'Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri',
-      author: 'Ahmet Kaya',
-      thumb: '/assets/photos/haber-foto1.jpg',
-      slug: 'yerel-yonetimlerde-katilimci-demokrasi-deneyimleri',
-    },
-    {
-      kicker: 'Özel Haber',
-      cat: 'ozel-haber',
-      title: 'Politik alan kolektif yaratım alanıdır',
-      author: 'Dilzar Dîlok',
-      thumb: '/assets/photos/haber-foto4.jpg',
-      slug: 'politik-alan-kolektif-yaratim-alanidir',
-    },
-  ];
+  const soylesiList = articles.filter((a) => a.category?.slug === 'soylesi');
+  const opinionCards = soylesiList.length >= 3
+    ? soylesiList.slice(0, 3).map((item) => ({
+        kicker: item.kicker || 'Söyleşi',
+        cat: 'soylesi',
+        title: item.title,
+        author: item.author?.name || 'Yeni Yaşam',
+        thumb: getStrapiMedia(item.coverImage, item.id),
+        slug: item.slug,
+      }))
+    : [
+        {
+          kicker: 'Söyleşi',
+          cat: 'kadin',
+          title: 'Bizleri birleştiren noktalara dikkat kesilmeliyiz',
+          author: 'Nezahat Doğan',
+          thumb: '/assets/photos/haber-foto12.jpeg',
+          slug: 'bizleri-birlestiren-noktalara-dikkat-kesilmeliyiz',
+        },
+        {
+          kicker: 'Dosya',
+          cat: 'ekonomi',
+          title: 'Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri',
+          author: 'Ahmet Kaya',
+          thumb: '/assets/photos/haber-foto1.jpg',
+          slug: 'yerel-yonetimlerde-katilimci-demokrasi-deneyimleri',
+        },
+        {
+          kicker: 'Özel Haber',
+          cat: 'ozel-haber',
+          title: 'Politik alan kolektif yaratım alanıdır',
+          author: 'Dilzar Dîlok',
+          thumb: '/assets/photos/haber-foto4.jpg',
+          slug: 'politik-alan-kolektif-yaratim-alanidir',
+        },
+      ];
+
+  const renderCategoryRow = (catTitle: string, catSlug: string, fallbackCards: any[]) => {
+    const catArticles = articles.filter((a) => a.category?.slug === catSlug);
+    const displayItems = catArticles.length >= 3 ? catArticles.slice(0, 3) : fallbackCards;
+
+    return (
+      <div className="news-block-row" key={catSlug}>
+        <div className="category-col">
+          <h3 className="category-title" data-cat={catSlug}>
+            <Link href={`/kategori/${catSlug}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {catTitle}
+            </Link>
+          </h3>
+        </div>
+        <div className="news-items-grid">
+          {displayItems.map((item: any, idx: number) => {
+            const title = item.title;
+            const slug = item.slug;
+            const summary = item.summary || item.excerpt || '';
+            const cover = item.coverImage || item.thumb || '/assets/photos/haber-foto1.jpg';
+            const dateStr = item.publishedAt
+              ? new Date(item.publishedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+              : (item.date || '');
+
+            return (
+              <article className="news-card" key={item.id || idx}>
+                <Link href={`/haber/${slug}`} className="news-card-img">
+                  <img src={getStrapiMedia(cover, item.id || idx)} alt={title} />
+                </Link>
+                <h4>
+                  <Link href={`/haber/${slug}`}>{title}</Link>
+                </h4>
+                <p>{summary.slice(0, 95)}...</p>
+                <span className="news-date">{dateStr}</span>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -102,8 +159,10 @@ export default function MainContent({
                 <div className="opinion-content">
                   <span className="author-name">{author.name}</span>
                   <h4 className="opinion-title">
-                    <Link href={`/yazar/${author.slug}`}>
-                      {author.bio || `${author.name} köşe yazısı ve güncel değerlendirmeler.`}
+                    <Link
+                      href={author.latestArticleSlug ? `/haber/${author.latestArticleSlug}` : `/yazar/${author.slug}`}
+                    >
+                      {author.latestArticleTitle || author.bio || `${author.name} köşe yazısı ve güncel değerlendirmeler.`}
                     </Link>
                   </h4>
                 </div>
@@ -126,7 +185,10 @@ export default function MainContent({
             </div>
             <Link href="/manset" className="daily-card-link">
               <div className="daily-card-body">
-                <img src="/assets/photos/yy.jpg" alt="Bugünün Yeni Yaşamı" />
+                <img
+                  src={typeof dailyFeatures?.manset?.image === 'string' ? dailyFeatures.manset.image : '/assets/photos/yy.jpg'}
+                  alt={dailyFeatures?.manset?.captionTitle || "Bugünün Yeni Yaşamı"}
+                />
               </div>
             </Link>
           </article>
@@ -138,7 +200,10 @@ export default function MainContent({
             </div>
             <Link href="/jin-dergi" className="daily-card-link">
               <div className="daily-card-body">
-                <img src="/assets/photos/jin.jpeg" alt="Jin Dergi" />
+                <img
+                  src={typeof dailyFeatures?.jin?.image === 'string' ? dailyFeatures.jin.image : '/assets/photos/jin.jpeg'}
+                  alt={dailyFeatures?.jin?.title || "Jin Dergi"}
+                />
               </div>
             </Link>
           </article>
@@ -150,7 +215,10 @@ export default function MainContent({
             </div>
             <Link href="/karikatur" className="daily-card-link">
               <div className="daily-card-body">
-                <img src="/assets/photos/karikatur.jpeg" alt="Günün Karikatürü" />
+                <img
+                  src={typeof dailyFeatures?.karikatur?.image === 'string' ? dailyFeatures.karikatur.image : '/assets/photos/karikatur.jpeg'}
+                  alt={dailyFeatures?.karikatur?.captionTitle || "Günün Karikatürü"}
+                />
               </div>
             </Link>
           </article>
@@ -188,186 +256,104 @@ export default function MainContent({
       {/* Kategori Blokları */}
       <div className="custom-news-sections">
         {/* POLİTİKA */}
-        <div className="news-block-row">
-          <div className="category-col">
-            <h3 className="category-title" data-cat="politika">POLİTİKA</h3>
-          </div>
-          <div className="news-items-grid">
-            <article className="news-card">
-              <Link href="/haber/yerel-yonetimlerde-katilimci-demokrasi" className="news-card-img">
-                <img src="/assets/photos/haber-foto6.webp" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/yerel-yonetimlerde-katilimci-demokrasi">
-                  Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri
-                </Link>
-              </h4>
-              <p>Kent uzlaşıları ve yerel meclislerin karar alma mekanizmalarındaki yeri...</p>
-              <span className="news-date">25 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/ekoloji-mucadelesi" className="news-card-img">
-                <img src="/assets/photos/haber-foto4.jpg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/ekoloji-mucadelesi">
-                  Ekoloji Mücadelesi ve Yerel Direnişler
-                </Link>
-              </h4>
-              <p>Doğal yaşam alanlarını koruma ekseninde gelişen sivil toplum hareketleri...</p>
-              <span className="news-date">24 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/hak-temelli-habercilik" className="news-card-img">
-                <img src="/assets/photos/haber-foto5.jpg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/hak-temelli-habercilik">
-                  Hak Temelli Haberciliğin Güncel Sorunları
-                </Link>
-              </h4>
-              <p>Dijital çağda bağımsız medyanın sürdürülebilirliği ve karşılaştığı engeller...</p>
-              <span className="news-date">23 Ekim 2026</span>
-            </article>
-          </div>
-        </div>
+        {renderCategoryRow('POLİTİKA', 'politika', [
+          {
+            title: 'Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri',
+            slug: 'yerel-yonetimlerde-katilimci-demokrasi',
+            excerpt: 'Kent uzlaşıları ve yerel meclislerin karar alma mekanizmalarındaki yeri...',
+            date: '25 Ekim 2026',
+            thumb: '/assets/photos/haber-foto6.webp',
+          },
+          {
+            title: 'Ekoloji Mücadelesi ve Yerel Direnişler',
+            slug: 'ekoloji-mucadelesi',
+            excerpt: 'Doğal yaşam alanlarını koruma ekseninde gelişen sivil toplum hareketleri...',
+            date: '24 Ekim 2026',
+            thumb: '/assets/photos/haber-foto4.jpg',
+          },
+          {
+            title: 'Hak Temelli Haberciliğin Güncel Sorunları',
+            slug: 'hak-temelli-habercilik',
+            excerpt: 'Dijital çağda bağımsız medyanın sürdürülebilirliği ve karşılaştığı engeller...',
+            date: '23 Ekim 2026',
+            thumb: '/assets/photos/haber-foto5.jpg',
+          },
+        ])}
 
         {/* KADIN */}
-        <div className="news-block-row">
-          <div className="category-col">
-            <h3 className="category-title" data-cat="kadin">KADIN</h3>
-          </div>
-          <div className="news-items-grid">
-            <article className="news-card">
-              <Link href="/haber/deprem-bolgesinde-toplumsal-yasam" className="news-card-img">
-                <img src="/assets/photos/haber-foto11.jpeg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/deprem-bolgesinde-toplumsal-yasam">
-                  Deprem Bölgesinde Toplumsal Yaşam ve Dayanışma
-                </Link>
-              </h4>
-              <p>Afet sonrası kurulan yaşam alanlarında dayanışma ağlarının dönüştürücü gücü...</p>
-              <span className="news-date">25 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/anadilde-egitim" className="news-card-img">
-                <img src="/assets/photos/haber-foto6.webp" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/anadilde-egitim">
-                  Anadilde Eğitim ve Çok Dilli Yaşam Üzerine
-                </Link>
-              </h4>
-              <p>Kültürel haklar bağlamında anadilin kamusal alandaki görünürlüğü...</p>
-              <span className="news-date">24 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/dijital-yayincilikta-alternatif-modeller" className="news-card-img">
-                <img src="/assets/photos/haber-foto9.jpg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/dijital-yayincilikta-alternatif-modeller">
-                  Dijital Yayıncılıkta Yeni Alternatif Modeller
-                </Link>
-              </h4>
-              <p>Geleneksel medyanın dışında kalan alanlarda üretilen özgün içerikler...</p>
-              <span className="news-date">23 Ekim 2026</span>
-            </article>
-          </div>
-        </div>
+        {renderCategoryRow('KADIN', 'kadin', [
+          {
+            title: 'Deprem Bölgesinde Toplumsal Yaşam ve Dayanışma',
+            slug: 'deprem-bolgesinde-toplumsal-yasam',
+            excerpt: 'Afet sonrası kurulan yaşam alanlarında dayanışma ağlarının dönüştürücü gücü...',
+            date: '25 Ekim 2026',
+            thumb: '/assets/photos/haber-foto11.jpeg',
+          },
+          {
+            title: 'Anadilde Eğitim ve Çok Dilli Yaşam Üzerine',
+            slug: 'anadilde-egitim',
+            excerpt: 'Kültürel haklar bağlamında anadilin kamusal alandaki görünürlüğü...',
+            date: '24 Ekim 2026',
+            thumb: '/assets/photos/haber-foto6.webp',
+          },
+          {
+            title: 'Dijital Yayıncılıkta Yeni Alternatif Modeller',
+            slug: 'dijital-yayincilikta-alternatif-modeller',
+            excerpt: 'Geleneksel medyanın dışında kalan alanlarda üretilen özgün içerikler...',
+            date: '23 Ekim 2026',
+            thumb: '/assets/photos/haber-foto9.jpg',
+          },
+        ])}
 
         {/* EKOLOJİ */}
-        <div className="news-block-row">
-          <div className="category-col">
-            <h3 className="category-title" data-cat="ekoloji">EKOLOJİ</h3>
-          </div>
-          <div className="news-items-grid">
-            <article className="news-card">
-              <Link href="/haber/ekolojik-yikim-ve-kuraklik-tehdidi-nehirler-can-cekisiyor" className="news-card-img">
-                <img src="/assets/photos/haber-foto3.jpg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/ekolojik-yikim-ve-kuraklik-tehdidi-nehirler-can-cekisiyor">
-                  Ekolojik yıkım ve kuraklık tehdidi: Nehirler can çekişiyor
-                </Link>
-              </h4>
-              <p>Uzmanlar, su havzalarındaki kuraklığın geri döndürülemez noktalara yaklaştığı uyarısında bulunuyor...</p>
-              <span className="news-date">25 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/kaz-daglarinda-su-kaynaklari" className="news-card-img">
-                <img src="/assets/photos/haber-foto10.webp" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/kaz-daglarinda-su-kaynaklari">
-                  Kaz Dağları'nda su kaynakları tehdit altında: Rapor açıklandı
-                </Link>
-              </h4>
-              <p>Bölgede sürdürülen madencilik faaliyetleri su havzalarını zehirliyor...</p>
-              <span className="news-date">24 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/kent-bostanlari-yayginlasiyor" className="news-card-img">
-                <img src="/assets/photos/haber-foto11.jpeg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/kent-bostanlari-yayginlasiyor">
-                  Kent bostanları yaygınlaşıyor: Yerel üretim alternatifleri
-                </Link>
-              </h4>
-              <p>Şehirlerde ekolojik üretim alanları yurttaşların buluşma noktasına dönüşüyor...</p>
-              <span className="news-date">23 Ekim 2026</span>
-            </article>
-          </div>
-        </div>
+        {renderCategoryRow('EKOLOJİ', 'ekoloji', [
+          {
+            title: 'Ekolojik yıkım ve kuraklık tehdidi: Nehirler can çekişiyor',
+            slug: 'ekolojik-yikim-ve-kuraklik-tehdidi-nehirler-can-cekisiyor',
+            excerpt: 'Uzmanlar, su havzalarındaki kuraklığın geri döndürülemez noktalara yaklaştığı uyarısında bulunuyor...',
+            date: '25 Ekim 2026',
+            thumb: '/assets/photos/haber-foto3.jpg',
+          },
+          {
+            title: "Kaz Dağları'nda su kaynakları tehdit altında: Rapor açıklandı",
+            slug: 'kaz-daglarinda-su-kaynaklari',
+            excerpt: 'Bölgede sürdürülen madencilik faaliyetleri su havzalarını zehirliyor...',
+            date: '24 Ekim 2026',
+            thumb: '/assets/photos/haber-foto10.webp',
+          },
+          {
+            title: 'Kent bostanları yaygınlaşıyor: Yerel üretim alternatifleri',
+            slug: 'kent-bostanlari-yayginlasiyor',
+            excerpt: 'Şehirlerde ekolojik üretim alanları yurttaşların buluşma noktasına dönüşüyor...',
+            date: '23 Ekim 2026',
+            thumb: '/assets/photos/haber-foto11.jpeg',
+          },
+        ])}
 
         {/* EKONOMİ */}
-        <div className="news-block-row">
-          <div className="category-col">
-            <h3 className="category-title" data-cat="ekonomi">
-              <Link href="/kategori/ekonomi" style={{ color: 'inherit', textDecoration: 'none' }}>EKONOMİ</Link>
-            </h3>
-          </div>
-          <div className="news-items-grid">
-            <article className="news-card">
-              <Link href="/haber/asgari-ucret-zirvesi" className="news-card-img">
-                <img src="/assets/photos/haber-foto2.jpeg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/asgari-ucret-zirvesi">
-                  Muhalefet ve sendikalardan ortak asgari ücret ve geçim zirvesi
-                </Link>
-              </h4>
-              <p>Yüksek enflasyon karşısında eriyen ücretler ve hayat pahalılığı için temel gelir güvencesi çağrısı...</p>
-              <span className="news-date">25 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/enflasyon-ve-gelir-dagilimi" className="news-card-img">
-                <img src="/assets/photos/haber-foto1.jpg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/enflasyon-ve-gelir-dagilimi">
-                  Gelir dağılımında tarihi uçurum: Raporlar ne söylüyor?
-                </Link>
-              </h4>
-              <p>DİSK-AR ve bağımsız ekonomistlerin analizlerine göre emeğin milli gelirden aldığı pay geriledi...</p>
-              <span className="news-date">24 Ekim 2026</span>
-            </article>
-            <article className="news-card">
-              <Link href="/haber/tarimda-maliyet-krizi" className="news-card-img">
-                <img src="/assets/photos/haber-foto7.jpg" alt="Haber" />
-              </Link>
-              <h4>
-                <Link href="/haber/tarimda-maliyet-krizi">
-                  Tarımda mazot ve gübre maliyeti üreticiyi çıkmaza sürüklüyor
-                </Link>
-              </h4>
-              <p>Çiftçiler ve üretici kooperatifleri, artan girdi maliyetlerine karşı acil kamusal destek ve taban fiyat garantisi talep ediyor...</p>
-              <span className="news-date">23 Ekim 2026</span>
-            </article>
-          </div>
-        </div>
+        {renderCategoryRow('EKONOMİ', 'ekonomi', [
+          {
+            title: 'Muhalefet ve sendikalardan ortak asgari ücret ve geçim zirvesi',
+            slug: 'asgari-ucret-zirvesi',
+            excerpt: 'Yüksek enflasyon karşısında eriyen ücretler ve hayat pahalılığı için temel gelir güvencesi çağrısı...',
+            date: '25 Ekim 2026',
+            thumb: '/assets/photos/haber-foto2.jpeg',
+          },
+          {
+            title: 'Gelir dağılımında tarihi uçurum: Raporlar ne söylüyor?',
+            slug: 'enflasyon-ve-gelir-dagilimi',
+            excerpt: 'DİSK-AR ve bağımsız ekonomistlerin analizlerine göre emeğin milli gelirden aldığı pay geriledi...',
+            date: '24 Ekim 2026',
+            thumb: '/assets/photos/haber-foto1.jpg',
+          },
+          {
+            title: 'Tarımda mazot ve gübre maliyeti üreticiyi çıkmaza sürüklüyor',
+            slug: 'tarimda-maliyet-krizi',
+            excerpt: 'Çiftçiler ve üretici kooperatifleri, artan girdi maliyetlerine karşı acil kamusal destek ve taban fiyat garantisi talep ediyor...',
+            date: '23 Ekim 2026',
+            thumb: '/assets/photos/haber-foto7.jpg',
+          },
+        ])}
 
         {/* ÖZEL HABER */}
         <div className="news-block-row">
@@ -450,137 +436,174 @@ export default function MainContent({
       {/* 4 Kolonlu Haber Bölümü */}
       <section className="multi-column-news-section">
         <div className="news-four-columns">
-          {/* Toplum-Yaşam */}
-          <div className="news-col">
-            <div className="col-header">
-              <h3>
-                <Link href="/kategori/toplum-yasam">Toplum-Yaşam <span>❯</span></Link>
-              </h3>
-            </div>
-            <article className="col-featured">
-              <Link href="/haber/yerel-yonetimlerde-kadin-kooperatifleri" className="col-featured-img-link">
-                <div className="col-featured-img">
-                  <img src="/assets/photos/haber-foto3.jpg" alt="Haber" />
+          {/* Güncel */}
+          {(() => {
+            const guncelList = articles.filter((a) => a.category?.slug === 'guncel');
+            const featured = guncelList[0];
+            const subs = guncelList.slice(1, 4);
+            return (
+              <div className="news-col">
+                <div className="col-header">
+                  <h3>
+                    <Link href="/kategori/guncel">Güncel <span>❯</span></Link>
+                  </h3>
                 </div>
-              </Link>
-              <h4>
-                <Link href="/haber/yerel-yonetimlerde-kadin-kooperatifleri">
-                  Yerel yönetimlerde kadın kooperatifleri ve dayanışma ağı
-                </Link>
-              </h4>
-              <p>Bölge genelinde kadın emeğini görünür kılan kooperatifleşme adımları ve yerel ekonomi modelleri yaygınlaşıyor.</p>
-            </article>
-            <div className="col-sub-list">
-              <article className="sub-news-item">
-                <h4><Link href="/haber/ekolojik-koy-projesi">Van'da ekolojik köy projesi: Doğayla uyumlu ortak yaşam</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/deprem-bolgesi-yasam-mucadelesi">Deprem bölgesinde konteyner kentlerdeki yaşam mücadelesi</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/egitimde-anadili-talebi">Eğitimde anadili talebi: 'Çocukların gelişimi için hayati'</Link></h4>
-              </article>
-            </div>
-          </div>
+                {featured && (
+                  <article className="col-featured">
+                    <Link href={`/haber/${featured.slug}`} className="col-featured-img-link">
+                      <div className="col-featured-img">
+                        <img src={getStrapiMedia(featured.coverImage, featured.id)} alt={featured.title} />
+                      </div>
+                    </Link>
+                    <h4>
+                      <Link href={`/haber/${featured.slug}`}>{featured.title}</Link>
+                    </h4>
+                    <p>{(featured.summary || '').slice(0, 110)}...</p>
+                  </article>
+                )}
+                <div className="col-sub-list">
+                  {subs.map((item) => (
+                    <article className="sub-news-item" key={item.id}>
+                      <h4><Link href={`/haber/${item.slug}`}>{item.title}</Link></h4>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
-          {/* Gençlik */}
-          <div className="news-col">
-            <div className="col-header">
-              <h3>
-                <Link href="/kategori/genclik">Gençlik <span>❯</span></Link>
-              </h3>
-            </div>
-            <article className="col-featured">
-              <Link href="/haber/universite-ogrencileri-barinma-cikmazi" className="col-featured-img-link">
-                <div className="col-featured-img">
-                  <img src="/assets/photos/haber-foto4.jpg" alt="Haber" />
+          {/* Kültür-Sanat */}
+          {(() => {
+            const kulturList = articles.filter((a) => a.category?.slug === 'kultur-sanat');
+            const featured = kulturList[0];
+            const subs = kulturList.slice(1, 4);
+            return (
+              <div className="news-col">
+                <div className="col-header">
+                  <h3>
+                    <Link href="/kategori/kultur-sanat">Kültür-Sanat <span>❯</span></Link>
+                  </h3>
                 </div>
-              </Link>
-              <h4>
-                <Link href="/haber/universite-ogrencileri-barinma-cikmazi">
-                  Üniversite öğrencilerinin barınma ve geçim çıkmazı büyüyor
-                </Link>
-              </h4>
-              <p>Yüksek yurt ve kira fiyatları gençlerin eğitim hakkını doğrudan tehdit ederken, dayanışma ağları çözüm arıyor.</p>
-            </article>
-            <div className="col-sub-list">
-              <article className="sub-news-item">
-                <h4><Link href="/haber/gencler-kultur-sanat-atolyeleri">Gençler kültür-sanat atölyelerinde bir araya geliyor</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/genc-goc-analizi">Yurt dışına göç eden genç beyinler: Neden gidiyorlar?</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/alternatif-genclik-festivalleri">Bağımsız gençlik festivalleri ve alternatif müzik sahneleri</Link></h4>
-              </article>
-            </div>
-          </div>
+                {featured && (
+                  <article className="col-featured">
+                    <Link href={`/haber/${featured.slug}`} className="col-featured-img-link">
+                      <div className="col-featured-img">
+                        <img src={getStrapiMedia(featured.coverImage, featured.id)} alt={featured.title} />
+                      </div>
+                    </Link>
+                    <h4>
+                      <Link href={`/haber/${featured.slug}`}>{featured.title}</Link>
+                    </h4>
+                    <p>{(featured.summary || '').slice(0, 110)}...</p>
+                  </article>
+                )}
+                <div className="col-sub-list">
+                  {subs.map((item) => (
+                    <article className="sub-news-item" key={item.id}>
+                      <h4><Link href={`/haber/${item.slug}`}>{item.title}</Link></h4>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Dünya */}
-          <div className="news-col">
-            <div className="col-header">
-              <h3>
-                <Link href="/kategori/dunya">Dünya <span>❯</span></Link>
-              </h3>
-            </div>
-            <article className="col-featured">
-              <Link href="/haber/ortadoguda-diplomatik-trafik" className="col-featured-img-link">
-                <div className="col-featured-img">
-                  <img src="/assets/photos/haber-foto5.jpg" alt="Haber" />
+          {(() => {
+            const dunyaList = articles.filter((a) => a.category?.slug === 'dunya');
+            const featured = dunyaList[0];
+            const subs = dunyaList.slice(1, 4);
+            return (
+              <div className="news-col">
+                <div className="col-header">
+                  <h3>
+                    <Link href="/kategori/dunya">Dünya <span>❯</span></Link>
+                  </h3>
                 </div>
-              </Link>
-              <h4>
-                <Link href="/haber/ortadoguda-diplomatik-trafik">
-                  Ortadoğu'da diplomatik trafik hızlandı: Yeni zirve bekleniyor
-                </Link>
-              </h4>
-              <p>Bölgesel aktörler arasında artan gerilimi düşürmek için uluslararası arabuluculuk girişimleri yoğunlaştı.</p>
-            </article>
-            <div className="col-sub-list">
-              <article className="sub-news-item">
-                <h4><Link href="/haber/avrupada-asiri-sag">Avrupa'da aşırı sağın yükselişi parlamentoları nasıl etkiliyor?</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/latin-amerika-sol">Latin Amerika'da sol hükümetlerden yeni entegrasyon hamlesi</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/iklim-krizi">İklim krizinde yeni dönemeç: Zirveden ortak karar çıktı mı?</Link></h4>
-              </article>
-            </div>
-          </div>
+                {featured && (
+                  <article className="col-featured">
+                    <Link href={`/haber/${featured.slug}`} className="col-featured-img-link">
+                      <div className="col-featured-img">
+                        <img src={getStrapiMedia(featured.coverImage, featured.id)} alt={featured.title} />
+                      </div>
+                    </Link>
+                    <h4>
+                      <Link href={`/haber/${featured.slug}`}>{featured.title}</Link>
+                    </h4>
+                    <p>{(featured.summary || '').slice(0, 110)}...</p>
+                  </article>
+                )}
+                <div className="col-sub-list">
+                  {subs.map((item) => (
+                    <article className="sub-news-item" key={item.id}>
+                      <h4><Link href={`/haber/${item.slug}`}>{item.title}</Link></h4>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Spor */}
-          <div className="news-col">
-            <div className="col-header">
-              <h3>
-                <Link href="/kategori/spor">Spor <span>❯</span></Link>
-              </h3>
-            </div>
-            <article className="col-featured">
-              <Link href="/haber/amedspor-zirve-yarisi" className="col-featured-img-link">
-                <div className="col-featured-img">
-                  <img src="/assets/photos/haber-foto7.jpg" alt="Haber" />
+          {(() => {
+            const sporList = articles.filter((a) => a.category?.slug === 'spor');
+            const featured = sporList[0];
+            const subs = sporList.slice(1, 4);
+            return (
+              <div className="news-col">
+                <div className="col-header">
+                  <h3>
+                    <Link href="/kategori/spor">Spor <span>❯</span></Link>
+                  </h3>
                 </div>
-              </Link>
-              <h4>
-                <Link href="/haber/amedspor-zirve-yarisi">
-                  Amedspor ligde zirve yarışını sürdürüyor: Hedef şampiyonluk
-                </Link>
-              </h4>
-              <p>Yeşil-kırmızılı ekip ligin kritik haftasında taraftarının desteğiyle sahadan 3 puanla ayrılarak iddiasını perçinledi.</p>
-            </article>
-            <div className="col-sub-list">
-              <article className="sub-news-item">
-                <h4><Link href="/haber/kadin-futbol-ligi-performanslar">Kadın futbol liginde haftanın maçları ve öne çıkanlar</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/bolgesel-amator-ligler-yetenekler">Bölgesel amatör liglerde genç yetenekler dikkat çekiyor</Link></h4>
-              </article>
-              <article className="sub-news-item">
-                <h4><Link href="/haber/tribunlerde-baris-kardeslik-cagrisi">Tribünlerde barış ve kardeşlik sesleri: Ortak çağrı</Link></h4>
-              </article>
-            </div>
-          </div>
+                {featured ? (
+                  <article className="col-featured">
+                    <Link href={`/haber/${featured.slug}`} className="col-featured-img-link">
+                      <div className="col-featured-img">
+                        <img src={getStrapiMedia(featured.coverImage, featured.id)} alt={featured.title} />
+                      </div>
+                    </Link>
+                    <h4>
+                      <Link href={`/haber/${featured.slug}`}>{featured.title}</Link>
+                    </h4>
+                    <p>{(featured.summary || '').slice(0, 110)}...</p>
+                  </article>
+                ) : (
+                  <article className="col-featured">
+                    <Link href="/haber/amedspor-zirve-yarisi" className="col-featured-img-link">
+                      <div className="col-featured-img">
+                        <img src="/assets/photos/haber-foto7.jpg" alt="Haber" />
+                      </div>
+                    </Link>
+                    <h4>
+                      <Link href="/haber/amedspor-zirve-yarisi">
+                        Amedspor ligde zirve yarışını sürdürüyor: Hedef şampiyonluk
+                      </Link>
+                    </h4>
+                    <p>Yeşil-kırmızılı ekip ligin kritik haftasında taraftarının desteğiyle sahadan 3 puanla ayrıldı.</p>
+                  </article>
+                )}
+                <div className="col-sub-list">
+                  {subs.length > 0 ? (
+                    subs.map((item) => (
+                      <article className="sub-news-item" key={item.id}>
+                        <h4><Link href={`/haber/${item.slug}`}>{item.title}</Link></h4>
+                      </article>
+                    ))
+                  ) : (
+                    <>
+                      <article className="sub-news-item">
+                        <h4><Link href="/kategori/spor">Kadın futbol liginde haftanın maçları ve öne çıkanlar</Link></h4>
+                      </article>
+                      <article className="sub-news-item">
+                        <h4><Link href="/kategori/spor">Bölgesel amatör liglerde genç yetenekler dikkat çekiyor</Link></h4>
+                      </article>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
 

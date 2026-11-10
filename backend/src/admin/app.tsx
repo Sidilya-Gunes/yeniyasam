@@ -11,6 +11,6 @@ export default {
     },
   },
   bootstrap(app: StrapiApp) {
-    // Türkçe dil desteği ve yapılandırma
+    // Yapılandırma
   },
 };

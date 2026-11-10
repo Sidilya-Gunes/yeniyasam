@@ -6,35 +6,35 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getAuthors, getStrapiMedia } from '@/lib/strapi';
+import { getAllAuthors, getStrapiMedia } from '@/lib/strapi';
 
 export const metadata: Metadata = {
   title: 'Yazarlar — Yeni Yaşam Gazetesi',
   description: 'Yeni Yaşam Gazetesi yazarlar listesi ve güncel köşe yazıları.',
 };
 
-export default async function YazarlarPage() {
-  const strapiAuthors = await getAuthors();
+interface YazarlarPageProps {
+  searchParams: Promise<{ page?: string }>;
+}
 
-  // Orijinal demo sayfasındaki zengin yazar listesi
-  const defaultAuthors = [
-    { name: 'Nurcan Baysal', avatar: '/assets/photos/yazar1.jpeg', slug: 'nurcan-baysal' },
-    { name: 'Hasan Özgür Top', avatar: '/assets/photos/yazar2.webp', slug: 'hasan-ozgur-top' },
-    { name: 'Fırat Yücel', avatar: '/assets/photos/yazar3.webp', slug: 'firat-yucel' },
-    { name: 'Ahmet Kaya', avatar: '/assets/photos/yazar4.webp', slug: 'ahmet-kaya' },
-    { name: 'Zehra Doğan', avatar: '/assets/photos/yazar5.jpeg', slug: 'zehra-dogan' },
-    { name: 'Nezahat Doğan', avatar: '/assets/photos/yazar1.jpeg', slug: 'nezahat-dogan' },
-    { name: 'Ayhan Kavak', avatar: '/assets/photos/yazar2.webp', slug: 'ayhan-kavak' },
-    { name: 'Nimet Sevim', avatar: '/assets/photos/yazar3.webp', slug: 'nimet-sevim' },
-    { name: 'Ergin Atabey', avatar: '/assets/photos/yazar4.webp', slug: 'ergin-atabey' },
-    { name: 'Sema Bingöl', avatar: '/assets/photos/yazar5.jpeg', slug: 'sema-bingol' },
-    { name: 'Evin Çiftçi', avatar: '/assets/photos/yazar1.jpeg', slug: 'evin-ciftci' },
-    { name: 'Dilzar Dîlok', avatar: '/assets/photos/yazar2.webp', slug: 'dilzar-dilok' },
-  ];
+export default async function YazarlarPage({ searchParams }: YazarlarPageProps) {
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || '1', 10));
+  const pageSize = 16;
 
-  const authors = strapiAuthors && strapiAuthors.length > defaultAuthors.length
-    ? strapiAuthors
-    : defaultAuthors;
+  const allAuthors = await getAllAuthors();
+  const totalAuthors = allAuthors.length;
+  const totalPages = Math.max(1, Math.ceil(totalAuthors / pageSize));
+  const validPage = Math.min(currentPage, totalPages);
+
+  const startIndex = (validPage - 1) * pageSize;
+  const currentAuthors = allAuthors.slice(startIndex, startIndex + pageSize);
+
+  // Sayfa numaraları dizisi
+  const pageNumbers: number[] = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
 
   return (
     <main className="site-main container">
@@ -48,8 +48,8 @@ export default async function YazarlarPage() {
       </header>
 
       <div className="authors-grid">
-        {authors.map((author, idx) => (
-          <Link href={`/yazar/${author.slug}`} className="author-card" key={idx}>
+        {currentAuthors.map((author, idx) => (
+          <Link href={`/yazar/${author.slug}`} className="author-card" key={author.id || idx}>
             <div className="author-card-avatar">
               <img
                 src={typeof author.avatar === 'string' ? author.avatar : getStrapiMedia(author.avatar)}
@@ -64,12 +64,48 @@ export default async function YazarlarPage() {
         ))}
       </div>
 
-      <nav className="author-pagination" aria-label="Sayfalama">
-        <span className="page-arrow disabled">‹</span>
-        <span className="page-num active">1</span>
-        <a href="#" className="page-num">2</a>
-        <a href="#" className="page-arrow" aria-label="Sonraki sayfa">›</a>
-      </nav>
+      {totalPages > 1 && (
+        <nav className="author-pagination" aria-label="Sayfalama">
+          {validPage > 1 ? (
+            <Link
+              href={`/yazarlar?page=${validPage - 1}`}
+              className="page-arrow"
+              aria-label="Önceki sayfa"
+            >
+              ‹
+            </Link>
+          ) : (
+            <span className="page-arrow disabled">‹</span>
+          )}
+
+          {pageNumbers.map((p) => {
+            if (p === validPage) {
+              return (
+                <span key={p} className="page-num active">
+                  {p}
+                </span>
+              );
+            }
+            return (
+              <Link key={p} href={`/yazarlar?page=${p}`} className="page-num">
+                {p}
+              </Link>
+            );
+          })}
+
+          {validPage < totalPages ? (
+            <Link
+              href={`/yazarlar?page=${validPage + 1}`}
+              className="page-arrow"
+              aria-label="Sonraki sayfa"
+            >
+              ›
+            </Link>
+          ) : (
+            <span className="page-arrow disabled">›</span>
+          )}
+        </nav>
+      )}
     </main>
   );
 }

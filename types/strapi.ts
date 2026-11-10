@@ -1,5 +1,22 @@
 
 
+export interface StrapiUser {
+  id: number | string;
+  documentId?: string;
+  username: string;
+  email: string;
+  provider?: string;
+  confirmed?: boolean;
+  blocked?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface StrapiAuthResponse {
+  jwt: string;
+  user: StrapiUser;
+}
+
 export interface StrapiMediaFormat {
   url: string;
   width: number;
@@ -42,6 +59,8 @@ export interface Author {
   email?: string;
   twitter?: string;
   articleCount?: number;
+  latestArticleTitle?: string;
+  latestArticleSlug?: string;
 }
 
 export interface Article {
@@ -74,6 +93,9 @@ export interface VideoMedia {
   duration: string;
   thumbnail: string | StrapiMedia;
   videoUrl?: string;
+  youtubeId?: string;
+  summary?: string;
+  description?: string;
   publishedAt?: string;
 }
 
@@ -87,6 +109,39 @@ export interface DailyFeature {
   captionTitle?: string;
   captionDescription?: string;
   captionMeta?: string;
+}
+
+export interface GununManseti {
+  id: number | string;
+  documentId?: string;
+  issueNumber: string;
+  issueDate: string;
+  coverImage: string;
+  pdfFile?: string | null;
+  description?: string;
+}
+
+export interface JinDergi {
+  id: number | string;
+  documentId?: string;
+  issueNumber: string;
+  title: string;
+  issueDate: string;
+  coverImage: string;
+  pdfFile?: string | null;
+  description?: string;
+  sectionTitle?: string;
+  highlightArticles?: string;
+}
+
+export interface Karikatur {
+  id: number | string;
+  documentId?: string;
+  title: string;
+  artist: string;
+  publishDate: string;
+  image: string;
+  description?: string;
 }
 
 export interface NewsletterSubscriber {

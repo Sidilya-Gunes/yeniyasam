@@ -443,6 +443,67 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAboneAbone extends Struct.CollectionTypeSchema {
+  collectionName: 'aboneler';
+  info: {
+    description: 'Yeni Ya\u015Fam dijital e-gazete ve dayan\u0131\u015Fma aboneleri';
+    displayName: '\uD83D\uDCCB Aboneler & \u00DCyelikler';
+    pluralName: 'aboneler';
+    singularName: 'abone';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    currency: Schema.Attribute.Enumeration<['TRY', 'EUR', 'USD']> &
+      Schema.Attribute.DefaultTo<'TRY'>;
+    email: Schema.Attribute.Email &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    endDate: Schema.Attribute.Date;
+    fullName: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::abone.abone'> &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    orderId: Schema.Attribute.String;
+    paymentMethod: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'iyzico'>;
+    phone: Schema.Attribute.String;
+    plan: Schema.Attribute.Enumeration<
+      [
+        'Yurt \u0130\u00E7i 6 Ayl\u0131k E-Abonelik',
+        'Yurt \u0130\u00E7i Y\u0131ll\u0131k E-Abonelik',
+        'Yurt \u0130\u00E7i Y\u0131ll\u0131k Destek (1)',
+        'Yurt \u0130\u00E7i Y\u0131ll\u0131k Destek (2)',
+        'Yurt \u0130\u00E7i Y\u0131ll\u0131k Destek (3)',
+        'Yurt D\u0131\u015F\u0131 6 Ayl\u0131k E-Abonelik',
+        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k E-Abonelik',
+        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k Destek (1)',
+        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k Destek (2)',
+        'Yurt D\u0131\u015F\u0131 Y\u0131ll\u0131k Destek (3)',
+        '\u00D6zel / Kurumsal / Bas\u0131l\u0131',
+      ]
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Yurt \u0130\u00E7i Y\u0131ll\u0131k E-Abonelik'>;
+    price: Schema.Attribute.Decimal;
+    publishedAt: Schema.Attribute.DateTime;
+    startDate: Schema.Attribute.Date;
+    status: Schema.Attribute.Enumeration<
+      ['Aktif', 'S\u00FCresi Doldu', 'Beklemede', '\u0130ptal Edildi']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Aktif'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDunyaHaberiDunyaHaberi extends Struct.CollectionTypeSchema {
   collectionName: 'dunya_haberleri';
   info: {
@@ -479,38 +540,7 @@ export interface ApiDunyaHaberiDunyaHaberi extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
-  };
-}
-
-export interface ApiDuyuruDuyuru extends Struct.CollectionTypeSchema {
-  collectionName: 'duyurular';
-  info: {
-    description: 'Son dakika bant duyurular\u0131 ve \u00F6nemli bildirimler';
-    displayName: '\uD83D\uDCE2 Duyurular & Son Dakika';
-    pluralName: 'duyurular';
-    singularName: 'duyuru';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    isUrgent: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    link: Schema.Attribute.String;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::duyuru.duyuru'
-    > &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    title: Schema.Attribute.String & Schema.Attribute.Required;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -551,6 +581,7 @@ export interface ApiEkolojiHaberiEkolojiHaberi
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -591,6 +622,7 @@ export interface ApiEkonomiHaberiEkonomiHaberi
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -631,6 +663,7 @@ export interface ApiGuncelHaberiGuncelHaberi
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -684,6 +717,7 @@ export interface ApiJinDergiJinDergi extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
     highlightArticles: Schema.Attribute.Text;
     issueDate: Schema.Attribute.Date & Schema.Attribute.Required;
     issueNumber: Schema.Attribute.String & Schema.Attribute.Required;
@@ -695,6 +729,7 @@ export interface ApiJinDergiJinDergi extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     pdfFile: Schema.Attribute.Media<'files'>;
     publishedAt: Schema.Attribute.DateTime;
+    sectionTitle: Schema.Attribute.String;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -738,6 +773,7 @@ export interface ApiKadinHaberiKadinHaberi extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -811,6 +847,7 @@ export interface ApiKulturSanatHaberiKulturSanatHaberi
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -885,6 +922,7 @@ export interface ApiPolitikaHaberiPolitikaHaberi
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -908,7 +946,17 @@ export interface ApiSoylesiSoylesi extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    kicker: Schema.Attribute.String;
+    kicker: Schema.Attribute.Enumeration<
+      [
+        'S\u00F6yle\u015Fi',
+        'Dosya',
+        'Forum',
+        '\u00D6zel Haber',
+        'R\u00F6portaj',
+        'Analiz',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'S\u00F6yle\u015Fi'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -924,6 +972,7 @@ export interface ApiSoylesiSoylesi extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -963,6 +1012,7 @@ export interface ApiSporHaberiSporHaberi extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
+    yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
   };
 }
 
@@ -978,10 +1028,32 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    category: Schema.Attribute.String;
+    category: Schema.Attribute.Enumeration<
+      [
+        'Genel',
+        'Politika',
+        'G\u00FCncel',
+        'D\u00FCnya',
+        'Kad\u0131n',
+        'Ekoloji',
+        'Ekonomi',
+        'K\u00FClt\u00FCr-Sanat',
+        'S\u00F6yle\u015Fi',
+        'Dosya',
+        'Forum',
+        '\u00D6zel Haber',
+        'Toplum-Ya\u015Fam',
+        'Gen\u00E7lik',
+        'Spor',
+        'Man\u015Fet',
+        'Analiz',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'Genel'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
     duration: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::video.video'> &
@@ -1001,7 +1073,7 @@ export interface ApiYazarYazar extends Struct.CollectionTypeSchema {
   collectionName: 'yazarlar';
   info: {
     description: 'Gazetenin k\u00F6\u015Fe yazarlar\u0131 ve profilleri';
-    displayName: '\u270D\uFE0F K\u00F6\u015Fe Yazarlar\u0131';
+    displayName: 'Yazarlar';
     pluralName: 'yazarlar';
     singularName: 'yazar';
   };
@@ -1540,8 +1612,8 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::abone.abone': ApiAboneAbone;
       'api::dunya-haberi.dunya-haberi': ApiDunyaHaberiDunyaHaberi;
-      'api::duyuru.duyuru': ApiDuyuruDuyuru;
       'api::ekoloji-haberi.ekoloji-haberi': ApiEkolojiHaberiEkolojiHaberi;
       'api::ekonomi-haberi.ekonomi-haberi': ApiEkonomiHaberiEkonomiHaberi;
       'api::guncel-haberi.guncel-haberi': ApiGuncelHaberiGuncelHaberi;

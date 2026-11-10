@@ -11,9 +11,11 @@ interface MetaShareProps {
 export default function MetaShare({ title = '' }: MetaShareProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMounted(true);
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsOpen(false);
@@ -43,7 +45,7 @@ export default function MetaShare({ title = '' }: MetaShareProps) {
   };
 
   const getShareUrl = (platform: string) => {
-    if (typeof window === 'undefined') return '#';
+    if (!mounted || typeof window === 'undefined') return '#';
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(title);
     if (platform === 'x') return `https://twitter.com/intent/tweet?url=${url}&text=${text}`;

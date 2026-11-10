@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ArticleBottomShareProps {
   title?: string;
@@ -8,6 +8,11 @@ interface ArticleBottomShareProps {
 
 export default function ArticleBottomShare({ title = '' }: ArticleBottomShareProps) {
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,7 +24,7 @@ export default function ArticleBottomShare({ title = '' }: ArticleBottomSharePro
   };
 
   const getShareUrl = (platform: string) => {
-    if (typeof window === 'undefined') return '#';
+    if (!mounted || typeof window === 'undefined') return '#';
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(title);
     if (platform === 'facebook') return `https://www.facebook.com/sharer/sharer.php?u=${url}`;

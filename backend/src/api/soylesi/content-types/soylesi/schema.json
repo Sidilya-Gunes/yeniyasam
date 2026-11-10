@@ -30,7 +30,16 @@
       "required": true
     },
     "kicker": {
-      "type": "string"
+      "type": "enumeration",
+      "enum": [
+        "Söyleşi",
+        "Dosya",
+        "Forum",
+        "Özel Haber",
+        "Röportaj",
+        "Analiz"
+      ],
+      "default": "Söyleşi"
     },
     "coverImage": {
       "type": "media",
@@ -56,6 +65,11 @@
     },
     "videoUrl": {
       "type": "string"
+    },
+    "yazar": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::yazar.yazar"
     }
   }
 }

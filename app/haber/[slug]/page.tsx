@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getArticles, getStrapiMedia } from '@/lib/strapi';
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 import MetaShare from '@/components/MetaShare';
 import ArticleBottomShare from '@/components/ArticleBottomShare';
 import ArticleSidebar from '@/components/ArticleSidebar';
@@ -63,8 +64,6 @@ export default async function HaberDetayPage({ params }: PageProps) {
   const categoryName = article.category?.name || 'Güncel';
   const categorySlug = article.category?.slug || 'guncel';
 
-  const defaultTags = ['Diplomasi', 'Bölgesel Gelişmeler', 'Ateşkes', 'İnsani Yardım'];
-
   return (
     <main className="site-main container">
       <div className="article-layout">
@@ -115,7 +114,7 @@ export default async function HaberDetayPage({ params }: PageProps) {
           {/* Makale Gövdesi */}
           <div className="article-body">
             {article.content ? (
-              <div dangerouslySetInnerHTML={{ __html: marked.parse(article.content) as string }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(article.content) as string) }} />
             ) : (
               <>
                 <p>
@@ -143,16 +142,6 @@ export default async function HaberDetayPage({ params }: PageProps) {
 
           {/* Alt Paylaşım Butonları */}
           <ArticleBottomShare title={article.title} />
-
-          {/* Etiketler */}
-          <div className="article-tags">
-            <span className="tags-label">Etiketler</span>
-            {defaultTags.map((tag, idx) => (
-              <Link key={idx} href={`/arama?q=${encodeURIComponent(tag)}`} className="tag">
-                {tag}
-              </Link>
-            ))}
-          </div>
 
           {/* İlgili Haberler */}
           <section className="related-news">

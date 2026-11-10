@@ -2,16 +2,30 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ThemeToggle from '@/components/ThemeToggle';
 import SearchOverlay from '@/components/SearchOverlay';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -142,9 +156,110 @@ export default function Header() {
                 </a>
               </div>
 
-              <Link href="/giris" className="btn-login">
-                Giriş Yap
-              </Link>
+              {user ? (
+                <div ref={userMenuRef} style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="btn-login"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      background: 'transparent',
+                    }}
+                    aria-label="Kullanıcı Menüsü"
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--primary)',
+                        color: '#fff',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {user.username?.charAt(0) || user.email?.charAt(0) || 'U'}
+                    </span>
+                    <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user.username || user.email.split('@')[0]}
+                    </span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+
+                  {isUserMenuOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: 'calc(100% + 6px)',
+                        minWidth: '190px',
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '6px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        zIndex: 100,
+                        padding: '6px 0',
+                      }}
+                    >
+                      <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--border-light)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--heading)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {user.username}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {user.email}
+                        </div>
+                      </div>
+                      <Link
+                        href="/abone"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        style={{
+                          display: 'block',
+                          padding: '8px 12px',
+                          fontSize: '0.82rem',
+                          color: 'var(--heading)',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        Abonelik Paketleri
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          logout();
+                        }}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '8px 12px',
+                          fontSize: '0.82rem',
+                          color: '#dc2626',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          borderTop: '1px solid var(--border-light)',
+                        }}
+                      >
+                        Çıkış Yap
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link href="/giris" className="btn-login">
+                  Giriş Yap
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -173,12 +288,62 @@ export default function Header() {
 
           <div className="container main-nav-container">
             <div className="mobile-auth-buttons">
-              <Link href="/abone" className="btn-subscribe" onClick={closeMenu}>
-                Abone Ol
-              </Link>
-              <Link href="/giris" className="btn-login" onClick={closeMenu}>
-                Giriş Yap
-              </Link>
+              {user ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--primary)',
+                        color: '#fff',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {user.username?.charAt(0) || user.email?.charAt(0) || 'U'}
+                    </span>
+                    <span style={{ fontWeight: 600, color: 'var(--heading)' }}>
+                      {user.username || user.email}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                    <Link
+                      href="/abone"
+                      className="btn-subscribe"
+                      onClick={closeMenu}
+                      style={{ flex: 1, textAlign: 'center', padding: '6px 12px' }}
+                    >
+                      Abonelik
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        closeMenu();
+                      }}
+                      className="btn-login"
+                      style={{ flex: 1, cursor: 'pointer', background: 'transparent', padding: '6px 12px' }}
+                    >
+                      Çıkış Yap
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Link href="/abone" className="btn-subscribe" onClick={closeMenu}>
+                    Abone Ol
+                  </Link>
+                  <Link href="/giris" className="btn-login" onClick={closeMenu}>
+                    Giriş Yap
+                  </Link>
+                </>
+              )}
             </div>
 
             <form
@@ -217,6 +382,18 @@ export default function Header() {
             <ul className="mobile-nav-list">
               <li>
                 <Link href="/" onClick={closeMenu}>Tüm Haberler</Link>
+              </li>
+              <li>
+                <Link href="/yazarlar" onClick={closeMenu}>Yazarlar</Link>
+              </li>
+              <li>
+                <Link href="/manset" onClick={closeMenu}>Günün Manşeti</Link>
+              </li>
+              <li>
+                <Link href="/jin-dergi" onClick={closeMenu}>Jin Dergi</Link>
+              </li>
+              <li>
+                <Link href="/karikatur" onClick={closeMenu}>Karikatür</Link>
               </li>
               <li>
                 <Link href="/kategori/guncel" onClick={closeMenu}>Güncel</Link>
@@ -264,13 +441,13 @@ export default function Header() {
                 <Link href="/kategori/gunun-fotografi" onClick={closeMenu}>Günün Fotoğrafı</Link>
               </li>
               <li>
-                <Link href="/karikatur" onClick={closeMenu}>Karikatür</Link>
-              </li>
-              <li>
                 <Link href="/kategori/panorama" onClick={closeMenu}>Panorama</Link>
               </li>
               <li>
                 <Link href="/kategori/spor" onClick={closeMenu}>Spor</Link>
+              </li>
+              <li>
+                <Link href="/video" onClick={closeMenu}>Video</Link>
               </li>
             </ul>
 
