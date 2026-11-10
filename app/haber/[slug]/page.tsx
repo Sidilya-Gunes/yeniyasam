@@ -175,7 +175,7 @@ export default async function HaberDetayPage({ params }: PageProps) {
         </article>
 
         {/* Kenar Çubuğu (Sidebar) */}
-        <ArticleSidebar className="article-sidebar" />
+        <ArticleSidebar className="article-sidebar" currentSlug={article.slug} />
       </div>
     </main>
   );
