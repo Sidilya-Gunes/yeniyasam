@@ -171,7 +171,7 @@ const CATEGORY_ENDPOINTS: Record<string, { endpoint: string; name: string; slug:
 };
 
 function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; color: string }): Article {
-  let cover = getStrapiMedia(item.coverImage, item.id);
+  let cover = getStrapiMedia(item.coverImage || item.thumbnail, item.id);
 
   const authorName = item.yazar?.name || item.authorName || 'Yeni Yaşam';
   const authorSlug = item.yazar?.slug || (item.authorName ? item.authorName.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'yeni-yasam');
@@ -181,8 +181,8 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
     documentId: item.documentId,
     title: item.title,
     slug: item.slug || `haber-${item.id}`,
-    summary: item.summary || '',
-    content: item.content || '',
+    summary: item.summary || item.description || '',
+    content: item.content || item.description || '',
     kicker: item.kicker || '',
     coverImage: cover,
     author: {
@@ -201,7 +201,7 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
     isHeadline: Boolean(item.isHeadline),
     isFeatured: Boolean(item.isFeatured),
     videoUrl: item.videoUrl || '',
-    readTime: item.readTime || '3 dk',
+    readTime: item.readTime || item.duration || '3 dk',
     publishedAt: item.publishedAt || item.createdAt || new Date().toISOString(),
   };
 }

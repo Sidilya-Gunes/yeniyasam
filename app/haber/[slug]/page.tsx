@@ -6,7 +6,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getArticleBySlug, getArticles, getStrapiMedia } from '@/lib/strapi';
 import type { Article } from '@/types/strapi';
 import { marked } from 'marked';
@@ -16,6 +16,13 @@ import ArticleSidebar from '@/components/ArticleSidebar';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+function extractYouTubeId(url?: string): string {
+  if (!url) return '';
+  if (url.length === 11 && !url.includes('/') && !url.includes('.')) return url;
+  const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+  return match && match[2].length === 11 ? match[2] : url;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -43,6 +50,11 @@ export default async function HaberDetayPage({ params }: PageProps) {
 
   if (!article) {
     notFound();
+  }
+
+  // Eğer içerik bir video haberi ise video oynatıcılı özel sayfaya yönlendir
+  if (article.category?.slug === 'video' || slug === 'video') {
+    redirect(`/video/${article.slug || slug}`);
   }
 
   const categoryName = article.category?.name || 'Güncel';
@@ -108,47 +120,51 @@ export default async function HaberDetayPage({ params }: PageProps) {
             <span className="meta-item">5 dk okuma</span>
           </div>
 
-          {/* Ana Görsel Hero */}
-          <figure className="article-hero">
-            <img src={getStrapiMedia(article.coverImage)} alt={article.title} />
-            <figcaption>
-              <span className="fig-caption">{article.title}</span>
-              <span className="fig-credit">Fotoğraf: Yeni Yaşam Arşivi</span>
-            </figcaption>
-          </figure>
+          {/* Video veya Ana Görsel Hero */}
+          {article.videoUrl ? (
+            <div
+              className="article-video-hero"
+              style={{
+                position: 'relative',
+                width: '100%',
+                paddingBottom: '56.25%',
+                height: 0,
+                overflow: 'hidden',
+                borderRadius: '6px',
+                marginBottom: 'var(--sp-3)',
+                background: '#000',
+              }}
+            >
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(article.videoUrl)}`}
+                title={article.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+              />
+            </div>
+          ) : (
+            <figure className="article-hero">
+              <img src={getStrapiMedia(article.coverImage)} alt={article.title} />
+              <figcaption>
+                <span className="fig-caption">{article.title}</span>
+                <span className="fig-credit">Fotoğraf: Yeni Yaşam Arşivi</span>
+              </figcaption>
+            </figure>
+          )}
 
           {/* Özet Lead Grubu */}
-          <div className="article-lead-group">
-            <p className="article-lead">{article.summary}</p>
-          </div>
+          {article.summary && (
+            <div className="article-lead-group">
+              <p className="article-lead">{article.summary}</p>
+            </div>
+          )}
 
           {/* Makale Gövdesi */}
           <div className="article-body">
             {article.content ? (
               <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(article.content) as string) }} />
-            ) : (
-              <>
-                <p>
-                  Bölgesel gelişmelerin hız kazandığı bu dönemde, diplomatik temaslar yeni bir boyuta evriliyor. Masadaki temel gündem maddeleri arasında sürdürülebilir barış, sınır güvenliği ve yerel toplulukların hakları yer alıyor.
-                </p>
-                <p>
-                  2013-2015 yılları arasındaki süreç ile şimdiki süreci karşılaştıran değerlendirmelerde, temel farkın iktidarın yaklaşımlarında ortaya çıktığı belirtiliyor. Önceki süreçte barışçıl çözüm iradesi öne çıkarken, bugün daha dar bir çerçevede güvenlik odaklı yaklaşımlar sergileniyor.
-                </p>
-                <h2>'Barış ve özgürlük mücadelesi kararlılıkla sürdürülmeli'</h2>
-                <p>
-                  Demokrasi güçlerinin ortak mücadelesine işaret eden uzmanlar, "Kilitlenmiş bir siyasal zeminde toplumsal muhalefetin birlikteliği yeni olanaklar yaratacaktır. Bu olanakları değerlendirmek ise tüm barış ve emek güçlerine düşüyor" ifadelerini kullandı.
-                </p>
-                <blockquote>
-                  <h6>
-                    “Tarihte ilk kez halkların kendi iradelerini doğrudan yansıttığı modeller kalıcı barışın teminatı olmuştur. Yerel yönetimlerin güçlendirilmesi ve demokratik katılım kanallarının açılması elzemdir.”
-                  </h6>
-                </blockquote>
-                <h2>Siyasi tutsakların özgürlüğü barışın temel koşullarından</h2>
-                <p>
-                  Toplumun tüm kesimlerinin barış sürecine etkin katılımının sağlanması gerektiği vurgulanırken, adil yargılanma hakkı ve evrensel hukuk standartlarına uyulmasının önemi bir kez daha yinelendi.
-                </p>
-              </>
-            )}
+            ) : null}
           </div>
 
           {/* Alt Paylaşım Butonları */}
@@ -159,7 +175,11 @@ export default async function HaberDetayPage({ params }: PageProps) {
             <h2 className="related-title">İlgili Haberler</h2>
             <div className="related-grid">
               {relatedArticles.map((rel) => (
-                <Link key={rel.id} href={`/haber/${rel.slug}`} className="related-card">
+                <Link
+                  key={rel.id}
+                  href={rel.category?.slug === 'video' ? `/video/${rel.slug}` : `/haber/${rel.slug}`}
+                  className="related-card"
+                >
                   <div className="related-img">
                     <img src={getStrapiMedia(rel.coverImage)} alt={rel.title} />
                   </div>
