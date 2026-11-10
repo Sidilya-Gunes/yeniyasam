@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getArticles, getStrapiMedia } from '@/lib/strapi';
+import type { Article } from '@/types/strapi';
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import ArticleBottomShare from '@/components/ArticleBottomShare';
@@ -44,10 +45,26 @@ export default async function HaberDetayPage({ params }: PageProps) {
     notFound();
   }
 
-  const allArticles = await getArticles({ limit: 8 });
-  const relatedArticles = allArticles
-    .filter((a) => a.slug !== article.slug)
-    .slice(0, 4);
+  const categoryName = article.category?.name || 'Güncel';
+  const categorySlug = article.category?.slug || 'guncel';
+
+  // 1. İlgili Haberler: Öncelikle aynı kategorideki haberleri çek (mevcut haber hariç)
+  let relatedArticles: Article[] = [];
+  if (categorySlug) {
+    const categoryArticles = await getArticles({ categorySlug, limit: 6 });
+    relatedArticles = categoryArticles.filter((a) => a.slug !== article.slug);
+  }
+
+  // 2. Eğer aynı kategoride 4'ten az haber varsa genel en yeni haberlerle 4'e tamamla
+  if (relatedArticles.length < 4) {
+    const generalArticles = await getArticles({ limit: 10 });
+    const additional = generalArticles.filter(
+      (a) => a.slug !== article.slug && !relatedArticles.some((r) => r.slug === a.slug)
+    );
+    relatedArticles = [...relatedArticles, ...additional];
+  }
+
+  relatedArticles = relatedArticles.slice(0, 4);
 
   const dateObj = new Date(article.publishedAt);
   const formattedDate = dateObj.toLocaleDateString('tr-TR', {
@@ -59,9 +76,6 @@ export default async function HaberDetayPage({ params }: PageProps) {
     hour: '2-digit',
     minute: '2-digit',
   });
-
-  const categoryName = article.category?.name || 'Güncel';
-  const categorySlug = article.category?.slug || 'guncel';
 
   return (
     <main className="site-main container">
@@ -149,7 +163,7 @@ export default async function HaberDetayPage({ params }: PageProps) {
                   <div className="related-img">
                     <img src={getStrapiMedia(rel.coverImage)} alt={rel.title} />
                   </div>
-                  <span className="related-cat">{rel.category?.name || 'Dünya'}</span>
+                  <span className="related-cat">{rel.category?.name || categoryName}</span>
                   <h3 className="related-heading">{rel.title}</h3>
                   <span className="related-date">
                     {new Date(rel.publishedAt).toLocaleDateString('tr-TR')}
