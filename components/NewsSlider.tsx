@@ -134,7 +134,7 @@ export default function NewsSlider({ articles }: NewsSliderProps) {
                     className="slide-cat"
                     data-cat={item.category?.slug || 'guncel'}
                   >
-                    {item.category?.name || 'Güncel'}
+                    {item.author?.name || item.kicker || item.category?.name || 'Güncel'}
                   </span>
                   <h2 className="slide-title">
                     <Link href={`/haber/${item.slug}`} className="slide-title-link">
