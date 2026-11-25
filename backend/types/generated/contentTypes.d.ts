@@ -443,6 +443,42 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiBultenAbonesiBultenAbonesi
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'bulten_aboneleri';
+  info: {
+    description: "Footer'dan e-b\u00FCltene kay\u0131t olan okuyucular";
+    displayName: '\uD83D\uDCEC B\u00FClten Aboneleri';
+    pluralName: 'bulten-aboneleri';
+    singularName: 'bulten-abonesi';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::bulten-abonesi.bulten-abonesi'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    source: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Web Sitesi (Footer)'>;
+    subscribedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDunyaHaberiDunyaHaberi extends Struct.CollectionTypeSchema {
   collectionName: 'dunya_haberleri';
   info: {
@@ -461,6 +497,8 @@ export interface ApiDunyaHaberiDunyaHaberi extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -472,6 +510,7 @@ export interface ApiDunyaHaberiDunyaHaberi extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -502,6 +541,8 @@ export interface ApiEkolojiHaberiEkolojiHaberi
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -513,6 +554,7 @@ export interface ApiEkolojiHaberiEkolojiHaberi
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -543,6 +585,8 @@ export interface ApiEkonomiHaberiEkonomiHaberi
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -554,6 +598,7 @@ export interface ApiEkonomiHaberiEkonomiHaberi
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -584,6 +629,8 @@ export interface ApiGuncelHaberiGuncelHaberi
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -595,6 +642,7 @@ export interface ApiGuncelHaberiGuncelHaberi
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -603,6 +651,97 @@ export interface ApiGuncelHaberiGuncelHaberi
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
     yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
+  };
+}
+
+export interface ApiGunlukBultenGunlukBulten
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'gunluk_bultenler';
+  info: {
+    description: "Her g\u00FCn saat 15:00'te abonelere gidecek b\u00FClten y\u00F6netimi ve haber se\u00E7imi";
+    displayName: '\uD83D\uDCF0 G\u00FCnl\u00FCk E-B\u00FClten (Saat 15:00)';
+    pluralName: 'gunluk-bultenler';
+    singularName: 'gunluk-bulten';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    autoFallback: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dosyalar: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::politika-haberi.politika-haberi'
+    >;
+    editorNote: Schema.Attribute.Text;
+    isSent: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    koseYazilari: Schema.Attribute.Relation<'oneToMany', 'api::makale.makale'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::gunluk-bulten.gunluk-bulten'
+    > &
+      Schema.Attribute.Private;
+    mansetler: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::guncel-haberi.guncel-haberi'
+    >;
+    ozelHaberler: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::guncel-haberi.guncel-haberi'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    recipientCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sendDate: Schema.Attribute.Date &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    sentAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiGununFotografiGununFotografi
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'gunun_fotograflari';
+  info: {
+    description: 'G\u00FCn\u00FCn \u00F6ne \u00E7\u0131kan foto\u011Fraf hikayeleri, sahadan kareler ve g\u00F6rsel ar\u015Fiv';
+    displayName: '\uD83D\uDCF8 G\u00FCn\u00FCn Foto\u011Fraf\u0131';
+    pluralName: 'gunun-fotograflari';
+    singularName: 'gunun-fotografi';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    coverImage: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    credit: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Yeni Ya\u015Fam Ar\u015Fivi'>;
+    isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::gunun-fotografi.gunun-fotografi'
+    > &
+      Schema.Attribute.Private;
+    location: Schema.Attribute.String;
+    photos: Schema.Attribute.Media<'images', true>;
+    publishDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    scheduledPublishAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    summary: Schema.Attribute.Text & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -634,6 +773,42 @@ export interface ApiGununMansetiGununManseti
       Schema.Attribute.Private;
     pdfFile: Schema.Attribute.Media<'files'>;
     publishedAt: Schema.Attribute.DateTime;
+    scheduledPublishAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiIletisimMesajiIletisimMesaji
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'iletisim_mesajlari';
+  info: {
+    description: 'Web sitesi ileti\u015Fim formundan gelen okuyucu mesajlar\u0131';
+    displayName: '\u2709\uFE0F \u0130leti\u015Fim Mesajlar\u0131';
+    pluralName: 'iletisim-mesajlari';
+    singularName: 'iletisim-mesaji';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    ipAddress: Schema.Attribute.String;
+    isRead: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::iletisim-mesaji.iletisim-mesaji'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text & Schema.Attribute.Required;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    subject: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -668,6 +843,7 @@ export interface ApiJinDergiJinDergi extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     pdfFile: Schema.Attribute.Media<'files'>;
     publishedAt: Schema.Attribute.DateTime;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     sectionTitle: Schema.Attribute.String;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
@@ -694,6 +870,8 @@ export interface ApiKadinHaberiKadinHaberi extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -705,6 +883,7 @@ export interface ApiKadinHaberiKadinHaberi extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -742,6 +921,7 @@ export interface ApiKarikaturKarikatur extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishDate: Schema.Attribute.Date & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -768,6 +948,8 @@ export interface ApiKulturSanatHaberiKulturSanatHaberi
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -779,6 +961,7 @@ export interface ApiKulturSanatHaberiKulturSanatHaberi
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -806,6 +989,8 @@ export interface ApiMakaleMakale extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -814,6 +999,7 @@ export interface ApiMakaleMakale extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishDate: Schema.Attribute.Date;
     publishedAt: Schema.Attribute.DateTime;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -843,6 +1029,8 @@ export interface ApiPolitikaHaberiPolitikaHaberi
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -854,6 +1042,7 @@ export interface ApiPolitikaHaberiPolitikaHaberi
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -862,6 +1051,54 @@ export interface ApiPolitikaHaberiPolitikaHaberi
       Schema.Attribute.Private;
     videoUrl: Schema.Attribute.String;
     yazar: Schema.Attribute.Relation<'manyToOne', 'api::yazar.yazar'>;
+  };
+}
+
+export interface ApiSiteAyariSiteAyari extends Struct.SingleTypeSchema {
+  collectionName: 'site_ayarlari';
+  info: {
+    description: 'Yeni Ya\u015Fam Gazetesi sosyal medya hesaplar\u0131 ve genel site ayarlar\u0131';
+    displayName: '\u2699\uFE0F Site & Sosyal Medya Ayarlar\u0131';
+    pluralName: 'site-ayarlari';
+    singularName: 'site-ayari';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    bluesky: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://bsky.app/profile/yeniyasamgazetesi.bsky.social'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email &
+      Schema.Attribute.DefaultTo<'yeniyasamgazetesi@gmail.com'>;
+    facebook: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://www.facebook.com/profile.php?id=61594460757919'>;
+    instagram: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::site-ayari.site-ayari'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    siteDescription: Schema.Attribute.Text;
+    siteTitle: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Yeni Ya\u015Fam Gazetesi'>;
+    telegram: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://web.telegram.org/k/#@yeniyasamgazetesi'>;
+    tiktok: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://www.tiktok.com/@yeniyasamgazete'>;
+    twitter: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://x.com/yeniyasamnews6'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    whatsapp: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://whatsapp.com/channel/0029VbDs4DAEAKWHDAbQRX03'>;
+    youtube: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://www.youtube.com/@yeniyasammedia'>;
   };
 }
 
@@ -883,6 +1120,8 @@ export interface ApiSoylesiSoylesi extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.Enumeration<
@@ -904,6 +1143,7 @@ export interface ApiSoylesiSoylesi extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -933,6 +1173,8 @@ export interface ApiSporHaberiSporHaberi extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    includeInNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isHeadline: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     kicker: Schema.Attribute.String;
@@ -944,6 +1186,7 @@ export interface ApiSporHaberiSporHaberi extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     readTime: Schema.Attribute.String;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Text & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -998,6 +1241,7 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::video.video'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    scheduledPublishAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     thumbnail: Schema.Attribute.Media<'images'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -1551,17 +1795,22 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::bulten-abonesi.bulten-abonesi': ApiBultenAbonesiBultenAbonesi;
       'api::dunya-haberi.dunya-haberi': ApiDunyaHaberiDunyaHaberi;
       'api::ekoloji-haberi.ekoloji-haberi': ApiEkolojiHaberiEkolojiHaberi;
       'api::ekonomi-haberi.ekonomi-haberi': ApiEkonomiHaberiEkonomiHaberi;
       'api::guncel-haberi.guncel-haberi': ApiGuncelHaberiGuncelHaberi;
+      'api::gunluk-bulten.gunluk-bulten': ApiGunlukBultenGunlukBulten;
+      'api::gunun-fotografi.gunun-fotografi': ApiGununFotografiGununFotografi;
       'api::gunun-manseti.gunun-manseti': ApiGununMansetiGununManseti;
+      'api::iletisim-mesaji.iletisim-mesaji': ApiIletisimMesajiIletisimMesaji;
       'api::jin-dergi.jin-dergi': ApiJinDergiJinDergi;
       'api::kadin-haberi.kadin-haberi': ApiKadinHaberiKadinHaberi;
       'api::karikatur.karikatur': ApiKarikaturKarikatur;
       'api::kultur-sanat-haberi.kultur-sanat-haberi': ApiKulturSanatHaberiKulturSanatHaberi;
       'api::makale.makale': ApiMakaleMakale;
       'api::politika-haberi.politika-haberi': ApiPolitikaHaberiPolitikaHaberi;
+      'api::site-ayari.site-ayari': ApiSiteAyariSiteAyari;
       'api::soylesi.soylesi': ApiSoylesiSoylesi;
       'api::spor-haberi.spor-haberi': ApiSporHaberiSporHaberi;
       'api::video.video': ApiVideoVideo;
