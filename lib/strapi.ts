@@ -1,3 +1,4 @@
+import { cache } from 'react';
 
 import {
   Article,
@@ -8,10 +9,32 @@ import {
   GununManseti,
   JinDergi,
   Karikatur,
+  DailyPhoto,
   StrapiMedia,
   StrapiResponse,
+  SiteSettings,
+  DEFAULT_SITE_SETTINGS,
 } from '@/types/strapi';
 import authorPhotosMap from './author-photos.json';
+
+// =================================================================
+// HIZLI ÖNBELLEK (IN-MEMORY CACHE & DEDUPLICATION)
+// Strapi'ye arka arkaya atılan 11+ paralel sorguyu ve gecikmeleri önler.
+// =================================================================
+const CACHE_TTL_MS = 60 * 1000; // 60 saniye
+
+let cachedAllAuthorsData: { data: Author[]; timestamp: number } | null = null;
+const authorBySlugCache = new Map<string, { author: Author; timestamp: number }>();
+let cachedVideosData: { data: VideoMedia[]; timestamp: number } | null = null;
+let cachedMansetData: { data: GununManseti[]; timestamp: number } | null = null;
+let cachedJinData: { data: JinDergi[]; timestamp: number } | null = null;
+let cachedKarikaturData: { data: Karikatur[]; timestamp: number } | null = null;
+const LONG_CACHE_TTL_MS = 3 * 60 * 1000; // 3 dakika
+
+let globalArticlesCache: { data: Article[]; timestamp: number } | null = null;
+const articleBySlugCache = new Map<string, { article: Article; timestamp: number }>();
+const slugEndpointMap = new Map<string, { endpoint: string; name: string; slug: string; color: string }>();
+
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
@@ -77,8 +100,8 @@ export async function fetchStrapi<T>(
   urlParams: Record<string, string | number | boolean> = {},
   options: RequestInit = {}
 ): Promise<StrapiResponse<T> | null> {
-  // Vercel veya canlı ortamda localhost Strapi'ye istek atıp timeout (504/500) almamak için doğrudan mock'a düşür
-  if (STRAPI_URL.includes('localhost') && (process.env.VERCEL || process.env.NODE_ENV === 'production')) {
+  // Vercel ortamında localhost Strapi'ye istek atıp timeout (504/500) almamak için doğrudan mock'a düşür
+  if (STRAPI_URL.includes('localhost') && process.env.VERCEL) {
     return null;
   }
 
@@ -99,7 +122,7 @@ export async function fetchStrapi<T>(
     const res = await fetch(requestUrl, {
       ...options,
       headers,
-      next: { revalidate: 0, ...(options as { next?: { revalidate?: number } }).next },
+      next: { revalidate: 60, ...(options as { next?: { revalidate?: number } }).next },
     });
 
     if (!res.ok) {
@@ -190,6 +213,30 @@ const CATEGORY_ENDPOINTS: Record<string, { endpoint: string; name: string; slug:
   'video': { endpoint: '/videolar', name: 'Video', slug: 'video', color: 'var(--cat-gundem)' },
 };
 
+export function cleanDumpArtifacts(text?: string | null, isSummary = false): string {
+  if (!text || typeof text !== 'string') return '';
+  let s = text;
+
+  // 1. rn ve nn kalıntılarını temizle (WordPress ve dump aktarımından kalan kaçış hataları)
+  s = s.replace(/(?:r\s*n){2,}/gi, isSummary ? ' ' : '\n\n');
+  s = s.replace(/([>)"’'…\.\?\!])\s*nn+\s*/gi, isSummary ? '$1 ' : '$1\n\n');
+  s = s.replace(/\s*nn+<(?=[a-z0-9\/])/gi, isSummary ? ' <' : '\n\n<');
+  s = s.replace(/([a-zçğıöşüA-ZÇĞİÖŞÜ0-9])nn+([A-ZÇĞİÖŞÜ])/g, isSummary ? '$1 $2' : '$1\n\n$2');
+  s = s.replace(/(?:^|\s|>|"|')nn(?=[A-ZÇĞİÖŞÜ])/g, isSummary ? ' ' : '\n\n');
+  s = s.replace(/(?:^|\n|\r)\s*nn+\s*/gi, isSummary ? ' ' : '\n\n');
+  s = s.replace(/<\/(strong|p|b|i|h[1-6]|div|span)>n+/gi, isSummary ? ' ' : '</$1>\n\n');
+  s = s.replace(/(?:rn)+<([a-z0-9]+)/gi, isSummary ? ' <$1' : '\n<$1');
+  s = s.replace(/<\/([a-z0-9]+)>(?:rn)+/gi, isSummary ? '</$1> ' : '</$1>\n');
+  s = s.replace(/>\s*(?:rn)+\s*</gi, isSummary ? '><' : '>\n<');
+
+  if (isSummary) {
+    s = s.replace(/\s+/g, ' ');
+  } else {
+    s = s.replace(/\n{3,}/g, '\n\n');
+  }
+  return s.trim();
+}
+
 function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; color: string }): Article {
   const yazarObj = item.yazar?.data ? { id: item.yazar.data.id, ...item.yazar.data.attributes } : item.yazar;
   const authorName = yazarObj?.name || item.authorName || 'Yeni Yaşam';
@@ -208,13 +255,13 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
     cover = getStrapiMedia(null, item.id);
   }
 
-  return {
+  const artItem: Article = {
     id: `${catInfo.slug}-${item.id}`,
     documentId: item.documentId,
     title: item.title,
     slug: item.slug || `haber-${item.id}`,
-    summary: item.summary || item.description || '',
-    content: item.content || item.description || '',
+    summary: cleanDumpArtifacts(item.summary || item.description || '', true),
+    content: cleanDumpArtifacts(item.content || item.description || '', false),
     kicker: item.kicker || '',
     coverImage: cover,
     author: {
@@ -235,7 +282,30 @@ function normalizeStrapiItem(item: any, catInfo: { name: string; slug: string; c
     videoUrl: item.videoUrl || '',
     readTime: item.readTime || item.duration || '3 dk',
     publishedAt: item.publishedAt || item.publishDate || item.createdAt || new Date().toISOString(),
+    scheduledPublishAt: item.scheduledPublishAt || undefined,
   };
+
+  if (artItem.slug) {
+    slugEndpointMap.set(artItem.slug, {
+      endpoint: (catInfo as any).endpoint || CATEGORY_ENDPOINTS[catInfo.slug]?.endpoint || '/guncel-haberleri',
+      name: catInfo.name,
+      slug: catInfo.slug,
+      color: catInfo.color,
+    });
+    articleBySlugCache.set(artItem.slug, { article: artItem, timestamp: Date.now() });
+  }
+
+  return artItem;
+}
+
+export function isArticleScheduleReady(article: Article): boolean {
+  if (article.scheduledPublishAt) {
+    const t = new Date(article.scheduledPublishAt).getTime();
+    if (!isNaN(t) && t > Date.now()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export async function getArticles(filter?: {
@@ -244,7 +314,17 @@ export async function getArticles(filter?: {
   limit?: number;
   page?: number;
 }): Promise<Article[]> {
-  const articles: Article[] = [];
+  // Genel haberler için 60 saniyelik bellek önbelleği kontrolü (0 ms)
+  const isGeneralQuery = !filter?.categorySlug && !filter?.page;
+  if (isGeneralQuery && globalArticlesCache && Date.now() - globalArticlesCache.timestamp < CACHE_TTL_MS) {
+    let cachedList = globalArticlesCache.data;
+    if (filter?.isHeadline !== undefined) {
+      cachedList = cachedList.filter((a) => Boolean(a.isHeadline) === filter.isHeadline);
+    }
+    return filter?.limit ? cachedList.slice(0, filter.limit) : cachedList;
+  }
+
+  let articles: Article[] = [];
 
   // Belirli bir kategori istenmişse sadece o koleksiyondan çek
   if (filter?.categorySlug && CATEGORY_ENDPOINTS[filter.categorySlug]) {
@@ -257,7 +337,7 @@ export async function getArticles(filter?: {
     });
 
     if (data && Array.isArray(data.data) && data.data.length > 0) {
-      const items = data.data.map((i) => normalizeStrapiItem(i, cat));
+      const items = data.data.map((i) => normalizeStrapiItem(i, cat)).filter(isArticleScheduleReady);
       return filter.isHeadline !== undefined
         ? items.filter((a) => Boolean(a.isHeadline) === filter.isHeadline)
         : items;
@@ -298,8 +378,22 @@ export async function getArticles(filter?: {
 
   // Eğer Strapi'den herhangi bir haber geldiyse sıralayıp dön
   if (articles.length > 0) {
+    // Zamanlanmış yayın tarihi henüz gelmemiş haberleri filtrele
+    const nowTime = Date.now();
+    articles = articles.filter((a) => {
+      if (a.scheduledPublishAt && new Date(a.scheduledPublishAt).getTime() > nowTime) {
+        return false;
+      }
+      return true;
+    });
     articles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    if (isGeneralQuery) {
+      globalArticlesCache = { data: articles, timestamp: Date.now() };
+    }
     let filtered = articles;
+    if (filter?.categorySlug === 'ozel-haber') {
+      filtered = filtered.filter((a) => a.category?.slug === 'ozel-haber' || (a.kicker && a.kicker.toLowerCase().includes('özel')) || a.isFeatured);
+    }
     if (filter?.isHeadline !== undefined) {
       filtered = filtered.filter((a) => Boolean(a.isHeadline) === filter.isHeadline);
       // Eğer hiç manşet işaretlenmemişse ilk haberleri göster
@@ -327,12 +421,50 @@ export async function getArticles(filter?: {
   return results;
 }
 
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
+async function fetchArticleBySlugInternal(slug: string): Promise<Article | null> {
   if (!slug) return null;
 
-  // Benzersiz kategori koleksiyonlarında paralel olarak ara (ana kategorileri koruyarak)
+  // 1. In-memory hızlı önbellek kontrolü (0 ms)
+  const cached = articleBySlugCache.get(slug);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.article;
+  }
+
+  // 2. Slug'ın hangi endpoint'te olduğu biliniyorsa doğrudan tek o endpoint'e sor (1 istek!)
+  const knownCat = slugEndpointMap.get(slug);
+  if (knownCat) {
+    try {
+      const data = await fetchStrapi<any[]>(knownCat.endpoint, {
+        'filters[slug][$eq]': slug,
+        populate: '*',
+      });
+      if (data && Array.isArray(data.data) && data.data[0]) {
+        const art = normalizeStrapiItem(data.data[0], knownCat);
+        if (!isArticleScheduleReady(art)) return null;
+        articleBySlugCache.set(slug, { article: art, timestamp: Date.now() });
+        return art;
+      }
+    } catch {
+      // Endpoint değişmiş olabilir, genel aramaya geç
+    }
+  }
+
+  // 3. Bilinmeyen slug ise öncelikli kategorilerden başlayarak paralel ara
+  const priorityEndpoints = [
+    CATEGORY_ENDPOINTS['guncel'],
+    CATEGORY_ENDPOINTS['politika'],
+    CATEGORY_ENDPOINTS['makale'],
+    CATEGORY_ENDPOINTS['dunya'],
+    CATEGORY_ENDPOINTS['kadin'],
+    CATEGORY_ENDPOINTS['ekonomi'],
+    CATEGORY_ENDPOINTS['kultur-sanat'],
+    CATEGORY_ENDPOINTS['soylesi'],
+    CATEGORY_ENDPOINTS['spor'],
+    CATEGORY_ENDPOINTS['video'],
+  ].filter(Boolean);
+
   const uniqueEndpointsMap = new Map<string, (typeof CATEGORY_ENDPOINTS)[string]>();
-  for (const cat of Object.values(CATEGORY_ENDPOINTS)) {
+  for (const cat of priorityEndpoints) {
     if (!uniqueEndpointsMap.has(cat.endpoint)) {
       uniqueEndpointsMap.set(cat.endpoint, cat);
     }
@@ -356,7 +488,10 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
   const results = await Promise.all(promises);
   const foundArticle = results.find(Boolean);
-  if (foundArticle) return foundArticle;
+  if (foundArticle && isArticleScheduleReady(foundArticle)) {
+    articleBySlugCache.set(slug, { article: foundArticle, timestamp: Date.now() });
+    return foundArticle;
+  }
 
   const found = MOCK_ARTICLES.find((a) => a.slug === slug);
   if (found) return found;
@@ -364,45 +499,18 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   return null;
 }
 
+export const getArticleBySlug = cache(fetchArticleBySlugInternal);
+
 export async function getCategories(): Promise<Category[]> {
   return MOCK_CATEGORIES;
 }
 
-export function getAuthorAvatar(authorName: string, authorSlug?: string): string {
+export function getAuthorAvatar(authorName?: string, authorSlug?: string): string {
   const photos = authorPhotosMap as Record<string, string>;
   if (authorSlug && photos[authorSlug]) {
     return photos[authorSlug];
   }
-
-  const cleanSlug = (authorName || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '-')
-    .replace(/-+/g, '-');
-  if (photos[cleanSlug]) {
-    return photos[cleanSlug];
-  }
-
-  const femaleNames = [
-    'ayşe', 'sebahat', 'nezahat', 'gülcan', 'beyza', 'pervin',
-    'dilzar', 'meryem', 'filiz', 'fidan', 'esra', 'fatma', 'yıldız',
-    'ferda', 'nurcan', 'zehra', 'nimet', 'evin', 'sema'
-  ];
-  const lower = (authorName || '').toLowerCase();
-  const isFemale = femaleNames.some((f) => lower.includes(f));
-
-  let hash = 0;
-  for (let i = 0; i < (authorName || '').length; i++) {
-    hash = (hash << 5) - hash + authorName.charCodeAt(i);
-    hash |= 0;
-  }
-  const positive = Math.abs(hash);
-
-  if (isFemale) {
-    return positive % 2 === 0 ? '/assets/photos/yazar3.webp' : '/assets/photos/yazar4.webp';
-  }
-
-  const malePhotos = ['/assets/photos/yazar1.jpeg', '/assets/photos/yazar2.webp', '/assets/photos/yazar5.jpeg'];
-  return malePhotos[positive % malePhotos.length];
+  return '/assets/photos/default-avatar.jpg';
 }
 
 export async function getAuthors(): Promise<Author[]> {
@@ -448,16 +556,16 @@ export async function getAuthors(): Promise<Author[]> {
 
     // 2. Strapi'den doğrudan eklenen en yeni yazarları da listeye dahil et
     const strapiData = await fetchStrapi<any[]>('/yazarlar', {
-      'filters[name][$notIn][0]': 'Yeni Yaşam',
-      'filters[name][$notIn][1]': 'İçeriden',
-      'filters[role][$ne]': 'Editör',
       populate: '*',
       sort: 'createdAt:desc',
-      'pagination[pageSize]': 30,
+      'pagination[pageSize]': 40,
     });
 
     if (strapiData && Array.isArray(strapiData.data)) {
       for (const y of strapiData.data) {
+        if (!y.name || y.name === 'Yeni Yaşam' || y.name === 'İçeriden' || y.role === 'Editör') {
+          continue;
+        }
         const key = y.slug || y.name;
         if (!seen.has(key)) {
           seen.add(key);
@@ -465,7 +573,7 @@ export async function getAuthors(): Promise<Author[]> {
             id: y.id,
             name: y.name,
             slug: y.slug,
-            role: y.role || '',
+            role: y.role || 'Yazar',
             bio: y.bio || '',
             avatar: (y.avatar && (y.avatar.url || typeof y.avatar === 'string')) ? getStrapiMedia(y.avatar) : getAuthorAvatar(y.name, y.slug),
             twitter: y.twitter,
@@ -486,53 +594,82 @@ export async function getAuthors(): Promise<Author[]> {
 }
 
 export async function getAllAuthors(): Promise<Author[]> {
+  if (cachedAllAuthorsData && Date.now() - cachedAllAuthorsData.timestamp < LONG_CACHE_TTL_MS) {
+    return cachedAllAuthorsData.data;
+  }
   try {
-    const strapiData = await fetchStrapi<any[]>('/yazarlar', {
-      'filters[name][$notIn][0]': 'Yeni Yaşam',
-      'filters[name][$notIn][1]': 'İçeriden',
-      'filters[role][$ne]': 'Editör',
-      populate: '*',
-      sort: 'name:asc',
-      'pagination[pageSize]': 250,
-    });
+    let allData: any[] = [];
+    let page = 1;
+    let pageCount = 1;
 
-    if (strapiData && Array.isArray(strapiData.data) && strapiData.data.length > 0) {
-      const seen = new Set<string>();
+    do {
+      const strapiData = await fetchStrapi<any[]>('/yazarlar', {
+        populate: '*',
+        sort: 'name:asc',
+        'pagination[page]': page,
+        'pagination[pageSize]': 100,
+      });
+
+      if (strapiData && Array.isArray(strapiData.data) && strapiData.data.length > 0) {
+        allData = allData.concat(strapiData.data);
+        pageCount = strapiData.meta?.pagination?.pageCount || 1;
+      } else {
+        break;
+      }
+      page++;
+    } while (page <= pageCount);
+
+    if (allData.length > 0) {
+      const seenSlugs = new Set<string>();
+      const seenNames = new Set<string>();
       const all: Author[] = [];
-      for (const y of strapiData.data) {
-        if (!seen.has(y.slug)) {
-          seen.add(y.slug);
+      for (const y of allData) {
+        if (!y.name || y.name === 'Yeni Yaşam' || y.name === 'İçeriden' || y.role === 'Editör') {
+          continue;
+        }
+        const normName = y.name.trim().toLocaleLowerCase('tr-TR');
+        const cleanSlug = y.slug || `yazar-${y.id}`;
+        if (!seenSlugs.has(cleanSlug) && !seenNames.has(normName)) {
+          seenSlugs.add(cleanSlug);
+          seenNames.add(normName);
           all.push({
             id: y.id,
             name: y.name,
-            slug: y.slug,
-            role: y.role || '',
+            slug: cleanSlug,
+            role: y.role || 'Yazar',
             bio: y.bio || '',
-            avatar: (y.avatar && (y.avatar.url || typeof y.avatar === 'string')) ? getStrapiMedia(y.avatar) : getAuthorAvatar(y.name, y.slug),
+            avatar: (y.avatar && (y.avatar.url || typeof y.avatar === 'string')) ? getStrapiMedia(y.avatar) : getAuthorAvatar(y.name, cleanSlug),
             twitter: y.twitter,
             articleCount: 1,
           });
         }
       }
-      return all;
+      if (all.length > 0) {
+        cachedAllAuthorsData = { data: all, timestamp: Date.now() };
+        return all;
+      }
     }
   } catch {
     // fallback
   }
 
-  // Combine MOCK_AUTHORS and author-photos.json
-  const authors: Author[] = [...MOCK_AUTHORS];
-  const seenSlugs = new Set(authors.map((a) => a.slug));
+  // Combine MOCK_AUTHORS and author-photos.json without duplicates
+  const authorsMap = new Map<string, Author>();
+
+  for (const a of MOCK_AUTHORS) {
+    if (a.slug && a.slug !== 'iceriden') {
+      authorsMap.set(a.slug, a);
+    }
+  }
 
   const photos = authorPhotosMap as Record<string, string>;
   for (const [slug, avatarPath] of Object.entries(photos)) {
-    if (!seenSlugs.has(slug) && slug !== 'iceriden') {
-      seenSlugs.add(slug);
+    if (!authorsMap.has(slug) && slug !== 'iceriden' && !slug.endsWith('1')) {
       const name = slug
         .split('-')
         .map((w) => w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1))
         .join(' ');
-      authors.push({
+      authorsMap.set(slug, {
         id: slug,
         name,
         slug,
@@ -544,11 +681,16 @@ export async function getAllAuthors(): Promise<Author[]> {
     }
   }
 
-  return authors;
+  return Array.from(authorsMap.values());
 }
 
-export async function getAuthorBySlug(slug: string): Promise<Author | null> {
+async function fetchAuthorBySlugInternal(slug: string): Promise<Author | null> {
   if (!slug) return null;
+
+  const cached = authorBySlugCache.get(slug);
+  if (cached && Date.now() - cached.timestamp < LONG_CACHE_TTL_MS) {
+    return cached.author;
+  }
 
   try {
     const strapiData = await fetchStrapi<any[]>('/yazarlar', {
@@ -574,7 +716,10 @@ export async function getAuthorBySlug(slug: string): Promise<Author | null> {
   }
 
   const found = MOCK_AUTHORS.find((author) => author.slug === slug);
-  if (found) return found;
+  if (found) {
+    authorBySlugCache.set(slug, { author: found, timestamp: Date.now() });
+    return found;
+  }
 
   const photos = authorPhotosMap as Record<string, string>;
   if (photos[slug]) {
@@ -584,7 +729,7 @@ export async function getAuthorBySlug(slug: string): Promise<Author | null> {
       .map((w) => w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1))
       .join(' ');
 
-    return {
+    const fallbackAuthor: Author = {
       id: slug,
       name,
       slug,
@@ -593,10 +738,14 @@ export async function getAuthorBySlug(slug: string): Promise<Author | null> {
       avatar: photos[slug],
       articleCount: 1,
     };
+    authorBySlugCache.set(slug, { author: fallbackAuthor, timestamp: Date.now() });
+    return fallbackAuthor;
   }
 
   return null;
 }
+
+export const getAuthorBySlug = cache(fetchAuthorBySlugInternal);
 
 export async function getArticlesByAuthor(
   authorSlug: string,
@@ -633,6 +782,9 @@ export async function getArticlesByAuthor(
 }
 
 export async function getVideos(): Promise<VideoMedia[]> {
+  if (cachedVideosData && Date.now() - cachedVideosData.timestamp < LONG_CACHE_TTL_MS) {
+    return cachedVideosData.data;
+  }
   try {
     const strapiData = await fetchStrapi<any[]>('/videolar', {
       populate: '*',
@@ -640,7 +792,7 @@ export async function getVideos(): Promise<VideoMedia[]> {
     });
 
     if (strapiData && Array.isArray(strapiData.data) && strapiData.data.length > 0) {
-      return strapiData.data.map((v: any) => ({
+      const videoList: VideoMedia[] = strapiData.data.map((v: any) => ({
         id: v.id,
         title: v.title,
         slug: v.slug || `video-${v.id}`,
@@ -651,6 +803,8 @@ export async function getVideos(): Promise<VideoMedia[]> {
         description: v.description || '',
         publishedAt: v.createdAt || new Date().toISOString(),
       }));
+      cachedVideosData = { data: videoList, timestamp: Date.now() };
+      return videoList;
     }
   } catch {
     // fallback
@@ -690,100 +844,147 @@ export async function getVideoBySlug(slug: string): Promise<VideoMedia | null> {
   return all.find((v) => v.slug === slug) || null;
 }
 
+const searchCache = new Map<string, { articles: Article[]; timestamp: number }>();
+const authorSearchCache = new Map<string, { authors: Author[]; timestamp: number }>();
+const SEARCH_CACHE_TTL_MS = 2 * 60 * 1000; // 2 dakika
+
 export async function searchArticles(query: string): Promise<Article[]> {
   const q = query.trim();
   if (!q) return [];
 
-  // Strapi'deki tüm kategori koleksiyonlarında veritabanı düzeyinde filtreleme yap
+  const qLower = q.toLocaleLowerCase('tr-TR');
+
+  // 1. In-memory hızlı önbellek kontrolü (0 ms)
+  const cached = searchCache.get(qLower);
+  if (cached && Date.now() - cached.timestamp < SEARCH_CACHE_TTL_MS) {
+    return cached.articles;
+  }
+
+  // 2. Strapi'deki kategori koleksiyonlarında hızlı arama (withCount: false & pageSize: 12)
   const searchEndpoints = [
     { endpoint: '/guncel-haberleri', name: 'Güncel', slug: 'guncel', color: 'var(--cat-gundem)' },
     { endpoint: '/politika-haberleri', name: 'Politika', slug: 'politika', color: 'var(--cat-politika)' },
-    { endpoint: '/ekonomi-haberleri', name: 'Ekonomi', slug: 'ekonomi', color: 'var(--cat-ekonomi)' },
     { endpoint: '/dunya-haberleri', name: 'Dünya', slug: 'dunya', color: 'var(--cat-dunya)' },
+    { endpoint: '/makaleler', name: 'Köşe Yazısı', slug: 'yazarlar', color: 'var(--cat-politika)' },
     { endpoint: '/kadin-haberleri', name: 'Kadın', slug: 'kadin', color: 'var(--cat-kadin)' },
+    { endpoint: '/ekonomi-haberleri', name: 'Ekonomi', slug: 'ekonomi', color: 'var(--cat-ekonomi)' },
     { endpoint: '/ekoloji-haberleri', name: 'Ekoloji', slug: 'ekoloji', color: 'var(--cat-ekoloji)' },
     { endpoint: '/kultur-sanat-haberleri', name: 'Kültür-Sanat', slug: 'kultur-sanat', color: 'var(--cat-kultur-sanat)' },
     { endpoint: '/soylesiler', name: 'Söyleşi', slug: 'soylesi', color: 'var(--cat-forum)' },
     { endpoint: '/spor-haberleri', name: 'Spor', slug: 'spor', color: 'var(--cat-spor)' },
-    { endpoint: '/makaleler', name: 'Köşe Yazısı', slug: 'yazarlar', color: 'var(--cat-politika)' },
   ];
 
   try {
     const promises = searchEndpoints.map(async (cat) => {
-      const data = await fetchStrapi<any[]>(cat.endpoint, {
-        'filters[$or][0][title][$containsi]': q,
-        'filters[$or][1][summary][$containsi]': q,
-        populate: '*',
-        sort: 'createdAt:desc',
-        'pagination[pageSize]': 30,
-      });
+      try {
+        const data = await fetchStrapi<any[]>(cat.endpoint, {
+          'filters[title][$containsi]': q,
+          'pagination[withCount]': false,
+          'pagination[pageSize]': 12,
+          populate: '*',
+          sort: 'createdAt:desc',
+        });
 
-      if (data && Array.isArray(data.data)) {
-        return data.data.map((i) => normalizeStrapiItem(i, cat));
+        if (data && Array.isArray(data.data)) {
+          return data.data.map((i) => normalizeStrapiItem(i, cat));
+        }
+      } catch {
+        return [];
       }
       return [];
     });
 
     const results = (await Promise.all(promises)).flat();
-    if (results.length > 0) {
-      return results.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    const seenSlugs = new Set<string>();
+    const uniqueResults: Article[] = [];
+    for (const item of results) {
+      if (!seenSlugs.has(item.slug)) {
+        seenSlugs.add(item.slug);
+        uniqueResults.push(item);
+      }
+    }
+
+    const readyResults = uniqueResults.filter(isArticleScheduleReady);
+    if (readyResults.length > 0) {
+      readyResults.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+      searchCache.set(qLower, { articles: readyResults, timestamp: Date.now() });
+      return readyResults;
     }
   } catch {
     // Strapi bağlantı hatası durumunda fallback
   }
 
   // Strapi erişilemiyorsa veya sonuç çıkmadıysa mock verilerde ara
-  const qLower = q.toLocaleLowerCase('tr-TR');
-  return MOCK_ARTICLES.filter(
+  const mockResults = MOCK_ARTICLES.filter(
     (a) =>
       a.title.toLocaleLowerCase('tr-TR').includes(qLower) ||
       a.summary.toLocaleLowerCase('tr-TR').includes(qLower) ||
       (a.author?.name && a.author.name.toLocaleLowerCase('tr-TR').includes(qLower)) ||
       (a.category?.name && a.category.name.toLocaleLowerCase('tr-TR').includes(qLower))
   );
+
+  searchCache.set(qLower, { articles: mockResults, timestamp: Date.now() });
+  return mockResults;
 }
 
 export async function searchAuthors(query: string): Promise<Author[]> {
   const q = query.trim();
   if (!q) return [];
 
+  const qLower = q.toLocaleLowerCase('tr-TR');
+  const cached = authorSearchCache.get(qLower);
+  if (cached && Date.now() - cached.timestamp < SEARCH_CACHE_TTL_MS) {
+    return cached.authors;
+  }
+
   try {
     const strapiData = await fetchStrapi<any[]>('/yazarlar', {
-      'filters[$or][0][name][$containsi]': q,
-      'filters[$or][1][bio][$containsi]': q,
-      'filters[$or][2][role][$containsi]': q,
+      'filters[name][$containsi]': q,
+      'pagination[withCount]': false,
+      'pagination[pageSize]': 15,
       populate: '*',
-      'pagination[pageSize]': 20,
     });
 
     if (strapiData && Array.isArray(strapiData.data) && strapiData.data.length > 0) {
-      return strapiData.data.map((y: any) => ({
-        id: y.id,
-        name: y.name,
-        slug: y.slug || `yazar-${y.id}`,
-        role: y.role || 'Yazar',
-        bio: y.bio || '',
-        avatar: (y.avatar && (y.avatar.url || typeof y.avatar === 'string')) ? getStrapiMedia(y.avatar) : getAuthorAvatar(y.name, y.slug),
-        articleCount: 1,
-      }));
+      const seenSlugs = new Set<string>();
+      const seenNames = new Set<string>();
+      const list: Author[] = [];
+      for (const y of strapiData.data) {
+        if (!y.name || y.name === 'Yeni Yaşam' || y.name === 'İçeriden') continue;
+        const normName = y.name.trim().toLocaleLowerCase('tr-TR');
+        const slug = y.slug || `yazar-${y.id}`;
+        if (!seenSlugs.has(slug) && !seenNames.has(normName)) {
+          seenSlugs.add(slug);
+          seenNames.add(normName);
+          list.push({
+            id: y.id,
+            name: y.name,
+            slug,
+            role: y.role || 'Yazar',
+            bio: y.bio || '',
+            avatar: (y.avatar && (y.avatar.url || typeof y.avatar === 'string')) ? getStrapiMedia(y.avatar) : getAuthorAvatar(y.name, slug),
+            articleCount: 1,
+          });
+        }
+      }
+      authorSearchCache.set(qLower, { authors: list, timestamp: Date.now() });
+      return list;
     }
 
-    const authors = await getAllAuthors();
-    const qLower = q.toLocaleLowerCase('tr-TR');
-    return authors.filter(
+    // Strapi'de yazar yoksa mock yazarlardan hızlı filtrele (tüm yazarları tekrar API'den çekme!)
+    const mockMatching = MOCK_AUTHORS.filter(
       (a) =>
         a.name.toLocaleLowerCase('tr-TR').includes(qLower) ||
         (a.bio && a.bio.toLocaleLowerCase('tr-TR').includes(qLower)) ||
         (a.role && a.role.toLocaleLowerCase('tr-TR').includes(qLower))
     );
+    authorSearchCache.set(qLower, { authors: mockMatching, timestamp: Date.now() });
+    return mockMatching;
   } catch {
     return [];
   }
 }
 
-/**
- * Strapi Bülten Aboneliği (Newsletter) Kaydı
- */
 export async function subscribeToNewsletter(email: string): Promise<{ success: boolean; message: string }> {
   return { success: true, message: 'Bülten aboneliğiniz kaydedildi.' };
 }
@@ -792,6 +993,9 @@ export async function subscribeToNewsletter(email: string): Promise<{ success: b
  * Günün Manşeti (Gazete Baskısı) Fonksiyonları
  */
 export async function getMansetList(): Promise<GununManseti[]> {
+  if (cachedMansetData && Date.now() - cachedMansetData.timestamp < LONG_CACHE_TTL_MS) {
+    return cachedMansetData.data;
+  }
   try {
     const res = await fetchStrapi<any[]>('/gunun-mansetleri', {
       populate: '*',
@@ -799,7 +1003,7 @@ export async function getMansetList(): Promise<GununManseti[]> {
     });
 
     if (res && Array.isArray(res.data) && res.data.length > 0) {
-      return res.data.map((m: any) => ({
+      const mansetItems: GununManseti[] = res.data.map((m: any) => ({
         id: m.id,
         documentId: m.documentId,
         issueNumber: m.issueNumber || '',
@@ -808,6 +1012,8 @@ export async function getMansetList(): Promise<GununManseti[]> {
         pdfFile: m.pdfFile ? getStrapiMedia(m.pdfFile) : null,
         description: m.description || '',
       }));
+      cachedMansetData = { data: mansetItems, timestamp: Date.now() };
+      return mansetItems;
     }
   } catch {
     // fallback
@@ -973,14 +1179,10 @@ export async function getLatestKarikatur(): Promise<Karikatur> {
  */
 export async function getDailyFeatures(): Promise<{
   manset: DailyFeature;
-  jin: DailyFeature;
-  karikatur: DailyFeature;
+  jin?: DailyFeature;
+  karikatur?: DailyFeature;
 }> {
-  const [latestManset, latestJin, latestKarikatur] = await Promise.all([
-    getLatestManset(),
-    getLatestJinDergi(),
-    getLatestKarikatur(),
-  ]);
+  const latestManset = await getLatestManset();
 
   return {
     manset: {
@@ -991,21 +1193,212 @@ export async function getDailyFeatures(): Promise<{
       date: latestManset.issueDate || 'Bugün',
       image: latestManset.coverImage,
     },
-    jin: {
-      id: latestJin.id,
-      type: 'jin',
-      title: latestJin.title || 'Jin Dergi',
-      captionTitle: latestJin.issueNumber ? `Sayı: ${latestJin.issueNumber}` : 'Haftalık Kadın Eki',
-      date: latestJin.issueDate || 'Haftalık Kadın Eki',
-      image: latestJin.coverImage,
-    },
-    karikatur: {
-      id: latestKarikatur.id,
-      type: 'karikatur',
-      title: latestKarikatur.title || 'Günün Karikatürü',
-      captionTitle: latestKarikatur.artist ? `Çizen: ${latestKarikatur.artist}` : 'Günün Karikatürü',
-      date: latestKarikatur.publishDate || 'Bugün',
-      image: latestKarikatur.image,
-    },
   };
 }
+
+export const DEFAULT_DAILY_PHOTOS: DailyPhoto[] = [
+  {
+    id: 1,
+    slug: 'kuzey-suriye-gerginlik-suruyor',
+    title: "Kuzey Suriye'de gerginlik sürüyor",
+    summary: 'Bölgede devam eden çatışmalar sivil halkı zorluyor. Yerel kaynaklara göre son 24 saatte onlarca aile yerinden edildi.',
+    image: '/assets/photos/3556.jpg',
+    credit: 'Yeni Yaşam Arşivi / AFP',
+    date: '27 Ekim 2026',
+    location: 'Kuzey ve Doğu Suriye',
+    photos: [
+      { id: 1, url: '/assets/photos/3556.jpg', caption: 'Kuzey Suriye kırsalında askeri hareketlilik ve yerel kaynaklar' },
+      { id: 2, url: '/assets/photos/haber-foto11.jpeg', caption: 'Bölgedeki çadır kamplarında sivil halkın zorlu yaşam koşulları' },
+      { id: 3, url: '/assets/photos/haber-foto1.jpg', caption: 'Çatışma hattı yakınlarındaki yerleşim alanları' },
+      { id: 4, url: '/assets/photos/haber-foto2.jpeg', caption: 'Sınır hattı boyunca güvenlik noktaları ve hareketlilik' },
+    ],
+  },
+  {
+    id: 2,
+    slug: 'amed-baris-anneleri-bulusma',
+    title: 'Amed sokaklarında barış umudu ve kadınların sesleri',
+    summary: 'Barış Anneleri ve kadın hakları savunucuları, kalıcı bir toplumsal barış ve adalet talebiyle meydanlarda bir araya geldi.',
+    image: '/assets/photos/haber-foto12.jpeg',
+    credit: 'Yeni Yaşam / Medya Haber',
+    date: '26 Ekim 2026',
+    location: 'Diyarbakır (Amed)',
+    photos: [
+      { id: 1, url: '/assets/photos/haber-foto12.jpeg', caption: 'Kadın kurumları ve Barış Anneleri buluşması' },
+      { id: 2, url: '/assets/photos/haber-foto5.jpg', caption: 'Kadınların ortak adalet ve eşitlik açıklaması' },
+    ],
+  },
+  {
+    id: 3,
+    slug: 'munzur-ve-kazdaglari-direnis',
+    title: 'Munzur ve Kazdağları: Doğanın talanına karşı ortak direniş',
+    summary: 'Ekoloji aktivistleri ve yöre halkı, maden ve HES projeleriyle tahrip edilen vadilerini ve su havzalarını korumak için nöbette.',
+    image: '/assets/photos/haber-foto3.jpg',
+    credit: 'Ekoloji Kolektifi / Yeni Yaşam',
+    date: '25 Ekim 2026',
+    location: 'Dersim - Çanakkale',
+    photos: [
+      { id: 1, url: '/assets/photos/haber-foto3.jpg', caption: 'Toprağımıza sahip çıkıyoruz pankartıyla yapılan eylem' },
+      { id: 2, url: '/assets/photos/haber-foto4.jpg', caption: 'Köy halkı ve yaşam savunucularının doğa nöbeti' },
+    ],
+  },
+  {
+    id: 4,
+    slug: 'multeci-kamplari-kis-sartlari',
+    title: 'Zorlu kış öncesi mülteci kamplarında çadır nöbeti',
+    summary: 'Soğuk hava dalgasının yaklaşmasıyla beraber göç kamplarındaki temel ihtiyaçlar ve barınma sorunları yeniden alarm veriyor.',
+    image: '/assets/photos/haber-foto11.jpeg',
+    credit: 'Yeni Yaşam Arşivi',
+    date: '24 Ekim 2026',
+    location: 'Hesekê',
+    photos: [
+      { id: 1, url: '/assets/photos/haber-foto11.jpeg', caption: 'Kamplarda çadırların onarımı ve sivil savunma' },
+      { id: 2, url: '/assets/photos/haber-foto1.jpg', caption: 'Göç mağduru aileler ve çocuklar' },
+    ],
+  },
+  {
+    id: 5,
+    slug: 'bm-genel-kurulu-diplomasi',
+    title: 'BM Genel Kurulu’nda diplomasi trafiği ve bölgesel gerilimler',
+    summary: 'Uluslararası platformda Ortadoğu’daki çatışmalar ve ateşkes çağrıları liderlerin gündeminde yer aldı.',
+    image: '/assets/photos/haber-foto7.jpg',
+    credit: 'AFP / UN Photo',
+    date: '23 Ekim 2026',
+    location: 'New York - BM',
+    photos: [
+      { id: 1, url: '/assets/photos/haber-foto7.jpg', caption: 'Genel Kurul hitabı ve diplomatik temaslar' },
+    ],
+  },
+  {
+    id: 6,
+    slug: 'sur-sokaklarinda-sanat-ve-hafiza',
+    title: "Sanatın ve direnişin ritmi: Sur'da sokak ezgileri",
+    summary: 'Tarihi Sur sokaklarında genç sanatçılar dengbêjlik geleneğini çağdaş tınılarla buluşturarak hafızayı canlı tutuyor.',
+    image: '/assets/photos/haber-foto8.jpg',
+    credit: 'Yeni Yaşam Kültür Servisi',
+    date: '22 Ekim 2026',
+    location: 'Sur, Diyarbakır',
+    photos: [
+      { id: 1, url: '/assets/photos/haber-foto8.jpg', caption: 'Tarihi surlar ve kültürel etkinlikler' },
+    ],
+  },
+  {
+    id: 7,
+    slug: 'kadin-bulusmasi-dayanisma',
+    title: 'Yerel kadın atölyelerinde dayanışma ve ortak üretim',
+    summary: 'Toplumsal eşitlik ve kadın emeğini görünür kılmak amacıyla düzenlenen kadın buluşmaları sürüyor.',
+    image: '/assets/photos/haber-foto6.webp',
+    credit: 'Yeni Yaşam Kadın Servisi',
+    date: '21 Ekim 2026',
+    location: 'Van',
+    photos: [
+      { id: 1, url: '/assets/photos/haber-foto6.webp', caption: 'Kadın kooperatifi ve dayanışma çemberi' },
+    ],
+  },
+  {
+    id: 8,
+    slug: 'iklim-krizi-tarim-hasat',
+    title: 'Mezopotamya ovasında kuraklık: Değişen iklim ve tarım',
+    summary: 'Kuraklık ve azalan yer altı suları nedeniyle bölgedeki tarımsal üretim son yılların en kritik seviyesine geriledi.',
+    image: '/assets/photos/haber-foto4.jpg',
+    credit: 'Mezopotamya Ajansı',
+    date: '20 Ekim 2026',
+    location: 'Urfa - Mardin Ovası',
+    photos: [
+      { id: 1, url: '/assets/photos/haber-foto4.jpg', caption: 'Tarımsal üretim alanları ve üreticilerin nöbeti' },
+    ],
+  },
+];
+
+/**
+ * Günün Fotoğraflarını (ve Arşivini) getiren fonksiyon.
+ * Strapi api::gunun-fotografi koleksiyonunu sorgular, bulamazsa DEFAULT_DAILY_PHOTOS döner.
+ */
+export async function getDailyPhotos(): Promise<DailyPhoto[]> {
+  try {
+    const res = await fetchStrapi<any[]>('/gunun-fotograflari', {
+      populate: '*',
+      'sort[0]': 'publishDate:desc',
+      'pagination[pageSize]': 25,
+    });
+
+    if (res && Array.isArray(res.data) && res.data.length > 0) {
+      const strapiItems: DailyPhoto[] = res.data.map((item: any) => {
+        const attrs = item.attributes || item;
+        const coverMedia = attrs.coverImage?.data ? attrs.coverImage.data.attributes : (attrs.coverImage || null);
+        const photosData = attrs.photos?.data ? attrs.photos.data : (Array.isArray(attrs.photos) ? attrs.photos : []);
+
+        const photoList = photosData.map((p: any, idx: number) => {
+          const pAttrs = p.attributes || p;
+          return {
+            id: p.id || idx,
+            url: getStrapiMedia(pAttrs?.url || pAttrs),
+            caption: pAttrs?.alternativeText || pAttrs?.caption || '',
+          };
+        });
+
+        const coverUrl = getStrapiMedia(coverMedia?.url || coverMedia);
+
+        return {
+          id: item.id,
+          slug: attrs.slug || `gunun-fotografi-${item.id}`,
+          title: attrs.title || '',
+          summary: cleanDumpArtifacts(attrs.summary, true) || '',
+          image: coverUrl,
+          credit: attrs.credit || 'Yeni Yaşam Arşivi',
+          date: attrs.publishDate
+            ? new Date(attrs.publishDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+            : 'Bugün',
+          location: attrs.location || undefined,
+          photos: photoList.length > 0 ? photoList : [{ id: 1, url: coverUrl, caption: attrs.title }],
+        };
+      });
+
+      const seen = new Set<string>();
+      const combined = [...strapiItems, ...DEFAULT_DAILY_PHOTOS];
+      return combined.filter((p) => {
+        if (seen.has(p.slug)) return false;
+        seen.add(p.slug);
+        return true;
+      });
+    }
+  } catch (err) {
+    console.error('getDailyPhotos error:', err);
+  }
+
+  return DEFAULT_DAILY_PHOTOS;
+}
+
+let siteSettingsCache: { settings: SiteSettings; timestamp: number } | null = null;
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  if (siteSettingsCache && Date.now() - siteSettingsCache.timestamp < 30000) {
+    return siteSettingsCache.settings;
+  }
+
+  try {
+    const res = await fetchStrapi<any>('/site-ayari', {}, { next: { revalidate: 30 } });
+    if (res && res.data) {
+      const d = res.data;
+      const settings: SiteSettings = {
+        twitter: d.twitter || DEFAULT_SITE_SETTINGS.twitter,
+        facebook: d.facebook || DEFAULT_SITE_SETTINGS.facebook,
+        bluesky: d.bluesky || DEFAULT_SITE_SETTINGS.bluesky,
+        youtube: d.youtube || DEFAULT_SITE_SETTINGS.youtube,
+        telegram: d.telegram || DEFAULT_SITE_SETTINGS.telegram,
+        tiktok: d.tiktok || DEFAULT_SITE_SETTINGS.tiktok,
+        whatsapp: d.whatsapp || DEFAULT_SITE_SETTINGS.whatsapp,
+        instagram: d.instagram || null,
+        email: d.email || DEFAULT_SITE_SETTINGS.email,
+        siteTitle: d.siteTitle || DEFAULT_SITE_SETTINGS.siteTitle,
+        siteDescription: d.siteDescription || DEFAULT_SITE_SETTINGS.siteDescription,
+      };
+      siteSettingsCache = { settings, timestamp: Date.now() };
+      return settings;
+    }
+  } catch (err) {
+    console.error('getSiteSettings error:', err);
+  }
+
+  return DEFAULT_SITE_SETTINGS;
+}
+
