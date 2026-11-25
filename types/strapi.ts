@@ -93,6 +93,7 @@ export interface Article {
   videoUrl?: string;
   readTime?: string;
   views?: number;
+  scheduledPublishAt?: string;
 }
 
 export interface VideoMedia {
@@ -155,6 +156,25 @@ export interface Karikatur {
   description?: string;
 }
 
+export interface DailyPhotoItem {
+  id: number | string;
+  url: string;
+  caption?: string;
+}
+
+export interface DailyPhoto {
+  id: number | string;
+  slug: string;
+  title: string;
+  summary: string;
+  image: string;
+  credit: string;
+  date: string;
+  location?: string;
+  articleSlug?: string;
+  photos?: DailyPhotoItem[];
+}
+
 export interface NewsletterSubscriber {
   id?: number | string;
   email: string;
@@ -180,3 +200,31 @@ export interface StrapiResponse<T> {
     message: string;
   };
 }
+
+export interface SiteSettings {
+  twitter: string;
+  facebook: string;
+  bluesky: string;
+  youtube: string;
+  telegram: string;
+  tiktok: string;
+  whatsapp: string;
+  instagram?: string | null;
+  email: string;
+  siteTitle?: string;
+  siteDescription?: string;
+}
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  twitter: 'https://x.com/yeniyasamnews6',
+  facebook: 'https://www.facebook.com/profile.php?id=61594460757919',
+  bluesky: 'https://bsky.app/profile/yeniyasamgazetesi.bsky.social',
+  youtube: 'https://www.youtube.com/@yeniyasammedia',
+  telegram: 'https://web.telegram.org/k/#@yeniyasamgazetesi',
+  tiktok: 'https://www.tiktok.com/@yeniyasamgazete',
+  whatsapp: 'https://whatsapp.com/channel/0029VbDs4DAEAKWHDAbQRX03',
+  instagram: null,
+  email: 'yeniyasamgazetesi@gmail.com',
+  siteTitle: 'Yeni Yaşam Gazetesi',
+  siteDescription: 'Halkın Özgür Sesi',
+};
