@@ -29,6 +29,8 @@ const config: Core.Config.Middlewares = [
         'http://127.0.0.1:3000',
         'https://yeniyasamgazetesi5.com',
         'https://www.yeniyasamgazetesi5.com',
+        ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+        'https://*.vercel.app',
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
