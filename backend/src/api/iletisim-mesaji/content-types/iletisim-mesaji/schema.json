@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "iletisim_mesajlari",
+  "info": {
+    "singularName": "iletisim-mesaji",
+    "pluralName": "iletisim-mesajlari",
+    "displayName": "✉️ İletişim Mesajları",
+    "description": "Web sitesi iletişim formundan gelen okuyucu mesajları"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "subject": {
+      "type": "string",
+      "required": true
+    },
+    "message": {
+      "type": "text",
+      "required": true
+    },
+    "isRead": {
+      "type": "boolean",
+      "default": false
+    },
+    "ipAddress": {
+      "type": "string"
+    }
+  }
+}
