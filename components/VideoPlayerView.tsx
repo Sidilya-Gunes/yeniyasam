@@ -421,7 +421,6 @@ export default function VideoPlayerView({ initialVideo, allVideos }: VideoPlayer
           <button
             type="button"
             onClick={() => handleShare('x')}
-            className="share-btn share-x"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -434,6 +433,7 @@ export default function VideoPlayerView({ initialVideo, allVideos }: VideoPlayer
               fontWeight: 600,
               border: 'none',
               cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
           >
             X'te Paylaş
@@ -454,6 +454,7 @@ export default function VideoPlayerView({ initialVideo, allVideos }: VideoPlayer
               fontWeight: 600,
               border: 'none',
               cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
           >
             Facebook
@@ -474,6 +475,7 @@ export default function VideoPlayerView({ initialVideo, allVideos }: VideoPlayer
               fontWeight: 600,
               border: 'none',
               cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
           >
             WhatsApp
@@ -494,6 +496,7 @@ export default function VideoPlayerView({ initialVideo, allVideos }: VideoPlayer
               fontWeight: 600,
               border: 'none',
               cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
           >
             Telegram
@@ -514,6 +517,7 @@ export default function VideoPlayerView({ initialVideo, allVideos }: VideoPlayer
               fontSize: '0.8rem',
               fontWeight: 600,
               cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
           >
             {copied ? '✓ Kopyalandı' : 'Bağlantıyı Kopyala'}

@@ -1,9 +1,10 @@
 
 import Link from 'next/link';
-import { Article, Category, Author, DailyFeature, VideoMedia } from '@/types/strapi';
-import { getStrapiMedia } from '@/lib/strapi';
+import { Article, Category, Author, DailyFeature, VideoMedia, DailyPhoto } from '@/types/strapi';
+import { getStrapiMedia, DEFAULT_DAILY_PHOTOS } from '@/lib/strapi';
 import NewsSlider from '@/components/NewsSlider';
 import VideoCarousel from '@/components/VideoCarousel';
+import DailyPhotoSlider from '@/components/DailyPhotoSlider';
 
 interface MainContentProps {
   articles: Article[];
@@ -11,10 +12,11 @@ interface MainContentProps {
   authors: Author[];
   dailyFeatures?: {
     manset: DailyFeature;
-    jin: DailyFeature;
-    karikatur: DailyFeature;
+    jin?: DailyFeature;
+    karikatur?: DailyFeature;
   };
   videos?: VideoMedia[];
+  dailyPhotos?: DailyPhoto[];
 }
 
 export default function MainContent({
@@ -23,6 +25,7 @@ export default function MainContent({
   authors,
   dailyFeatures,
   videos,
+  dailyPhotos,
 }: MainContentProps) {
   // Slider için manşet haberleri (En fazla 10 manşet, en yeni 10 haber alınır)
   const headlineArticles = (
@@ -31,47 +34,83 @@ export default function MainContent({
       : articles
   ).slice(0, 10);
 
-  // Sol söyleşi/dosya/özel haber kartları (Strapi'den gelenler öncelikli, eksik kalanlar fallback ile tamamlanır)
-  const defaultOpinionCards = [
-    {
-      kicker: 'Söyleşi',
-      cat: 'kadin',
-      title: 'Bizleri birleştiren noktalara dikkat kesilmeliyiz',
-      author: 'Nezahat Doğan',
-      thumb: '/assets/photos/haber-foto12.jpeg',
-      slug: 'bizleri-birlestiren-noktalara-dikkat-kesilmeliyiz',
-    },
-    {
-      kicker: 'Dosya',
-      cat: 'ekonomi',
-      title: 'Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri',
-      author: 'Ahmet Kaya',
-      thumb: '/assets/photos/haber-foto1.jpg',
-      slug: 'yerel-yonetimlerde-katilimci-demokrasi-deneyimleri',
-    },
-    {
-      kicker: 'Özel Haber',
-      cat: 'ozel-haber',
-      title: 'Politik alan kolektif yaratım alanıdır',
-      author: 'Dilzar Dîlok',
-      thumb: '/assets/photos/haber-foto4.jpg',
-      slug: 'politik-alan-kolektif-yaratim-alanidir',
-    },
-  ];
+  // Sol söyleşi/özel haber/dosya kartları (Sıralama: 1. Söyleşi, 2. Özel Haber, 3. Dosya)
+  const soylesiArticle = articles.find(
+    (a) => a.category?.slug === 'soylesi' || a.category?.slug === 'forum' || (a.kicker && a.kicker.toLowerCase().includes('söyleşi'))
+  );
 
-  const soylesiList = articles.filter((a) => a.category?.slug === 'soylesi' || a.category?.slug === 'forum');
-  const liveOpinionCards = soylesiList.map((item) => ({
-    kicker: item.kicker || item.category?.name || 'Söyleşi',
-    cat: item.category?.slug || 'soylesi',
-    title: item.title,
-    author: item.author?.name || 'Yeni Yaşam',
-    thumb: getStrapiMedia(item.coverImage, item.id),
-    slug: item.slug,
-  }));
+  const ozelArticle = articles.find(
+    (a) =>
+      a.slug !== soylesiArticle?.slug &&
+      (a.category?.slug === 'ozel-haber' || (a.kicker && a.kicker.toLowerCase().includes('özel')) || a.isFeatured)
+  );
+
+  const dosyaArticle = articles.find(
+    (a) =>
+      a.slug !== soylesiArticle?.slug &&
+      a.slug !== ozelArticle?.slug &&
+      (a.category?.slug === 'dosya' || (a.kicker && a.kicker.toLowerCase().includes('dosya')) || a.category?.slug === 'ekonomi' || a.category?.slug === 'analiz')
+  );
+
+  const defaultSoylesi = {
+    kicker: 'SÖYLEŞİ',
+    cat: 'soylesi',
+    title: 'Neoliberalizmin enkazı: Fransız Cumhuriyeti',
+    author: 'Yeni Yaşam',
+    thumb: '/assets/photos/haber-foto12.jpeg',
+    slug: 'neoliberalizmin-enkazi-fransiz-cumhuriyeti',
+  };
+
+  const defaultOzelHaber = {
+    kicker: 'ÖZEL HABER',
+    cat: 'ozel-haber',
+    title: 'Manisa’da bütçe forumu: Bütçe halkın ihtiyaçlarını esas almıyor',
+    author: 'Yeni Yaşam',
+    thumb: '/assets/photos/haber-foto4.jpg',
+    slug: 'manisada-butce-forumu-butce-halkin-ihtiyaclarini-esas-almiyor',
+  };
+
+  const defaultDosya = {
+    kicker: 'DOSYA',
+    cat: 'dosya',
+    title: 'Yerel Yönetimlerde Katılımcı Demokrasi Deneyimleri',
+    author: 'Ahmet Güneş',
+    thumb: '/assets/photos/haber-foto1.jpg',
+    slug: 'yerel-yonetimlerde-katilimci-demokrasi-deneyimleri',
+  };
+
   const opinionCards = [
-    ...liveOpinionCards,
-    ...defaultOpinionCards.filter((d) => !liveOpinionCards.some((l) => l.slug === d.slug)),
-  ].slice(0, 3);
+    soylesiArticle
+      ? {
+          kicker: 'SÖYLEŞİ',
+          cat: 'soylesi',
+          title: soylesiArticle.title,
+          author: soylesiArticle.author?.name || 'Yeni Yaşam',
+          thumb: getStrapiMedia(soylesiArticle.coverImage, soylesiArticle.id),
+          slug: soylesiArticle.slug,
+        }
+      : defaultSoylesi,
+    ozelArticle
+      ? {
+          kicker: 'ÖZEL HABER',
+          cat: 'ozel-haber',
+          title: ozelArticle.title,
+          author: ozelArticle.author?.name || 'Yeni Yaşam',
+          thumb: getStrapiMedia(ozelArticle.coverImage, ozelArticle.id),
+          slug: ozelArticle.slug,
+        }
+      : defaultOzelHaber,
+    dosyaArticle
+      ? {
+          kicker: 'DOSYA',
+          cat: 'dosya',
+          title: dosyaArticle.title,
+          author: dosyaArticle.author?.name || 'Yeni Yaşam',
+          thumb: getStrapiMedia(dosyaArticle.coverImage, dosyaArticle.id),
+          slug: dosyaArticle.slug,
+        }
+      : defaultDosya,
+  ];
 
   const renderCategoryRow = (catTitle: string, catSlug: string, fallbackCards: any[]) => {
     const catArticles = articles.filter((a) => a.category?.slug === catSlug);
@@ -183,49 +222,21 @@ export default function MainContent({
       {/* Video Carousel */}
       <VideoCarousel videos={videos} />
 
-      {/* Günlük Özellikler (Manşet, Jin, Karikatür, Abone Ol) */}
+      {/* Günlük Özellikler (Manşet ve Abone Ol) */}
       <section className="daily-features-section">
         <div className="daily-features-grid">
           <article className="daily-card daily-card--manset">
             <div className="daily-card-header">
-              <h3>MANŞET</h3>
-              <span className="daily-arrow">❯</span>
+              <Link href="/manset" className="daily-card-header-link">
+                <h3>MANŞET</h3>
+                <span className="daily-arrow">❯</span>
+              </Link>
             </div>
             <Link href="/manset" className="daily-card-link">
               <div className="daily-card-body">
                 <img
                   src={typeof dailyFeatures?.manset?.image === 'string' ? dailyFeatures.manset.image : '/assets/photos/yy.jpg'}
                   alt={dailyFeatures?.manset?.captionTitle || "Bugünün Yeni Yaşamı"}
-                />
-              </div>
-            </Link>
-          </article>
-
-          <article className="daily-card daily-card--jin">
-            <div className="daily-card-header">
-              <h3>JIN DERGİ</h3>
-              <span className="daily-arrow">❯</span>
-            </div>
-            <Link href="/jin-dergi" className="daily-card-link">
-              <div className="daily-card-body">
-                <img
-                  src={typeof dailyFeatures?.jin?.image === 'string' ? dailyFeatures.jin.image : '/assets/photos/jin.jpeg'}
-                  alt={dailyFeatures?.jin?.title || "Jin Dergi"}
-                />
-              </div>
-            </Link>
-          </article>
-
-          <article className="daily-card daily-card--karikatur">
-            <div className="daily-card-header">
-              <h3>KARİKATÜR</h3>
-              <span className="daily-arrow">❯</span>
-            </div>
-            <Link href="/karikatur" className="daily-card-link">
-              <div className="daily-card-body">
-                <img
-                  src={typeof dailyFeatures?.karikatur?.image === 'string' ? dailyFeatures.karikatur.image : '/assets/photos/karikatur.jpeg'}
-                  alt={dailyFeatures?.karikatur?.captionTitle || "Günün Karikatürü"}
                 />
               </div>
             </Link>
@@ -366,7 +377,7 @@ export default function MainContent({
                 {/* ÖZEL HABER */}
         {(() => {
           const ozelList = articles.filter(
-            (a) => a.category?.slug === 'ozel-haber' || (a.kicker && a.kicker.toLowerCase().includes('özel'))
+            (a) => a.category?.slug === 'ozel-haber' || Boolean(a.kicker && a.kicker.toLowerCase().includes('özel')) || Boolean(a.isFeatured)
           );
           const defaultFeatureMain = {
             title: 'Dün erken, yarın geç, şimdi zamanıdır!',
@@ -451,52 +462,8 @@ export default function MainContent({
 
 
 
-            {/* Günün Fotosu */}
-      {(() => {
-        const photoArticle = articles.find((a) => a.category?.slug === 'gunun-fotografi');
-        const photoImg = photoArticle ? getStrapiMedia(photoArticle.coverImage, photoArticle.id) : '/assets/photos/3556.jpg';
-        const photoTitle = photoArticle ? photoArticle.title : "Kuzey Suriye'de gerginlik sürüyor";
-        const photoSummary = photoArticle
-          ? photoArticle.summary
-          : 'Bölgede devam eden çatışmalar sivil halkı zorluyor. Yerel kaynaklara göre son 24 saatte onlarca aile yerinden edildi.';
-        const photoDate = photoArticle
-          ? new Date(photoArticle.publishedAt).toLocaleDateString('tr-TR')
-          : '27.10.2026';
-        const photoSlug = photoArticle?.slug;
-
-        return (
-          <section className="daily-photo-section">
-            <div className="container">
-              <div className="daily-photo-header">
-                <h2>
-                  <Link href="/kategori/kultur-sanat" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    GÜNÜN FOTOSU <span>❯</span>
-                  </Link>
-                </h2>
-              </div>
-              <div className="daily-photo-grid">
-                <div className="daily-photo-img-wrap">
-                  {photoSlug ? (
-                    <Link href={`/haber/${photoSlug}`}>
-                      <img src={photoImg} alt={photoTitle} />
-                    </Link>
-                  ) : (
-                    <img src={photoImg} alt={photoTitle} />
-                  )}
-                </div>
-                <div className="daily-photo-caption">
-                  <span className="caption-tag">FOTOĞRAFIN HİKAYESİ</span>
-                  <h3 className="caption-title">
-                    {photoSlug ? <Link href={`/haber/${photoSlug}`}>{photoTitle}</Link> : photoTitle}
-                  </h3>
-                  <p className="caption-desc">{photoSummary}</p>
-                  <span className="caption-meta">Fotoğraf: Yeni Yaşam Arşivi · {photoDate}</span>
-                </div>
-              </div>
-            </div>
-          </section>
-        );
-      })()}
+      {/* Günün Fotosu Slider */}
+      <DailyPhotoSlider photos={dailyPhotos && dailyPhotos.length > 0 ? dailyPhotos : DEFAULT_DAILY_PHOTOS} />
 
       {/* 4 Kolonlu Haber Bölümü */}
       <section className="multi-column-news-section">
@@ -840,7 +807,7 @@ export default function MainContent({
       {/* ÖZEL HABER Blok */}
       {(() => {
         const ozelItems = articles.filter(
-          (a) => a.category?.slug === 'ozel-haber' || (a.kicker && a.kicker.toLowerCase().includes('özel'))
+          (a) => a.category?.slug === 'ozel-haber' || Boolean(a.kicker && a.kicker.toLowerCase().includes('özel')) || Boolean(a.isFeatured)
         );
         const fallbackOzel = [
           {
