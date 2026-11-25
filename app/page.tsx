@@ -8,17 +8,18 @@
 // Allah û Ekber Ve Lîllahîl Hamd.
 
 import MainContent from '@/components/MainContent';
-import { getArticles, getCategories, getAuthors, getDailyFeatures, getVideos } from '@/lib/strapi';
+import { getArticles, getCategories, getAuthors, getDailyFeatures, getVideos, getDailyPhotos } from '@/lib/strapi';
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [articles, categories, authors, dailyFeatures, videos] = await Promise.all([
+  const [articles, categories, authors, dailyFeatures, videos, dailyPhotos] = await Promise.all([
     getArticles(),
     getCategories(),
     getAuthors(),
     getDailyFeatures(),
     getVideos(),
+    getDailyPhotos(),
   ]);
 
   return (
@@ -29,6 +30,7 @@ export default async function HomePage() {
         authors={authors}
         dailyFeatures={dailyFeatures}
         videos={videos}
+        dailyPhotos={dailyPhotos}
       />
     </main>
   );

@@ -14,8 +14,10 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/context/AuthContext';
+import { getSiteSettings } from '@/lib/strapi';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://yeniyasamgazetesi5.com'),
   title: {
     default: `${SITE.name} — Özgür ve Bağımsız Habercilik`,
     template: `%s — ${SITE.name}`,
@@ -31,18 +33,20 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const siteSettings = await getSiteSettings();
+
   return (
     <html lang="tr" suppressHydrationWarning>
       <body>
         <AuthProvider>
-          <Header />
+          <Header initialSettings={siteSettings} />
           {children}
-          <Footer />
+          <Footer initialSettings={siteSettings} />
           <ScrollToTop />
         </AuthProvider>
       </body>
