@@ -61,6 +61,13 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::yazar.yazar"
+    },
+    "scheduledPublishAt": {
+      "type": "datetime"
+    },
+    "includeInNewsletter": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
