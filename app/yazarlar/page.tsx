@@ -30,11 +30,23 @@ export default async function YazarlarPage({ searchParams }: YazarlarPageProps) 
   const startIndex = (validPage - 1) * pageSize;
   const currentAuthors = allAuthors.slice(startIndex, startIndex + pageSize);
 
-  // Sayfa numaraları dizisi
-  const pageNumbers: number[] = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
+  // Akıllı sayfalama dizisi (Maksimum 7 buton + üç nokta)
+  const getPageItems = (): (number | string)[] => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const items: (number | string)[] = [1];
+    const start = Math.max(2, validPage - 1);
+    const end = Math.min(totalPages - 1, validPage + 1);
+
+    if (start > 2) items.push('ellipsis-start');
+    for (let i = start; i <= end; i++) items.push(i);
+    if (end < totalPages - 1) items.push('ellipsis-end');
+    items.push(totalPages);
+    return items;
+  };
+
+  const pageItems = getPageItems();
 
   return (
     <main className="site-main container">
@@ -78,7 +90,14 @@ export default async function YazarlarPage({ searchParams }: YazarlarPageProps) 
             <span className="page-arrow disabled">‹</span>
           )}
 
-          {pageNumbers.map((p) => {
+          {pageItems.map((p, idx) => {
+            if (typeof p === 'string') {
+              return (
+                <span key={p || idx} className="page-ellipsis" style={{ padding: '0 0.4rem', color: 'var(--text-soft)' }}>
+                  …
+                </span>
+              );
+            }
             if (p === validPage) {
               return (
                 <span key={p} className="page-num active">
