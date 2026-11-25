@@ -28,13 +28,17 @@
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "pdfFile": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["files"]
+      "allowedTypes": [
+        "files"
+      ]
     },
     "description": {
       "type": "text"
@@ -44,6 +48,9 @@
     },
     "highlightArticles": {
       "type": "text"
+    },
+    "scheduledPublishAt": {
+      "type": "datetime"
     }
   }
 }

@@ -35,6 +35,13 @@
     },
     "publishDate": {
       "type": "date"
+    },
+    "scheduledPublishAt": {
+      "type": "datetime"
+    },
+    "includeInNewsletter": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
