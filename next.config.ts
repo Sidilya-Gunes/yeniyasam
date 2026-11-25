@@ -2,10 +2,26 @@
 
 import type { NextConfig } from 'next';
 
+const strapiEnvUrl = process.env.NEXT_PUBLIC_STRAPI_URL;
+let dynamicStrapiPattern = null;
+if (strapiEnvUrl) {
+  try {
+    const parsed = new URL(strapiEnvUrl);
+    dynamicStrapiPattern = {
+      protocol: parsed.protocol.replace(':', '') as 'http' | 'https',
+      hostname: parsed.hostname,
+      ...(parsed.port ? { port: parsed.port } : {}),
+      pathname: '/**',
+    };
+  } catch {}
+}
+
 const nextConfig: NextConfig = {
+  ...(process.env.BUILD_STANDALONE === 'true' ? { output: 'standalone' } : {}),
   reactStrictMode: true,
   images: {
     remotePatterns: [
+      ...(dynamicStrapiPattern ? [dynamicStrapiPattern] : []),
       {
         protocol: 'http',
         hostname: 'localhost',
@@ -25,7 +41,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.yeniyasamgazetesi5.com',
+        hostname: '*.yeniyasamgazetesi*.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.yeniyasam*.com',
         pathname: '/**',
       },
       {

@@ -1,0 +1,55 @@
+services:
+  # ==========================================
+  # Strapi Backend (Headless CMS)
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: yeniyasam-backend
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=1337
+      - APP_KEYS=qrEFaPv77deqnwXettqI6A==,utBJwmABSgKg9YRS2A+lFQ==,1Y69gCu35GQqv9s3+cKWOQ==,MVu9nMune22jbqXTreeEIw==
+      - API_TOKEN_SALT=NslsULuD/sMUSuDRKOpLHw==
+      - ADMIN_JWT_SECRET=Q8NYYy3SAc9LynwR5F4j3w==
+      - JWT_SECRET=k8P6tGH5SKpiGmK+6U1anw==
+      - TRANSFER_TOKEN_SALT=iZbbKstBPFyCDgihJTB8GQ==
+      - ENCRYPTION_KEY=j4S295wW8socHLiXcc/klg==
+      - DATABASE_CLIENT=sqlite
+      - DATABASE_FILENAME=.tmp/data.db
+    volumes:
+      # Veritabanı ve yüklenen görsellerin host üzerinde kalıcı olarak saklanması
+      - ./backend/.tmp:/opt/app/.tmp
+      - ./backend/public/uploads:/opt/app/public/uploads
+    networks:
+      - yeniyasam-network
+
+  # ==========================================
+  # Next.js Frontend (Haber Portalı)
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yeniyasam-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_STRAPI_URL=${NEXT_PUBLIC_STRAPI_URL:-http://backend:1337}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    depends_on:
+      - backend
+    networks:
+      - yeniyasam-network
+
+networks:
+  yeniyasam-network:
+    driver: bridge
