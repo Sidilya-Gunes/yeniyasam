@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "gunluk_bultenler",
+  "info": {
+    "singularName": "gunluk-bulten",
+    "pluralName": "gunluk-bultenler",
+    "displayName": "📰 Günlük E-Bülten (Saat 15:00)",
+    "description": "Her gün saat 15:00'te abonelere gidecek bülten yönetimi ve haber seçimi"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "sendDate": {
+      "type": "date",
+      "required": true,
+      "unique": true
+    },
+    "editorNote": {
+      "type": "text"
+    },
+    "mansetler": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::guncel-haberi.guncel-haberi"
+    },
+    "ozelHaberler": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::guncel-haberi.guncel-haberi"
+    },
+    "dosyalar": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::politika-haberi.politika-haberi"
+    },
+    "koseYazilari": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::makale.makale"
+    },
+    "autoFallback": {
+      "type": "boolean",
+      "default": true
+    },
+    "isSent": {
+      "type": "boolean",
+      "default": false
+    },
+    "sentAt": {
+      "type": "datetime"
+    },
+    "recipientCount": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}
