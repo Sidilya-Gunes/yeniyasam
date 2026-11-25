@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bulten_aboneleri",
+  "info": {
+    "singularName": "bulten-abonesi",
+    "pluralName": "bulten-aboneleri",
+    "displayName": "📬 Bülten Aboneleri",
+    "description": "Footer'dan e-bültene kayıt olan okuyucular"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "subscribedAt": {
+      "type": "datetime"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "source": {
+      "type": "string",
+      "default": "Web Sitesi (Footer)"
+    }
+  }
+}
