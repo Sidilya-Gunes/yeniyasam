@@ -1,0 +1,58 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_ayarlari",
+  "info": {
+    "singularName": "site-ayari",
+    "pluralName": "site-ayarlari",
+    "displayName": "⚙️ Site & Sosyal Medya Ayarları",
+    "description": "Yeni Yaşam Gazetesi sosyal medya hesapları ve genel site ayarları"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "twitter": {
+      "type": "string",
+      "default": "https://x.com/yeniyasamnews6"
+    },
+    "facebook": {
+      "type": "string",
+      "default": "https://www.facebook.com/profile.php?id=61594460757919"
+    },
+    "bluesky": {
+      "type": "string",
+      "default": "https://bsky.app/profile/yeniyasamgazetesi.bsky.social"
+    },
+    "youtube": {
+      "type": "string",
+      "default": "https://www.youtube.com/@yeniyasammedia"
+    },
+    "telegram": {
+      "type": "string",
+      "default": "https://web.telegram.org/k/#@yeniyasamgazetesi"
+    },
+    "tiktok": {
+      "type": "string",
+      "default": "https://www.tiktok.com/@yeniyasamgazete"
+    },
+    "whatsapp": {
+      "type": "string",
+      "default": "https://whatsapp.com/channel/0029VbDs4DAEAKWHDAbQRX03"
+    },
+    "instagram": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email",
+      "default": "yeniyasamgazetesi@gmail.com"
+    },
+    "siteTitle": {
+      "type": "string",
+      "default": "Yeni Yaşam Gazetesi"
+    },
+    "siteDescription": {
+      "type": "text"
+    }
+  }
+}
