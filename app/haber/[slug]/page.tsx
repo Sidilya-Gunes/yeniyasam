@@ -64,6 +64,13 @@ export default async function HaberDetayPage({ params }: PageProps) {
 
   const categoryName = article.category?.name || 'Güncel';
   const categorySlug = article.category?.slug || 'guncel';
+  const isKoseYazisi =
+    categorySlug === 'yazarlar' ||
+    categorySlug === 'makale' ||
+    categoryName.toLowerCase().includes('köşe') ||
+    categoryName.toLowerCase().includes('kose') ||
+    categoryName.toLowerCase().includes('makale') ||
+    Boolean(article.kicker?.toLowerCase().includes('köşe'));
 
   // 1. İlgili Haberler: Öncelikle aynı kategorideki haberleri çek (mevcut haber hariç)
   let relatedArticles: Article[] = [];
@@ -94,6 +101,9 @@ export default async function HaberDetayPage({ params }: PageProps) {
     minute: '2-digit',
   });
 
+  const coverUrl = getStrapiMedia(article.coverImage);
+  const hasRealCoverImage = Boolean(coverUrl && !coverUrl.includes('/assets/photos/haber-foto'));
+
   return (
     <main className="site-main container">
       <div className="article-layout">
@@ -114,18 +124,25 @@ export default async function HaberDetayPage({ params }: PageProps) {
 
           {/* Meta */}
           <div className="article-meta">
-            <span className="meta-source">
-              <strong>Haber:</strong> {article.author?.name || 'Sema Bingöl \\ MA'}
+            <span className="meta-source" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <strong>{isKoseYazisi ? 'Yazar:' : 'Haber:'}</strong>
+              {isKoseYazisi && article.author?.slug ? (
+                <Link href={`/yazar/${article.author.slug}`} style={{ color: 'inherit', textDecoration: 'underline' }}>
+                  {article.author.name}
+                </Link>
+              ) : (
+                article.author?.name || 'Yeni Yaşam'
+              )}
             </span>
             <span className="meta-sep">·</span>
             <span className="meta-item">{formattedDate}</span>
             <span className="meta-sep">·</span>
             <span className="meta-item">{formattedTime}</span>
             <span className="meta-sep">·</span>
-            <span className="meta-item">5 dk okuma</span>
+            <span className="meta-item">{article.readTime || '5 dk okuma'}</span>
           </div>
 
-          {/* Video veya Ana Görsel Hero */}
+          {/* Video veya Ana Görsel Hero (Köşe yazılarında veya kapak görseli genel yedek olan haberlerde sahte görsel basılmaz) */}
           {article.videoUrl ? (
             <div
               className="article-video-hero"
@@ -148,15 +165,15 @@ export default async function HaberDetayPage({ params }: PageProps) {
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
               />
             </div>
-          ) : (
+          ) : !isKoseYazisi && hasRealCoverImage ? (
             <figure className="article-hero">
-              <img src={getStrapiMedia(article.coverImage)} alt={article.title} />
+              <img src={coverUrl} alt={article.title} />
               <figcaption>
                 <span className="fig-caption">{article.title}</span>
                 <span className="fig-credit">Fotoğraf: Yeni Yaşam Arşivi</span>
               </figcaption>
             </figure>
-          )}
+          ) : null}
 
           {/* Özet Lead Grubu */}
           {article.summary && (
@@ -168,7 +185,16 @@ export default async function HaberDetayPage({ params }: PageProps) {
           {/* Makale Gövdesi */}
           <div className="article-body">
             {article.content ? (
-              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(article.content) as string) }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(marked.parse(article.content) as string, {
+                    ADD_ATTR: ['onerror'],
+                  }).replace(
+                    /<img\s+/gi,
+                    '<img onerror="this.style.display=\'none\'; if(this.parentElement && this.parentElement.tagName === \'A\') this.parentElement.style.display=\'none\';" '
+                  ),
+                }}
+              />
             ) : null}
           </div>
 

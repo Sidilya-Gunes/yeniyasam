@@ -41,6 +41,7 @@ export default async function KategoriDetayPage({ params, searchParams }: PagePr
   if (slug === 'karikatur') redirect('/karikatur');
   if (slug === 'manset') redirect('/manset');
   if (slug === 'jin' || slug === 'jin-dergi') redirect('/jin-dergi');
+  if (slug === 'gunun-fotografi') redirect('/gunun-fotografi');
   if (slug === 'yazarlar') redirect('/yazarlar');
 
   const category = await getCategoryBySlug(slug);
