@@ -1,25 +1,11 @@
-# Bağımlılıklar ve Geçici Dosyalar
 node_modules
 .next
-out
-build
-*.tsbuildinfo
-tmp
-
-# Hassas Veriler, Abone Listeleri & Raporlar
-all-subscribers.json
-migration_report.json
-*.sqlite
-*.db
-test_*.js
-test*.js
-
-# Ortam Değişkenleri & Gizli Anahtarlar
-.env
-.env*.local
-.env.production
 .git
 .gitignore
-.vscode
-.idea
+backend
+README.md
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env*.local
