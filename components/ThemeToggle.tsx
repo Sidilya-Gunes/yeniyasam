@@ -7,16 +7,29 @@ export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('darkMode') === 'on';
-    if (saved) {
+    const isCurrentlyDark =
+      document.body.classList.contains('dark-mode') ||
+      localStorage.getItem('darkMode') === 'on';
+    if (isCurrentlyDark) {
       document.body.classList.add('dark-mode');
       document.documentElement.classList.add('dark');
       setIsDark(true);
     }
+
+    const handleThemeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isDark: boolean }>;
+      if (customEvent.detail) {
+        setIsDark(customEvent.detail.isDark);
+      }
+    };
+
+    window.addEventListener('theme-change', handleThemeChange);
+    return () => window.removeEventListener('theme-change', handleThemeChange);
   }, []);
 
   const toggleTheme = () => {
-    const nextDark = !isDark;
+    const isCurrentlyDark = document.body.classList.contains('dark-mode');
+    const nextDark = !isCurrentlyDark;
     setIsDark(nextDark);
     if (nextDark) {
       document.body.classList.add('dark-mode');
@@ -27,6 +40,7 @@ export default function ThemeToggle() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('darkMode', 'off');
     }
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: { isDark: nextDark } }));
   };
 
   return (
