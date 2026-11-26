@@ -217,6 +217,10 @@ export function cleanDumpArtifacts(text?: string | null, isSummary = false): str
   if (!text || typeof text !== 'string') return '';
   let s = text;
 
+  // 0. Excerpt/Paragraf basindaki artık rn kalıntılarını temizle
+  s = s.replace(/^(?:rn\s*|\s*rn\s+)+/gi, '');
+  s = s.replace(/(?:^|\n)\s*rn\s+/gi, '\n');
+
   // 1. rn ve nn kalıntılarını temizle (WordPress ve dump aktarımından kalan kaçış hataları)
   s = s.replace(/(?:r\s*n){2,}/gi, isSummary ? ' ' : '\n\n');
   s = s.replace(/([>)"’'…\.\?\!])\s*nn+\s*/gi, isSummary ? '$1 ' : '$1\n\n');

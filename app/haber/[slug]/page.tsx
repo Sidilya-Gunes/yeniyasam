@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${article.title} — Yeni Yaşam Gazetesi`,
+    title: article.title,
     description: article.summary,
     openGraph: {
       title: article.title,
@@ -115,7 +115,7 @@ export default async function HaberDetayPage({ params }: PageProps) {
             </Link>
             <span className="breadcrumb-sep">›</span>
             <Link href={`/kategori/${categorySlug}`} className="breadcrumb-item">
-              {categoryName.toUpperCase()}
+              {categoryName.toLocaleUpperCase("tr-TR")}
             </Link>
           </nav>
 
@@ -175,12 +175,14 @@ export default async function HaberDetayPage({ params }: PageProps) {
             </figure>
           ) : null}
 
-          {/* Özet Lead Grubu */}
-          {article.summary && (
-            <div className="article-lead-group">
-              <p className="article-lead">{article.summary}</p>
-            </div>
-          )}
+          {/* Özet Lead Grubu - İçerik aynı özet cümlesiyle başlamıyorsa göster */}
+          {article.summary &&
+            (!article.content ||
+              !article.content.trim().toLowerCase().startsWith(article.summary.trim().toLowerCase().slice(0, 40))) && (
+              <div className="article-lead-group">
+                <p className="article-lead">{article.summary}</p>
+              </div>
+            )}
 
           {/* Makale Gövdesi */}
           <div className="article-body">
