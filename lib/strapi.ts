@@ -850,7 +850,7 @@ export async function getVideoBySlug(slug: string): Promise<VideoMedia | null> {
 
 const searchCache = new Map<string, { articles: Article[]; timestamp: number }>();
 const authorSearchCache = new Map<string, { authors: Author[]; timestamp: number }>();
-const SEARCH_CACHE_TTL_MS = 2 * 60 * 1000; // 2 dakika
+const SEARCH_CACHE_TTL_MS = 0; // Arama gerçek zamanlı (no-store) çalışır
 
 export async function searchArticles(query: string): Promise<Article[]> {
   const q = query.trim();
@@ -881,13 +881,17 @@ export async function searchArticles(query: string): Promise<Article[]> {
   try {
     const promises = searchEndpoints.map(async (cat) => {
       try {
-        const data = await fetchStrapi<any[]>(cat.endpoint, {
-          'filters[title][$containsi]': q,
-          'pagination[withCount]': false,
-          'pagination[pageSize]': 12,
-          populate: '*',
-          sort: 'createdAt:desc',
-        });
+        const data = await fetchStrapi<any[]>(
+          cat.endpoint,
+          {
+            'filters[title][$containsi]': q,
+            'pagination[withCount]': false,
+            'pagination[pageSize]': 12,
+            populate: '*',
+            sort: 'createdAt:desc',
+          },
+          { cache: 'no-store' }
+        );
 
         if (data && Array.isArray(data.data)) {
           return data.data.map((i) => normalizeStrapiItem(i, cat));
@@ -942,12 +946,16 @@ export async function searchAuthors(query: string): Promise<Author[]> {
   }
 
   try {
-    const strapiData = await fetchStrapi<any[]>('/yazarlar', {
-      'filters[name][$containsi]': q,
-      'pagination[withCount]': false,
-      'pagination[pageSize]': 15,
-      populate: '*',
-    });
+    const strapiData = await fetchStrapi<any[]>(
+      '/yazarlar',
+      {
+        'filters[name][$containsi]': q,
+        'pagination[withCount]': false,
+        'pagination[pageSize]': 15,
+        populate: '*',
+      },
+      { cache: 'no-store' }
+    );
 
     if (strapiData && Array.isArray(strapiData.data) && strapiData.data.length > 0) {
       const seenSlugs = new Set<string>();

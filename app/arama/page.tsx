@@ -10,6 +10,9 @@ import { searchArticles, searchAuthors } from '@/lib/strapi';
 import { Article } from '@/types/strapi';
 import SearchResultsView from '@/components/SearchResultsView';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface SearchPageProps {
   searchParams: Promise<{ q?: string; page?: string; tab?: string; sort?: string }>;
 }
