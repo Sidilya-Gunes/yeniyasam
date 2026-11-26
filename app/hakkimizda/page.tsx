@@ -67,13 +67,6 @@ export default function HakkimizdaPage() {
               <strong>Bağımsızlık:</strong> Herhangi bir çıkar veya sermaye grubuna bağlı olmaksızın sadece okurlarının desteğiyle varlığını sürdürmek.
             </li>
           </ul>
-
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '2rem 0 1rem 0', color: 'var(--accent)' }}>
-            Jin Dergi ve Haftalık Eklerimiz
-          </h2>
-          <p>
-            Yeni Yaşam Gazetesi, günlük gazetenin yanı sıra her pazar günü okurlarıyla buluşan <strong>Jin Dergi</strong> ile kadın odaklı teorik, politik ve kültürel tartışmaları sayfalarına taşımaktadır.
-          </p>
         </div>
       </div>
     </main>

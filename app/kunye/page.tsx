@@ -14,17 +14,11 @@ export const metadata: Metadata = {
 
 export default function KunyePage() {
   const staff = [
-    { title: 'İmtiyaz Sahibi / Yayın Sahibi', name: 'Arinna Basın Yayın ve Reklam Sanayi Ticaret Ltd. Şti.' },
-    { title: 'Sorumlu Haber Müdürü', name: 'Ahmet Güneş' },
-    { title: 'Genel Yayın Yönetmeni', name: 'Mehmet Ferhat Çelik' },
-    { title: 'Haber Koordinatörü', name: 'Derya Okatan' },
-    { title: 'Politika Editörü', name: 'Ali Barış Kurt' },
-    { title: 'Kadın Sayfası Editörü', name: 'Zeynep Durgut' },
-    { title: 'Ekoloji & Yaşam Editörü', name: 'Gülcan Dereli' },
-    { title: 'Kültür Sanat Editörü', name: 'Ramazan Kaya' },
-    { title: 'Görsel Yönetmen / Tasarım', name: 'Kemal Akın' },
-    { title: 'İnternet Editörü & Web Sorumlusu', name: 'Dijital Yayın Masası' },
-    { title: 'Hukuk Danışmanı', name: 'Av. Özcan Kılıç' },
+    { title: 'İmtiyaz Sahibi', name: 'Cengiz Çiçek' },
+    { title: 'Genel Yayın Yönetmeni', name: 'Bilir (Zana) Kaya' },
+    { title: 'Sorumlu Yazı İşleri Müdürü', name: 'Ahmet Güneş' },
+    { title: 'İnternet Editörü', name: 'Aziz Oruç' },
+    { title: 'Haber Müdürü', name: 'Ferd Demirel' },
   ];
 
   return (
