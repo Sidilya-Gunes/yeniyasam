@@ -10,16 +10,22 @@ interface DailyPhotoSliderProps {
 
 export default function DailyPhotoSlider({ photos }: DailyPhotoSliderProps) {
   const safePhotos = photos && photos.length > 0 ? photos : [];
-  // Günün seçilen TEK konusu/haberi
-  const currentStory = safePhotos[0];
+  
+  // Eğer ilk konunun kendine ait alt fotoğraf galerisi varsa onu kullan,
+  // yoksa günün fotoğrafları listesini hikayeler olarak gezdir.
+  const hasSubGallery = Boolean(safePhotos[0]?.photos && safePhotos[0].photos.length > 1);
 
-  // Bu tek konuya ait fotoğraflar galerisi
-  const storyPhotos = currentStory?.photos && currentStory.photos.length > 0
-    ? currentStory.photos
-    : (currentStory ? [{ id: 1, url: currentStory.image, caption: currentStory.title }] : []);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const currentStory = hasSubGallery
+    ? safePhotos[0]
+    : (safePhotos[currentImageIndex] || safePhotos[0]);
+
+  const storyPhotos = hasSubGallery
+    ? (safePhotos[0]?.photos || [])
+    : safePhotos.map((p, idx) => ({ id: p.id || idx, url: p.image, caption: p.summary || p.title }));
 
   const total = storyPhotos.length;
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const touchStartX = useRef<number | null>(null);

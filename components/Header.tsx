@@ -53,7 +53,7 @@ export default function Header({ initialSettings }: HeaderProps = {}) {
         window.requestAnimationFrame(() => {
           const y = window.scrollY || window.pageYOffset;
           // Yumuşak geçiş ve sıçramayı önleyen histerezis eşiği
-          setIsScrolled((prev) => (y > (prev ? 110 : 160)));
+          setIsScrolled((prev) => (y > (prev ? 240 : 280)));
           ticking = false;
         });
         ticking = true;

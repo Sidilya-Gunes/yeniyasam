@@ -10,6 +10,7 @@ export default function ThemeToggle() {
     const saved = localStorage.getItem('darkMode') === 'on';
     if (saved) {
       document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark');
       setIsDark(true);
     }
   }, []);
@@ -19,9 +20,11 @@ export default function ThemeToggle() {
     setIsDark(nextDark);
     if (nextDark) {
       document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark');
       localStorage.setItem('darkMode', 'on');
     } else {
       document.body.classList.remove('dark-mode');
+      document.documentElement.classList.remove('dark');
       localStorage.setItem('darkMode', 'off');
     }
   };
@@ -29,7 +32,7 @@ export default function ThemeToggle() {
   return (
     <button
       type="button"
-      className="dark-mode-toggle"
+      className={`dark-mode-toggle ${isDark ? 'active' : ''}`}
       onClick={toggleTheme}
       aria-label="Gece/Gündüz Modunu Değiştir"
       title={isDark ? 'Gündüz moduna geç' : 'Gece moduna geç'}

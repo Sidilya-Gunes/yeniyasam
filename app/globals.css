@@ -276,7 +276,9 @@ body.dark-mode {
     --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
     --bg-main: #0f172a;
-    --accent: #ef4444;
+    
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
 }
 body.dark-mode .site-header,
 body.dark-mode .main-nav { background-color: var(--surface); }
@@ -345,7 +347,7 @@ body.dark-mode textarea::placeholder {
    04. HEADER & NAVİGASYON
    ================================================================= */
 .site-header {
-    background: var(--surface, #fff);
+    background: #ffffff;
     position: relative; top: 0; z-index: 1000;
     border-top: 3px solid var(--primary, #cc0000);
 }
@@ -399,8 +401,10 @@ body.dark-mode textarea::placeholder {
     border-radius: 50%; position: absolute; top: 2px; left: 2px;
     transition: transform 0.2s;
 }
-body.dark-mode .switch-track { background-color: #3b82f6; }
-body.dark-mode .switch-thumb { transform: translateX(14px); }
+body.dark-mode .switch-track,
+.dark-mode-toggle.active .switch-track { background-color: #3b82f6; }
+body.dark-mode .switch-thumb,
+.dark-mode-toggle.active .switch-thumb { transform: translateX(14px); }
 
 .btn-login {
     border: 1px solid var(--border, #e2e8f0);
@@ -488,6 +492,11 @@ body.dark-mode .header-compact {
 }
 .compact-toggle:hover { color: var(--primary, #cc0000); }
 
+.site-header.scrolled .header-normal {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
 .site-header.scrolled .header-compact {
     transform: translateY(0);
     opacity: 1;
