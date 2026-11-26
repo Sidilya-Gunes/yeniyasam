@@ -13,8 +13,6 @@ const SCHEDULING_TABLES = [
   { table: 'makaleler', uid: 'api::makale.makale', name: 'Köşe Yazıları (Makaleler)' },
   { table: 'gunun_fotograflari', uid: 'api::gunun-fotografi.gunun-fotografi', name: 'Günün Fotoğrafı' },
   { table: 'gunun_mansetleri', uid: 'api::gunun-manseti.gunun-manseti', name: 'Günün Manşeti' },
-  { table: 'karikaturler', uid: 'api::karikatur.karikatur', name: 'Günün Karikatürü' },
-  { table: 'jin_dergiler', uid: 'api::jin-dergi.jin-dergi', name: 'Jin Dergi' },
   { table: 'videolar', uid: 'api::video.video', name: 'Videolar' },
 ];
 
