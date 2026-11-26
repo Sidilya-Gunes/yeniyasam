@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { getKarikaturList } from '@/lib/strapi';
 
 export const metadata: Metadata = {
-  title: 'Günün Karikatürü — Yeni Yaşam Gazetesi',
+  title: 'Günün Karikatürü',
   description: 'Günün siyasi ve toplumsal olaylarına mizahi bakış, karikatür arşivi.',
 };
 

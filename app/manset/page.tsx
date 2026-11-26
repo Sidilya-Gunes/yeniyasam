@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { getMansetList } from '@/lib/strapi';
 
 export const metadata: Metadata = {
-  title: 'Günün Manşeti — Yeni Yaşam Gazetesi',
+  title: 'Günün Manşeti',
   description: 'Yeni Yaşam Gazetesi günlük basılı manşeti, birinci sayfa arşivi ve e-gazete.',
 };
 

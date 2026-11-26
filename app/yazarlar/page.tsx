@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { getAllAuthors, getStrapiMedia } from '@/lib/strapi';
 
 export const metadata: Metadata = {
-  title: 'Yazarlar — Yeni Yaşam Gazetesi',
+  title: 'Yazarlar',
   description: 'Yeni Yaşam Gazetesi yazarlar listesi ve güncel köşe yazıları.',
 };
 

@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { getJinDergiList } from '@/lib/strapi';
 
 export const metadata: Metadata = {
-  title: 'Jin Dergi — Yeni Yaşam Gazetesi',
+  title: 'Jin Dergi',
   description: 'Jin Dergi haftalık kadın eki, makaleler, söyleşiler ve arşiv.',
 };
 
