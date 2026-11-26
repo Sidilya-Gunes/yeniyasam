@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Künye | Yeni Yaşam Gazetesi',
+  title: 'Künye',
   description: 'Yeni Yaşam Gazetesi yönetim, yayın ve editöryal kadrosu künyesi.',
 };
 

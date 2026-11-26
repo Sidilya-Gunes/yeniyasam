@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Kullanım Koşulları | Yeni Yaşam Gazetesi',
+  title: 'Kullanım Koşulları',
   description: 'Yeni Yaşam Gazetesi web sitesi kullanım koşulları ve telif kuralları.',
 };
 

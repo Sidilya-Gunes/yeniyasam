@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Reklam ve İş Birliği | Yeni Yaşam Gazetesi',
+  title: 'Reklam ve İş Birliği',
   description: 'Yeni Yaşam Gazetesi basılı ve dijital reklam seçenekleri ve sponsorluk.',
 };
 
