@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Hakkımızda | Yeni Yaşam Gazetesi',
+  title: 'Hakkımızda',
   description: 'Yeni Yaşam Gazetesi yayın ilkeleri, tarihçesi ve bağımsız gazetecilik anlayışı.',
 };
 

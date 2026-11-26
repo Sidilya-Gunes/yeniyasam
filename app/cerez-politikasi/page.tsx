@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Çerez Politikası | Yeni Yaşam Gazetesi',
+  title: 'Çerez Politikası',
   description: 'Yeni Yaşam Gazetesi çerez kullanım politikası ve tercihleri.',
 };
 

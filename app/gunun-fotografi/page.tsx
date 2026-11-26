@@ -10,7 +10,7 @@ import { getDailyPhotos } from '@/lib/strapi';
 import DailyPhotoGalleryClient from '@/components/DailyPhotoGalleryClient';
 
 export const metadata: Metadata = {
-  title: 'Günün Fotoğrafı ve Görsel Arşiv — Yeni Yaşam Gazetesi',
+  title: 'Günün Fotoğrafı ve Görsel Arşiv',
   description: 'Yeni Yaşam Gazetesi günün fotoğrafı, fotoğraf galerileri ve toplumsal olayların görsel tanıklık arşivi.',
 };
 
