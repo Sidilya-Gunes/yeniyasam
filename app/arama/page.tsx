@@ -20,7 +20,7 @@ interface SearchPageProps {
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const { q } = await searchParams;
   return {
-    title: q ? `"${q}" için arama sonuçları — Yeni Yaşam Gazetesi` : 'Sitede Ara — Yeni Yaşam Gazetesi',
+    title: q ? `"${q}" için arama sonuçları` : 'Sitede Ara',
   };
 }
 

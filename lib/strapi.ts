@@ -234,6 +234,9 @@ export function cleanDumpArtifacts(text?: string | null, isSummary = false): str
   s = s.replace(/>\s*(?:rn)+\s*</gi, isSummary ? '><' : '>\n<');
 
   if (isSummary) {
+    // Özet metinlerde kalıntı HTML etiketlerini tamamen temizle
+    s = s.replace(/<[^>]+>/g, ' ');
+    s = s.replace(/<\/?[a-z0-9]+(?:\s+[^>]*)?/gi, ' ');
     s = s.replace(/\s+/g, ' ');
   } else {
     s = s.replace(/\n{3,}/g, '\n\n');
